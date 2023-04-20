@@ -109,7 +109,7 @@ public class InvTransfer{
             if (!paDetail.get(ItemCount()-1).getStockIDx().equals("") &&
                     Double.valueOf(paDetail.get(ItemCount()-1).getQuantity().toString())!= 0.00){
                 paDetail.add(new UnitInvTransferDetail());
-                paDetail.get(ItemCount()-1).setOrderNox(paDetail.get(ItemCount()-2).getOrderNox());
+//                paDetail.get(ItemCount()-1).setOrderNox(paDetail.get(ItemCount()-2).getOrderNox());
                 
                 paDetailOthers.add(new UnitInvTransferDetailOthers());
             }
@@ -1826,7 +1826,8 @@ public class InvTransfer{
                 if (loJSON != null){
                     setDetail(fnRow, fnCol, (String) loJSON.get("sTransNox"));
                     paDetailOthers.get(fnRow).setValue("sOrderNox", (String) loJSON.get("sTransNox"));
-                    loadRequest((String) loJSON.get("sTransNox"));
+//                    poData.setValue("sOrderNox", (String) loJSON.get("sTransNox"));
+//                    loadRequest((String) loJSON.get("sTransNox"));
                     return true;
                 } else{
                     setDetail(fnRow, fnCol, "");
@@ -1834,85 +1835,11 @@ public class InvTransfer{
                     return false;
                 }
             case 3:
-                lsHeader = "Brand»Description»Unit»Model»Qty On Hnd»Inv. Type»Barcode»Stock ID";
-                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»sBarCodex»sStockIDx";
-                lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
-                lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
-                
-                if (fbByCode){
-                    if (paDetailOthers.get(fnRow).getValue("sStockIDx").equals(fsValue)) return true;
-                
-                    lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx = " + SQLUtil.toSQL(fsValue));
+                if(!paDetailOthers.get(fnRow).getValue("sOrderNox").toString().isEmpty()){
                     
-                    loRS = poGRider.executeQuery(lsSQL);
-                    
-                    loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
-                }else {
-                    if (!fbSearch){
-                        if (paDetailOthers.get(fnRow).getValue("sBarCodex").equals(fsValue)) return true;
-                        
-                        loJSON = showFXDialog.jsonSearch(poGRider, 
-                                                            lsSQL, 
-                                                            fsValue, 
-                                                            lsHeader, 
-                                                            lsColName, 
-                                                            lsColCrit, 
-                                                            6);
-                    } else{
-                        if (paDetailOthers.get(fnRow).getValue("sDescript").equals(fsValue)) return true;
-                        
-                        loJSON = showFXDialog.jsonSearch(poGRider, 
-                                                            lsSQL, 
-                                                            fsValue, 
-                                                            lsHeader, 
-                                                            lsColName, 
-                                                            lsColCrit, 
-                                                            1);
-                    }
-                        
-                }
-                System.err.println(lsSQL);
-                
-                if (loJSON != null){
-                    setDetail(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
-                    setDetail(fnRow, "nInvCostx", Double.valueOf((String) loJSON.get("nUnitPrce")));
-
-                    paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
-                    paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
-                    paDetailOthers.get(fnRow).setValue("sDescript", (String) loJSON.get("sDescript"));
-                    paDetailOthers.get(fnRow).setValue("nQtyOnHnd", Double.valueOf((String) loJSON.get("nQtyOnHnd")));
-                    paDetailOthers.get(fnRow).setValue("nResvOrdr", Double.valueOf((String) loJSON.get("nResvOrdr")));
-                    paDetailOthers.get(fnRow).setValue("nBackOrdr", Double.valueOf((String) loJSON.get("nBackOrdr")));
-                    paDetailOthers.get(fnRow).setValue("nFloatQty", Double.valueOf((String) loJSON.get("nFloatQty")));
-                    paDetailOthers.get(fnRow).setValue("nLedgerNo", Integer.valueOf((String) loJSON.get("nLedgerNo")));
-                    paDetailOthers.get(fnRow).setValue("sInvTypNm", (String) loJSON.get("xInvTypNm"));
-                    paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
-
-                    //for selection of sub unit
-                    if (Double.valueOf((String) loJSON.get("nQtyOnHnd")) > 0) 
-                        setDetail(fnRow, "nQuantity", 1);
-                    else confirmSelectParent(fnRow);
-
-
-                    return true;
-                } else{
-                    setDetail(fnRow, fnCol, "");
-                    setDetail(fnRow, "nInvCostx", 0.00);
-                    setDetail(fnRow, "nQuantity", 0);
-                    
-                    paDetailOthers.get(fnRow).setValue("sStockIDx", "");
-                    paDetailOthers.get(fnRow).setValue("sBarCodex", "");
-                    paDetailOthers.get(fnRow).setValue("sDescript", "");
-                    paDetailOthers.get(fnRow).setValue("sStockIDx", "");
-                    paDetailOthers.get(fnRow).setValue("sParentID", "");
-                    paDetailOthers.get(fnRow).setValue("nQtyOnHnd", 0);
-                    paDetailOthers.get(fnRow).setValue("nResvOrdr", 0);
-                    paDetailOthers.get(fnRow).setValue("nBackOrdr", 0);
-                    paDetailOthers.get(fnRow).setValue("nFloatQty", 0);
-                    paDetailOthers.get(fnRow).setValue("nLedgerNo", 0);
-                    paDetailOthers.get(fnRow).setValue("xQuantity", 0);
-                    paDetailOthers.get(fnRow).setValue("sMeasurNm", "");
-                    return false;
+                    return searhItemOrder(fnRow, fnCol, fsValue, fbSearch, fbByCode);
+                }else{
+                    return searhItemDetail(fnRow, fnCol, fsValue, fbSearch, fbByCode);
                 }
             case 4:
                 lsHeader = "Barcode»Description»Inv. Type»Brand»Model»Stock ID";
@@ -1954,12 +1881,209 @@ public class InvTransfer{
                 return false;
         }
     }
-    
+    private boolean searhItemDetail(int fnRow, int fnCol, String fsValue, boolean fbSearch, boolean fbByCode){
+        String lsHeader = "";
+        String lsColName = "";
+        String lsColCrit = "";
+        String lsSQL = "";
+        
+        JSONObject loJSON;
+        ResultSet loRS;
+        
+        setErrMsg("");
+        setMessage("");
+        
+        lsHeader = "Brand»Description»Unit»Model»Qty On Hnd»Inv. Type»Barcode»Stock ID";
+        lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»sBarCodex»sStockIDx";
+        lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
+        lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
+       
+        if (fbByCode){
+            if (paDetailOthers.get(fnRow).getValue("sStockIDx").equals(fsValue)) return true;
+
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx = " + SQLUtil.toSQL(fsValue));
+
+            loRS = poGRider.executeQuery(lsSQL);
+
+            loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
+        }else {
+            if (!fbSearch){
+                if (paDetailOthers.get(fnRow).getValue("sBarCodex").equals(fsValue)) return true;
+
+                loJSON = showFXDialog.jsonSearch(poGRider, 
+                                                    lsSQL, 
+                                                    fsValue, 
+                                                    lsHeader, 
+                                                    lsColName, 
+                                                    lsColCrit, 
+                                                    6);
+            } else{
+                if (paDetailOthers.get(fnRow).getValue("sDescript").equals(fsValue)) return true;
+
+                loJSON = showFXDialog.jsonSearch(poGRider, 
+                                                    lsSQL, 
+                                                    fsValue, 
+                                                    lsHeader, 
+                                                    lsColName, 
+                                                    lsColCrit, 
+                                                    1);
+            }
+
+        }
+        System.err.println(lsSQL);
+
+        if (loJSON != null){
+            setDetail(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
+            setDetail(fnRow, "nInvCostx", Double.valueOf((String) loJSON.get("nUnitPrce")));
+
+            paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
+            paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
+            paDetailOthers.get(fnRow).setValue("sDescript", (String) loJSON.get("sDescript"));
+            paDetailOthers.get(fnRow).setValue("nQtyOnHnd", Double.valueOf((String) loJSON.get("nQtyOnHnd")));
+            paDetailOthers.get(fnRow).setValue("nResvOrdr", Double.valueOf((String) loJSON.get("nResvOrdr")));
+            paDetailOthers.get(fnRow).setValue("nBackOrdr", Double.valueOf((String) loJSON.get("nBackOrdr")));
+            paDetailOthers.get(fnRow).setValue("nFloatQty", Double.valueOf((String) loJSON.get("nFloatQty")));
+            paDetailOthers.get(fnRow).setValue("nLedgerNo", Integer.valueOf((String) loJSON.get("nLedgerNo")));
+            paDetailOthers.get(fnRow).setValue("sInvTypNm", (String) loJSON.get("xInvTypNm"));
+            paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+
+            //for selection of sub unit
+            if (Double.valueOf((String) loJSON.get("nQtyOnHnd")) > 0) 
+                setDetail(fnRow, "nQuantity", 1);
+            else confirmSelectParent(fnRow);
+
+
+            return true;
+        } else{
+            setDetail(fnRow, fnCol, "");
+            setDetail(fnRow, "nInvCostx", 0.00);
+            setDetail(fnRow, "nQuantity", 0);
+
+            paDetailOthers.get(fnRow).setValue("sStockIDx", "");
+            paDetailOthers.get(fnRow).setValue("sBarCodex", "");
+            paDetailOthers.get(fnRow).setValue("sDescript", "");
+            paDetailOthers.get(fnRow).setValue("sStockIDx", "");
+            paDetailOthers.get(fnRow).setValue("sParentID", "");
+            paDetailOthers.get(fnRow).setValue("nQtyOnHnd", 0);
+            paDetailOthers.get(fnRow).setValue("nResvOrdr", 0);
+            paDetailOthers.get(fnRow).setValue("nBackOrdr", 0);
+            paDetailOthers.get(fnRow).setValue("nFloatQty", 0);
+            paDetailOthers.get(fnRow).setValue("nLedgerNo", 0);
+            paDetailOthers.get(fnRow).setValue("xQuantity", 0);
+            paDetailOthers.get(fnRow).setValue("sMeasurNm", "");
+            return false;
+        }
+    }
+    private boolean searhItemOrder (int fnRow, int fnCol, String fsValue, boolean fbSearch, boolean fbByCode){
+        String lsHeader = "";
+        String lsColName = "";
+        String lsColCrit = "";
+        String lsSQL = "";
+        
+        JSONObject loJSON;
+        ResultSet loRS;
+        
+        setErrMsg("");
+        setMessage("");
+        
+        lsHeader = "Brand»Description»Unit»Model»Qty On Hnd»Inv. Type»Barcode»Stock ID";
+        lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»sBarCodex»sStockIDx";
+        lsColCrit = "b.sDescript»a.sDescript»g.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
+        lsSQL = MiscUtil.addCondition(getSQ_StocksByRequest(), "e.sTransNox = " + SQLUtil.toSQL(paDetailOthers.get(fnRow).getValue("sOrderNox")));
+        if (fbByCode){
+            if (paDetailOthers.get(fnRow).getValue("sStockIDx").equals(fsValue)) return true;
+
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx = " + SQLUtil.toSQL(fsValue));
+
+            loRS = poGRider.executeQuery(lsSQL);
+
+            System.out.println("lsSQL = " + lsSQL);
+            loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
+        }else {
+            if (!fbSearch){
+                if (paDetailOthers.get(fnRow).getValue("sBarCodex").equals(fsValue)) return true;
+
+                System.out.println("lsSQL = " + lsSQL);
+                loJSON = showFXDialog.jsonSearch(poGRider, 
+                                                    lsSQL, 
+                                                    fsValue, 
+                                                    lsHeader, 
+                                                    lsColName, 
+                                                    lsColCrit, 
+                                                    6);
+            } else{
+                if (paDetailOthers.get(fnRow).getValue("sDescript").equals(fsValue)) return true;
+
+                System.out.println("lsSQL = " + lsSQL);
+                loJSON = showFXDialog.jsonSearch(poGRider, 
+                                                    lsSQL, 
+                                                    fsValue, 
+                                                    lsHeader, 
+                                                    lsColName, 
+                                                    lsColCrit, 
+                                                    1);
+            }
+
+        }
+        System.err.println(lsSQL);
+
+        if (loJSON != null){
+            setDetail(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
+            setDetail(fnRow, "nInvCostx", Double.valueOf((String) loJSON.get("nUnitPrce")));
+
+            paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
+            paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
+            paDetailOthers.get(fnRow).setValue("sDescript", (String) loJSON.get("sDescript"));
+            paDetailOthers.get(fnRow).setValue("nQtyOnHnd", Double.valueOf((String) loJSON.get("nQtyOnHnd")));
+            paDetailOthers.get(fnRow).setValue("nResvOrdr", Double.valueOf((String) loJSON.get("nResvOrdr")));
+            paDetailOthers.get(fnRow).setValue("nBackOrdr", Double.valueOf((String) loJSON.get("nBackOrdr")));
+            paDetailOthers.get(fnRow).setValue("nFloatQty", Double.valueOf((String) loJSON.get("nFloatQty")));
+            paDetailOthers.get(fnRow).setValue("nLedgerNo", Integer.valueOf((String) loJSON.get("nLedgerNo")));
+            paDetailOthers.get(fnRow).setValue("sInvTypNm", (String) loJSON.get("xInvTypNm"));
+            paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+
+            //for selection of sub unit
+            if (Double.valueOf((String) loJSON.get("nQtyOnHnd")) > 0) 
+                setDetail(fnRow, "nQuantity", 1);
+            else confirmSelectParent(fnRow);
+
+
+            return true;
+        } else{
+            setDetail(fnRow, fnCol, "");
+            setDetail(fnRow, "nInvCostx", 0.00);
+            setDetail(fnRow, "nQuantity", 0);
+
+            paDetailOthers.get(fnRow).setValue("sStockIDx", "");
+            paDetailOthers.get(fnRow).setValue("sBarCodex", "");
+            paDetailOthers.get(fnRow).setValue("sDescript", "");
+            paDetailOthers.get(fnRow).setValue("sStockIDx", "");
+            paDetailOthers.get(fnRow).setValue("sParentID", "");
+            paDetailOthers.get(fnRow).setValue("nQtyOnHnd", 0);
+            paDetailOthers.get(fnRow).setValue("nResvOrdr", 0);
+            paDetailOthers.get(fnRow).setValue("nBackOrdr", 0);
+            paDetailOthers.get(fnRow).setValue("nFloatQty", 0);
+            paDetailOthers.get(fnRow).setValue("nLedgerNo", 0);
+            paDetailOthers.get(fnRow).setValue("xQuantity", 0);
+            paDetailOthers.get(fnRow).setValue("sMeasurNm", "");
+            return false;
+        }
+    }
     public boolean SearchDetail(int fnRow, String fsCol, String fsValue, boolean fbSearch, boolean fbByCode){
         return SearchDetail(fnRow, poDetail.getColumn(fsCol), fsValue, fbSearch, fbByCode);
     }
      
-    public boolean SearchMaster(int fnCol, String fsValue, boolean fbByCode){       
+    public boolean SearchMaster(int fnCol, String fsValue, boolean fbByCode){     
+        String lsHeader = "";
+        String lsColName = "";
+        String lsColCrit = "";
+        String lsSQL = "";
+        
+        JSONObject loJSON;
+        ResultSet loRS;
+        
+        setErrMsg("");
+        setMessage("");
         switch(fnCol){
             case 4: //sDestinat
                 XMBranch loBranch = new XMBranch(poGRider, psBranchCd, true);
@@ -1967,6 +2091,52 @@ public class InvTransfer{
                     setMaster(fnCol, (String) loBranch.getMaster("sBranchCd"));
                     MasterRetreived(fnCol);
                     return true;
+                }
+            case 18:
+                lsHeader = "Order No»Branch»Date»Inv. Type";
+                lsColName = "sTransNox»sBranchNm»dTransact»sDescript";
+                lsColCrit = "a.sTransNox»c.sBranchNm»a.dTransact»b.sDescript";
+                lsSQL = getSQ_Requests();
+                System.out.println("paDetailOthers = " + paDetailOthers.size());
+                if (fbByCode){
+                    if (paDetailOthers.get(paDetailOthers.size()-1).getValue("sOrderNox").equals(fsValue)) return true;
+                    
+                    lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox = " + SQLUtil.toSQL(fsValue));
+                    
+                    loRS = poGRider.executeQuery(lsSQL);
+                    
+                    loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
+                } else {
+                    if (!fbByCode){
+                        if (paDetailOthers.get(paDetailOthers.size()-1).getValue("sOrderNox").equals(fsValue)) return true;
+                        
+                        loJSON = showFXDialog.jsonSearch(poGRider, 
+                                                            lsSQL, 
+                                                            fsValue, 
+                                                            lsHeader, 
+                                                            lsColName, 
+                                                            lsColCrit, 
+                                                            0);
+                    } else
+                        loJSON = showFXDialog.jsonSearch(poGRider, 
+                                                            lsSQL, 
+                                                            fsValue, 
+                                                            lsHeader, 
+                                                            lsColName, 
+                                                            lsColCrit, 
+                                                            1);
+                }
+                
+                if (loJSON != null){
+                    setDetail(paDetailOthers.size()-1, fnCol, (String) loJSON.get("sTransNox"));
+                    paDetailOthers.get(paDetailOthers.size()-1).setValue("sOrderNox", (String) loJSON.get("sTransNox"));
+                    poData.setValue("sOrderNox", (String) loJSON.get("sTransNox"));
+                    loadRequest((String) loJSON.get("sTransNox"));
+                    return true;
+                } else{
+                    setDetail(paDetailOthers.size()-1, fnCol, "");
+                    paDetailOthers.get(paDetailOthers.size()-1).setValue("sOrderNox", "");
+                    return false;
                 }
 
         }
@@ -2024,6 +2194,7 @@ public class InvTransfer{
     }
 
     public String getErrMsg() {
+        
         return psErrMsgx;
     }
 
@@ -2249,8 +2420,8 @@ public class InvTransfer{
                     ", a.cInvStatx" + 
                     ", a.sSupersed" + 
                     ", a.cRecdStat" + 
-                    ", b.sDescript" + 
-                    ", c.sDescript" + 
+                    ", b.sDescript xBrandNme" + 
+                    ", c.sDescript xModelNme" + 
                     ", d.sDescript xInvTypNm" + 
                     ", e.sTransNox" +
                     ", e.nQuantity" +
@@ -2350,6 +2521,7 @@ public class InvTransfer{
             System.out.println(MiscUtil.addCondition(getSQ_StocksByRequest(), " sTransNox = " + SQLUtil.toSQL(fsOrderNox)));
             loRS.beforeFirst();
             int lnCtr=0;
+           
             while (loRS.next()) {
                 setDetail(lnCtr,"sOrderNox", loRS.getString("sTransNox"));
                 setDetail(lnCtr,"sStockIDx", loRS.getString("sStockIDx"));                
@@ -2365,13 +2537,21 @@ public class InvTransfer{
                 paDetailOthers.get(lnCtr).setValue("nLedgerNo", loRS.getInt("nLedgerNo"));
                 paDetailOthers.get(lnCtr).setValue("sInvTypNm", loRS.getString("xInvTypNm"));
                 paDetailOthers.get(lnCtr).setValue("sMeasurNm", loRS.getString("sMeasurNm"));
+                System.out.println("lnCtr = " + lnCtr);
+                System.out.println("RecordCount = " + MiscUtil.RecordCount(loRS));
                  
                 if(!loRS.isLast()){
                     paDetail.add(new UnitInvTransferDetail());
                     paDetail.get(ItemCount()-1).setOrderNox(paDetail.get(ItemCount()-2).getOrderNox());
                     paDetailOthers.add(new UnitInvTransferDetailOthers());
+                }else{
+                    paDetail.add(new UnitInvTransferDetail());
+                    paDetail.get(ItemCount()-1).setOrderNox("");
+                    paDetailOthers.add(new UnitInvTransferDetailOthers());
                 }
+                
                 lnCtr++;
+                
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

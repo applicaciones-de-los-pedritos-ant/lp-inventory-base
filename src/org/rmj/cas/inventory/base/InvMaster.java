@@ -2,6 +2,7 @@ package org.rmj.cas.inventory.base;
 
 import com.mysql.jdbc.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import org.json.simple.JSONObject;
 import org.rmj.appdriver.constants.EditMode;
