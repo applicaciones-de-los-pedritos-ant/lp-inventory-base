@@ -133,7 +133,7 @@ String path;
     @Test
     public void test02SearchDetail(){
         try {     
-            if(trans.SearchDetail(1,  "P", false)){
+            if(trans.SearchDetail(1, 1, "P", false)){
                 System.out.println("success " + trans.getDetail(1,2));
             }else{
                 System.out.println("error " + trans.getMessage());
@@ -165,22 +165,7 @@ String path;
     @Test
     public void test04SearchDetail(){
         try {     
-            if(trans.SearchDetail(2,  "P00121000376", true)){
-                System.out.println("success " + trans.getDetail(2,2));
-            }else{
-                System.out.println("error " + trans.getMessage());
-            }
-            if(trans.addNewDetail()){
-                System.out.println("count " + trans.getItemCount());
-                for(int x = 1; x <= trans.getItemCount(); x++){
-                    System.out.println("entryNox " + trans.getDetailI(x, "nEntryNox"));
-                    
-                }
-            }else{
-                System.out.println("error " + trans.getMessage());
-            }
-              
-            if(trans.SearchDetail(3,  "P00121000376", true)){
+            if(trans.SearchDetail(2, 2, "P", false)){
                 System.out.println("success " + trans.getDetail(2,2));
             }else{
                 System.out.println("error " + trans.getMessage());
