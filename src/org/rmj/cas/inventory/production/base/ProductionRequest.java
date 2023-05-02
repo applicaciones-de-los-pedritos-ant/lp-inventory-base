@@ -44,6 +44,7 @@ public class ProductionRequest {
     private boolean p_bWithUI = true;
 
     private CachedRowSet p_oMaster;
+    private CachedRowSet p_oMasterDetail;
     private CachedRowSet p_oDetail;
     
     private LMasDetTrans p_oListener;
@@ -131,13 +132,69 @@ public class ProductionRequest {
      public void setMaster(String fsIndex, Object foValue) throws SQLException{
         setMaster(getColumnIndex(p_oMaster, fsIndex), foValue);
     }
-   
+
+     // Product request tab dashboard
+    public int getMasterItemCount() throws SQLException{
+        if (p_oMasterDetail == null) return 0;
+        p_oMasterDetail.last();
+        return p_oMasterDetail.getRow();
+    }
+    public Object getMasterDetail(int fnRow, int fnIndex) throws SQLException{
+        if (getMasterItemCount()  == 0) return null;
+        
+        if (getMasterItemCount() == 0 || fnRow > getMasterItemCount()) return null;   
+       
+        p_oMasterDetail.absolute(fnRow);
+        return p_oMasterDetail.getObject(fnIndex);
+        
+    }
+    
+    public Object getMasterDetail(int fnRow, String fsIndex) throws SQLException{
+        return getMasterDetail(fnRow, getColumnIndex(p_oMasterDetail, fsIndex));
+    }
+    
+    public void setMasterDetail(int fnRow, String fsIndex, Object foValue) throws SQLException{
+        setMasterDetail(fnRow, getColumnIndex(p_oMasterDetail, fsIndex), foValue);
+    }
+    
+    public void setMasterDetail(int fnRow, int fnIndex, Object foValue) throws SQLException{
+        if (p_nEditMode != EditMode.ADDNEW && p_nEditMode != EditMode.UPDATE) {
+            System.out.println("Invalid Edit Mode Detected.");
+            return;
+        }
+        p_oMasterDetail.absolute(fnRow);
+        p_oMasterDetail.updateString(fnIndex, (String) foValue);
+        p_oMasterDetail.updateRow();
+//        switch (fnIndex){
+//            case 6:
+//            case 7:
+//            case 8:
+//                if (foValue instanceof Integer){
+//                    p_oMasterDetail.updateInt(fnIndex, (int) foValue);
+//                    p_oMasterDetail.updateRow();
+//                }                
+//                
+//                if (p_oListener != null) p_oListener.DetailRetreive(fnRow, fnIndex, p_oDetail.getString(fnIndex));
+//                break;
+//            case 1: //sTransNox
+//            case 2: //xBarCodex
+//            case 3: //sBrandNme
+//            case 4: //xModelNme
+//            case 5: //xColorNme
+//            case 9: //sReferNox
+//                p_oMasterDetail.updateString(fnIndex, (String) foValue);
+//                p_oMasterDetail.updateRow();
+//                if (p_oListener != null) p_oListener.DetailRetreive(fnRow, fnIndex, p_oDetail.getString(fnIndex));
+//                break;
+//        }
+    }
     
     public int getItemCount() throws SQLException{
         if (p_oDetail == null) return 0;
         p_oDetail.last();
         return p_oDetail.getRow();
     }
+    
     
     
     public Object getDetail(int fnRow, int fnIndex) throws SQLException{
@@ -228,7 +285,6 @@ public class ProductionRequest {
             p_sMessage = "Application driver is not set.";
             return false;
         }
-        
         p_sMessage = "";
         
         String lsSQL = getSQL_Master();
@@ -311,6 +367,31 @@ public class ProductionRequest {
         p_nEditMode = EditMode.READY;
         return true;
     }
+    public boolean LoadList() throws SQLException{
+        p_nEditMode = EditMode.UNKNOWN;
+        
+        if (p_oApp == null){
+            p_sMessage = "Application driver is not set.";
+            return false;
+        }
+        
+        p_sMessage = "";
+           
+        String lsSQL;
+        ResultSet loRS;
+        RowSetFactory factory = RowSetProvider.newFactory();
+        
+        //open master
+        lsSQL = getSQL_Master();
+        loRS = p_oApp.executeQuery(lsSQL);
+        p_oMasterDetail = factory.createCachedRowSet();
+        p_oMasterDetail.populate(loRS);
+        MiscUtil.close(loRS);
+        
+        
+        p_nEditMode = EditMode.READY;
+        return true;
+    }
      
     public boolean UpdateTransaction() throws SQLException{
         if (p_oApp == null){
@@ -340,34 +421,64 @@ public class ProductionRequest {
         return true;
     }
     
-    public boolean SearchDetail(int fnRow, String fsValue, boolean fbByCode) throws SQLException{
+    
+    public boolean SearchDetail(int fnRow, int fnCol, String fsValue, boolean fbByCode) throws SQLException{
+        if (p_nEditMode != EditMode.ADDNEW && p_nEditMode != EditMode.UPDATE) return false;
+        
+        
+        ResultSet loRS;
         String lsSQL = getSQ_Stocks();
-        
-        if (fbByCode)
+        System.out.println(fnRow);
+        switch(fnCol){
+            case 1:
+                return SearchBarrcode(fnRow, fnCol, fsValue, fbByCode);
+            case 2:
+                return SearchDescript(fnRow, fnCol, fsValue, fbByCode);
+        }
+        return true;
+    }
+    private boolean SearchBarrcode(int fnRow, int fnCol, String fsValue, boolean fbByCode) throws SQLException{
+        ResultSet loRS;
+        String lsSQL = getSQ_Stocks();
+        System.out.println(fnRow);
+        if (fbByCode){
             lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx  = " + SQLUtil.toSQL(fsValue));
-        else
+        }else{
             lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex  LIKE " + SQLUtil.toSQL(fsValue + "%"));
+
+        }
         
-      
+        System.out.println(lsSQL);
         JSONObject loJSON;
         p_oDetail.absolute(fnRow);
         if (p_bWithUI){
-            loJSON = showFXDialog.jsonSearch(
-                        p_oApp, 
-                        lsSQL, 
-                        fsValue, 
-                        "Barcode»Description»Inv. Type»Brand»Model»Stock ID", 
-                        "sBarCodex»sDescript»xInvTypNm»sBrandNme»xModelNme»sStockIDx", 
-                        "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»c.sDescript»a.sStockIDx", 
-                        fbByCode ? 0 : 1);
+            if (fbByCode){
+                if(!p_oDetail.getString("sBarCodex").isEmpty()){
+                    if (p_oDetail.getString("sBarCodex").equals(fsValue)) return true;
+                }
+                loRS = p_oApp.executeQuery(lsSQL);
+                loJSON = showFXDialog.jsonBrowse(p_oApp, loRS, "Barcode»Description»Inv. Type»Brand»Model»Stock ID", "sBarCodex»sDescript»xInvTypNm»sBrandNme»xModelNme»sStockIDx");
+            } else {
+                
+                if(!p_oDetail.getString("sBarCodex").isEmpty()){
+                    if (p_oDetail.getString("sBarCodex").equals(fsValue)) return true;
+                }
+
+                    loRS = p_oApp.executeQuery(lsSQL);
+                    loJSON = showFXDialog.jsonBrowse(p_oApp, loRS, "Barcode»Description»Inv. Type»Brand»Model»Stock ID", "sBarCodex»sDescript»xInvTypNm»sBrandNme»xModelNme»sStockIDx");
+            
+                    
+            }
+           
             
             if (loJSON != null) {
-                p_oDetail.updateString("sStockIDx", (String) loJSON.get("sStockIDx"));
-                p_oDetail.updateString("nQtyOnHnd", (String) loJSON.get("nQtyOnHnd"));
-                p_oDetail.updateString("sDescript", (String) loJSON.get("sDescript"));
-                p_oDetail.updateString("sBrandNme", (String) loJSON.get("sBrandNme"));
-                p_oDetail.updateString("xModelNme", (String) loJSON.get("xModelNme"));
-                p_oDetail.updateString("xInvTypNm", (String) loJSON.get("xInvTypNm"));
+                p_oDetail.updateObject("sStockIDx", (String) loJSON.get("sStockIDx"));
+                p_oDetail.updateObject("sBarCodex", (String) loJSON.get("sBarCodex"));
+                p_oDetail.updateObject("nQtyOnHnd", (String) loJSON.get("nQtyOnHnd"));
+                p_oDetail.updateObject("sDescript", (String) loJSON.get("sDescript"));
+                p_oDetail.updateObject("xBrandNme", (String) loJSON.get("sBrandNme"));
+                p_oDetail.updateObject("xModelNme", (String) loJSON.get("xModelNme"));
+                p_oDetail.updateObject("xInvTypNm", (String) loJSON.get("xInvTypNm"));
                 
                 return true;
             }
@@ -376,16 +487,15 @@ public class ProductionRequest {
                 return false;
             }
         }
-        
         if (fbByCode){
               lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx  = " + SQLUtil.toSQL(fsValue));
         }
         else{
-            lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex  LIKE " + SQLUtil.toSQL(fsValue + "%"));
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex LIKE " + SQLUtil.toSQL(fsValue + "%"));
             lsSQL += " LIMIT 1";
         }
         
-        ResultSet loRS = p_oApp.executeQuery(lsSQL);
+        loRS = p_oApp.executeQuery(lsSQL);
         
         if (!loRS.next()){
             MiscUtil.close(loRS);
@@ -397,6 +507,7 @@ public class ProductionRequest {
         if(lsSQL != null){
             System.out.println(loRS.getString("sBrandNme"));
             p_oDetail.updateString("sStockIDx",  loRS.getString("sStockIDx"));
+            p_oDetail.updateString("sBarCodex",  loRS.getString("sBarCodex"));
             p_oDetail.updateString("nQtyOnHnd",  loRS.getString("nQtyOnHnd"));
             p_oDetail.updateString("sDescript",  loRS.getString("sDescript"));
             p_oDetail.updateString("xBrandNme",  loRS.getString("sBrandNme"));
@@ -404,10 +515,93 @@ public class ProductionRequest {
             p_oDetail.updateString("xInvTypNm",  loRS.getString("xInvTypNm"));
         }
         MiscUtil.close(loRS);
-        
         return true;
     }
     
+    private boolean SearchDescript(int fnRow, int fnCol, String fsValue, boolean fbByCode) throws SQLException{
+        ResultSet loRS;
+        String lsSQL = getSQ_Stocks();
+        System.out.println(fnRow);
+        if (fbByCode){
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex  = " + SQLUtil.toSQL(fsValue));
+        }else{
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sDescript  LIKE " + SQLUtil.toSQL(fsValue + "%"));
+
+        }
+        
+        System.out.println(lsSQL);
+        JSONObject loJSON;
+        p_oDetail.absolute(fnRow);
+        if (p_bWithUI){
+            if (fbByCode){
+                if(!p_oDetail.getString("sBarCodex").isEmpty()){
+                    if (p_oDetail.getString("sBarCodex").equals(fsValue)) return true;
+                }
+                loRS = p_oApp.executeQuery(lsSQL);
+                loJSON = showFXDialog.jsonBrowse(p_oApp, loRS, "Barcode»Description»Inv. Type»Brand»Model»Stock ID", "sBarCodex»sDescript»xInvTypNm»sBrandNme»xModelNme»sStockIDx");
+            } else {
+                
+                if(!p_oDetail.getString("sBarCodex").isEmpty()){
+                    if (p_oDetail.getString("sBarCodex").equals(fsValue)) return true;
+                }
+                loJSON = showFXDialog.jsonSearch(
+                    p_oApp, 
+                    lsSQL, 
+                    fsValue, 
+                    "Barcode»Description»Inv. Type»Brand»Model»Stock ID", 
+                    "sBarCodex»sDescript»xInvTypNm»sBrandNme»xModelNme»sStockIDx", 
+                    "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»c.sDescript»a.sStockIDx", 
+                    fbByCode ? 0 : 1);
+                    
+            }
+           
+            
+            if (loJSON != null) {
+                p_oDetail.updateObject("sStockIDx", (String) loJSON.get("sStockIDx"));
+                p_oDetail.updateObject("sBarCodex", (String) loJSON.get("sBarCodex"));
+                p_oDetail.updateObject("nQtyOnHnd", (String) loJSON.get("nQtyOnHnd"));
+                p_oDetail.updateObject("sDescript", (String) loJSON.get("sDescript"));
+                p_oDetail.updateObject("xBrandNme", (String) loJSON.get("sBrandNme"));
+                p_oDetail.updateObject("xModelNme", (String) loJSON.get("xModelNme"));
+                p_oDetail.updateObject("xInvTypNm", (String) loJSON.get("xInvTypNm"));
+                
+                return true;
+            }
+            else {
+                p_sMessage = "No record selected.";
+                return false;
+            }
+        }
+        if (fbByCode){
+              lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex  = " + SQLUtil.toSQL(fsValue));
+        }
+        else{
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sDescript LIKE " + SQLUtil.toSQL(fsValue + "%"));
+            lsSQL += " LIMIT 1";
+        }
+        
+        loRS = p_oApp.executeQuery(lsSQL);
+        
+        if (!loRS.next()){
+            MiscUtil.close(loRS);
+            p_sMessage = "No bracnh found for the givern criteria.";
+            return false;
+        }
+        
+        lsSQL = loRS.getString("sStockIDx");
+        if(lsSQL != null){
+            System.out.println(loRS.getString("sBrandNme"));
+            p_oDetail.updateString("sStockIDx",  loRS.getString("sStockIDx"));
+            p_oDetail.updateString("sBarCodex",  loRS.getString("sBarCodex"));
+            p_oDetail.updateString("nQtyOnHnd",  loRS.getString("nQtyOnHnd"));
+            p_oDetail.updateString("sDescript",  loRS.getString("sDescript"));
+            p_oDetail.updateString("xBrandNme",  loRS.getString("sBrandNme"));
+            p_oDetail.updateString("xModelNme",  loRS.getString("xModelNme"));
+            p_oDetail.updateString("xInvTypNm",  loRS.getString("xInvTypNm"));
+        }
+        MiscUtil.close(loRS);
+        return true;
+    }
     
     public boolean addDetail() throws SQLException {
         
@@ -544,7 +738,7 @@ public class ProductionRequest {
                 
                 lnCtr++;
             }
-            p_oMaster.updateObject("nEntryNox", getItemCount());
+            p_oMaster.updateObject("nEntryNox", lnCtr-1);
             p_oMaster.updateRow();
             
             lsSQL = MiscUtil.rowset2SQL(p_oMaster, MASTER_TABLE, "sClientNm");
@@ -562,22 +756,9 @@ public class ProductionRequest {
         } else {
             if (!p_bWithParent) p_oApp.beginTrans();
             
+            
             //set transaction number on records
             String lsTransNox = (String) getMaster("sTransNox");
-            
-            lsSQL = MiscUtil.rowset2SQL(p_oMaster, 
-                                        MASTER_TABLE, 
-                                        "xBranchNm;xDeptName", 
-                                        "sTransNox = " + SQLUtil.toSQL(lsTransNox));
-            
-            if (!lsSQL.isEmpty()){
-                if (p_oApp.executeQuery(lsSQL, MASTER_TABLE, p_sBranchCd, lsTransNox.substring(0, 4)) <= 0){
-                    if (!p_bWithParent) p_oApp.rollbackTrans();
-                    p_sMessage = p_oApp.getMessage() + ";" + p_oApp.getErrMsg();
-                    return false;
-                }
-            }
-            
             
             lnCtr = 1;
             p_oDetail.beforeFirst();
@@ -602,7 +783,22 @@ public class ProductionRequest {
                 lnCtr++;
             }
             
+            p_oMaster.updateObject("nEntryNox", lnCtr-1);
+            p_oMaster.updateRow();
                 
+            
+            lsSQL = MiscUtil.rowset2SQL(p_oMaster, 
+                                        MASTER_TABLE, 
+                                        "xBranchNm;xDeptName", 
+                                        "sTransNox = " + SQLUtil.toSQL(lsTransNox));
+            
+            if (!lsSQL.isEmpty()){
+                if (p_oApp.executeQuery(lsSQL, MASTER_TABLE, p_sBranchCd, lsTransNox.substring(0, 4)) <= 0){
+                    if (!p_bWithParent) p_oApp.rollbackTrans();
+                    p_sMessage = p_oApp.getMessage() + ";" + p_oApp.getErrMsg();
+                    return false;
+                }
+            }
             
             
             if (!p_bWithParent) p_oApp.commitTrans();
