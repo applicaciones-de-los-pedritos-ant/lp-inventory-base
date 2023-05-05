@@ -1843,7 +1843,7 @@ public class InvTransfer{
                 }
             case 4:
                 lsHeader = "Barcode»Description»Inv. Type»Brand»Model»Stock ID";
-                lsColName = "sBarCodex»sDescript»xInvTypNm»xBrandNme»xModelNme»sStockIDx";
+                lsColName = "a.sBarCodex»sDescript»xInvTypNm»xBrandNme»xModelNme»sStockIDx";
                 lsColCrit = "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»c.sDescript»a.sStockIDx";
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
                 
@@ -1893,30 +1893,28 @@ public class InvTransfer{
         setErrMsg("");
         setMessage("");
         
-        lsHeader = "Brand»Description»Unit»Model»Qty On Hnd»Inv. Type»Barcode»Stock ID";
-        lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»sBarCodex»sStockIDx";
-        lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
         lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
-       
+        lsHeader = "Barcode»Description»Brand»Unit»Model»Qty On Hnd»Inv. Type»Stock ID";
+        lsColName = "xBarcodex»sDescript»xBrandNme»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»a.sStockIDx";
+        lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sStockIDx";
         if (fbByCode){
             if (paDetailOthers.get(fnRow).getValue("sStockIDx").equals(fsValue)) return true;
 
             lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx = " + SQLUtil.toSQL(fsValue));
-
+            System.out.println(lsSQL);
             loRS = poGRider.executeQuery(lsSQL);
 
             loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
         }else {
             if (!fbSearch){
-                if (paDetailOthers.get(fnRow).getValue("sBarCodex").equals(fsValue)) return true;
-
+                if (paDetailOthers.get(fnRow).getValue("sBarCodex").toString().equalsIgnoreCase(fsValue)) return true;
                 loJSON = showFXDialog.jsonSearch(poGRider, 
                                                     lsSQL, 
                                                     fsValue, 
                                                     lsHeader, 
                                                     lsColName, 
                                                     lsColCrit, 
-                                                    6);
+                                                    0);
             } else{
                 if (paDetailOthers.get(fnRow).getValue("sDescript").equals(fsValue)) return true;
 
@@ -2128,11 +2126,23 @@ public class InvTransfer{
                 }
                 
                 if (loJSON != null){
-                    setDetail(paDetailOthers.size()-1, fnCol, (String) loJSON.get("sTransNox"));
-                    paDetailOthers.get(paDetailOthers.size()-1).setValue("sOrderNox", (String) loJSON.get("sTransNox"));
-                    poData.setValue("sOrderNox", (String) loJSON.get("sTransNox"));
-                    loadRequest((String) loJSON.get("sTransNox"));
-                    return true;
+                    if(poData.getValue("sOrderNox").toString().isEmpty()){
+                        setDetail(paDetailOthers.size()-1, fnCol, (String) loJSON.get("sTransNox"));
+                        paDetailOthers.get(paDetailOthers.size()-1).setValue("sOrderNox", (String) loJSON.get("sTransNox"));
+                        poData.setValue("sOrderNox", (String) loJSON.get("sTransNox"));
+                        loadRequest((String) loJSON.get("sTransNox"));
+                        return true;
+                    }else{
+                        paDetail.clear();
+                        paDetailOthers.clear();
+                        addDetail();
+                        setDetail(paDetailOthers.size()-1, fnCol, (String) loJSON.get("sTransNox"));
+                        paDetailOthers.get(paDetailOthers.size()-1).setValue("sOrderNox", (String) loJSON.get("sTransNox"));
+                        poData.setValue("sOrderNox", (String) loJSON.get("sTransNox"));
+                        loadRequest((String) loJSON.get("sTransNox"));
+//                        setMessage("Order no has .");
+                        return true;
+                    }
                 } else{
                     setDetail(paDetailOthers.size()-1, fnCol, "");
                     paDetailOthers.get(paDetailOthers.size()-1).setValue("sOrderNox", "");
@@ -2451,7 +2461,7 @@ public class InvTransfer{
     private String getSQ_Stocks(){
         String lsSQL = "SELECT " +
                             "  a.sStockIDx" +
-                            ", a.sBarCodex" + 
+                            ", a.sBarCodex xBarcodex" + 
                             ", a.sDescript" + 
                             ", a.sBriefDsc" + 
                             ", a.sAltBarCd" + 
@@ -2521,12 +2531,13 @@ public class InvTransfer{
             System.out.println(MiscUtil.addCondition(getSQ_StocksByRequest(), " sTransNox = " + SQLUtil.toSQL(fsOrderNox)));
             loRS.beforeFirst();
             int lnCtr=0;
-           
             while (loRS.next()) {
-                setDetail(lnCtr,"sOrderNox", loRS.getString("sTransNox"));
-                setDetail(lnCtr,"sStockIDx", loRS.getString("sStockIDx"));                
-                setDetail(lnCtr,"nQuantity", loRS.getDouble("nQuantity"));
-
+//                setDetail(lnCtr,"sOrderNox", loRS.getString("sTransNox"));
+//                setDetail(lnCtr,"sStockIDx", loRS.getString("sStockIDx"));                
+//                setDetail(lnCtr,"nQuantity", loRS.getDouble("nQuantity"));
+                paDetail.get(lnCtr).setOrderNox(loRS.getString("sTransNox"));
+                paDetail.get(lnCtr).setStockIDx(loRS.getString("sStockIDx"));
+                paDetail.get(lnCtr).setQuantity(loRS.getDouble("nQuantity"));
                 paDetailOthers.get(lnCtr).setValue("sStockIDx", loRS.getString("sStockIDx"));
                 paDetailOthers.get(lnCtr).setValue("sBarCodex", loRS.getString("sBarCodex"));
                 paDetailOthers.get(lnCtr).setValue("sDescript", loRS.getString("sDescript"));
@@ -2539,7 +2550,7 @@ public class InvTransfer{
                 paDetailOthers.get(lnCtr).setValue("sMeasurNm", loRS.getString("sMeasurNm"));
                 System.out.println("lnCtr = " + lnCtr);
                 System.out.println("RecordCount = " + MiscUtil.RecordCount(loRS));
-                 
+//                 
                 if(!loRS.isLast()){
                     paDetail.add(new UnitInvTransferDetail());
                     paDetail.get(ItemCount()-1).setOrderNox(paDetail.get(ItemCount()-2).getOrderNox());
@@ -2549,6 +2560,7 @@ public class InvTransfer{
                     paDetail.get(ItemCount()-1).setOrderNox("");
                     paDetailOthers.add(new UnitInvTransferDetailOthers());
                 }
+                
                 
                 lnCtr++;
                 
