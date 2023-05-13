@@ -1044,9 +1044,13 @@ public class InvRequest{
         
         switch(fnCol){
             case 1:
-                lsHeader = "Brand»Description»Unit»Model»Qty On Hnd»Inv. Type»Barcode»Stock ID";
-                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»sBarCodex»sStockIDx";
-                lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
+                lsHeader = "Barcode»Description»Brand»Unit»Qty. on hand»Inv. Type";
+                lsColName = "sBarCodex»sDescript»xBrandNme»sMeasurNm»nQtyOnHnd»xInvTypNm";
+                lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»e.nQtyOnHnd»d.sDescript";
+                
+//                lsHeader = "Brand»Description»Unit»Model»Qty On Hnd»Inv. Type»Barcode»Stock ID";
+//                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»a.sBarCodex»a.sStockIDx";
+//                lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
                 
                 if (fbByCode){
@@ -1059,7 +1063,7 @@ public class InvRequest{
                     loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
                 }else {
                     if (!fbSearch){
-                        if (paDetailOthers.get(fnRow).getValue("sBarCodex").equals(fsValue)) return true;
+//                        if (paDetailOthers.get(fnRow).getValue("sBarCodex").toString().equalsIgnoreCase(fsValue)) return true;
                         
                         loJSON = showFXDialog.jsonSearch(poGRider, 
                                                             lsSQL, 
@@ -1067,9 +1071,9 @@ public class InvRequest{
                                                             lsHeader, 
                                                             lsColName, 
                                                             lsColCrit, 
-                                                            6);
+                                                            0);
                     } else{
-                        if (paDetailOthers.get(fnRow).getValue("sDescript").equals(fsValue)) return true;
+//                        if (paDetailOthers.get(fnRow).getValue("sDescript").toString().equalsIgnoreCase(fsValue)) return true;
                         
                         loJSON = showFXDialog.jsonSearch(poGRider, 
                                                             lsSQL, 

@@ -65,7 +65,7 @@ public class DailyProduction{
                                                 lsHeader, 
                                                 lsColName, 
                                                 lsColCrit, 
-                                                1);
+                                                0);
         }
         
         if(loJSON == null)
@@ -212,7 +212,7 @@ public class DailyProduction{
                 if (fnCol == poInv.getColumn("nQtyReqrd")){
                     if (foData instanceof Number){
                         paInv.get(fnRow).setValue(fnCol, foData);
-                    }else paInv.get(fnRow).setValue(fnCol, 0);
+                    }else paInv.get(fnRow).setValue(fnCol, 0);     
                 } else if (fnCol == poInv.getColumn("nQtyUsedx")){
                     if (foData instanceof Number){
                         paInv.get(fnRow).setValue(fnCol, foData);
@@ -877,9 +877,13 @@ public class DailyProduction{
     }
     
     public boolean SearchDetail(int fnRow, int fnCol, String fsValue, boolean fbSearch, boolean fbByCode){
-        String lsHeader = "Brand»Description»Unit»Model»Inv. Type»Barcode»Stock ID";
-        String lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»xInvTypNm»sBarCodex»sStockIDx";
-        String lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»d.sDescript»a.sBarCodex»a.sStockIDx";
+//        String lsHeader = "Brand»Description»Unit»e.»Inv. Type»Barcode»Stock ID";
+//        String lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»xInvTypNm»sBarCodex»sStockIDx";
+//        String lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»d.sDescript»a.sBarCodex»a.sStockIDx";
+//        
+        String lsHeader = "Barcode»Description»Inv. Type»Brand»Qty on Hand»Stock ID";
+        String lsColName = "a.sBarCodex»sDescript»xInvTypNm»xBrandNme»e.nQtyOnHnd»sStockIDx";
+        String lsColCrit = "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»e.nQtyOnHnd»a.sStockIDx";
         String lsSQL = "";
         JSONObject loJSON;
         ResultSet loRS;
@@ -955,9 +959,13 @@ public class DailyProduction{
     }
     
     public boolean SearchInv(int fnRow, int fnCol, String fsValue, boolean fbSearch, boolean fbByCode){
-        String lsHeader = "Brand»Description»Unit»Model»Inv. Type»Barcode»Stock ID";
-        String lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»xInvTypNm»sBarCodex»sStockIDx";
-        String lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»d.sDescript»a.sBarCodex»a.sStockIDx";
+//        String lsHeader = "Brand»Description»Unit»Model»Inv. Type»Barcode»Stock ID";
+//        String lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»xInvTypNm»sBarCodex»sStockIDx";
+//        String lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»d.sDescript»a.sBarCodex»a.sStockIDx";
+
+        String lsHeader = "Barcode»Description»Inv. Type»Brand»Qty on Hand»Stock ID";
+        String lsColName = "a.sBarCodex»sDescript»xInvTypNm»xBrandNme»e.nQtyOnHnd»sStockIDx";
+        String lsColCrit = "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»e.nQtyOnHnd»a.sStockIDx";
         String lsSQL = "";
         JSONObject loJSON;
         ResultSet loRS;
@@ -1468,6 +1476,7 @@ public class DailyProduction{
                     ", c.sDescript xModelNme" + 
                     ", d.sDescript xInvTypNm" + 
                     ", f.sMeasurNm" +
+                    ", e.nQtyOnHnd" +
                 " FROM Inventory a" + 
                         " LEFT JOIN Brand b" + 
                             " ON a.sBrandCde = b.sBrandCde" + 
@@ -1479,7 +1488,7 @@ public class DailyProduction{
                             " ON a.sMeasurID = f.sMeasurID" +
                     ", Inv_Master e" +
                 " WHERE a.sStockIDx = e.sStockIDx" + 
-                    " AND a.sInvTypCd = 'FsGd'" +
+                    " AND a.sInvTypCd = 'FsGd'" + 
                     " AND e.sBranchCd = " + SQLUtil.toSQL(psBranchCd);
         
         return lsSQL;
@@ -1518,6 +1527,7 @@ public class DailyProduction{
                     ", c.sDescript xModelNme" + 
                     ", d.sDescript xInvTypNm" + 
                     ", f.sMeasurNm" +
+                    ", e.nQtyOnHnd" +
                 " FROM Inventory a" + 
                         " LEFT JOIN Brand b" + 
                             " ON a.sBrandCde = b.sBrandCde" + 
@@ -1529,6 +1539,15 @@ public class DailyProduction{
                             " ON a.sMeasurID = f.sMeasurID" +
                     ", Inv_Master e" + 
                     ", Inv_Master_Expiration g" +
+                
+                
+                
+                
+                
+                
+                
+                
+                
                 " WHERE a.sStockIDx = e.sStockIDx" + 
                     " AND e.sStockIDx = g.sStockIDx " +
                     " AND a.sInvTypCd = 'RwMt'" +
