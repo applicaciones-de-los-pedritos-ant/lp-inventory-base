@@ -433,7 +433,7 @@ public class InvTransfer{
                 loOth.setValue("nBackOrdr", loRS.getDouble("nBackOrdr"));
                 loOth.setValue("nReorderx", 0);
                 loOth.setValue("nLedgerNo", loRS.getInt("nLedgerNo"));
-                loOth.setValue("sOrigCode", loRS.getString("xBarCodex"));
+                loOth.setValue("sOrigCode", loRS.getString("sBarCodex"));
                 if (loRS.getString("sMeasurNm")!=null){
                    loOth.setValue("sMeasurNm", loRS.getString("sMeasurNm"));
                 }else{
@@ -1842,9 +1842,9 @@ public class InvTransfer{
                     return searhItemDetail(fnRow, fnCol, fsValue, fbSearch, fbByCode);
                 }
             case 4:
-                lsHeader = "Barcode»Description»Inv. Type»Brand»Model»Stock ID";
-                lsColName = "a.sBarCodex»sDescript»xInvTypNm»xBrandNme»xModelNme»sStockIDx";
-                lsColCrit = "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»c.sDescript»a.sStockIDx";
+                lsHeader = "Barcode»Description»Inv. Type»Brand»Qty on Hand»Stock ID";
+                lsColName = "a.sBarCodex»sDescript»xInvTypNm»xBrandNme»e.nQtyOnHnd»sStockIDx";
+                lsColCrit = "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»e.nQtyOnHnd»a.sStockIDx";
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
                 
                 if (fbByCode){
@@ -1895,7 +1895,7 @@ public class InvTransfer{
         
         lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
         lsHeader = "Barcode»Description»Brand»Unit»Model»Qty On Hnd»Inv. Type»Stock ID";
-        lsColName = "xBarcodex»sDescript»xBrandNme»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»a.sStockIDx";
+        lsColName = "sBarCodex»sDescript»xBrandNme»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»a.sStockIDx";
         lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sStockIDx";
         if (fbByCode){
             if (paDetailOthers.get(fnRow).getValue("sStockIDx").equals(fsValue)) return true;
@@ -2245,7 +2245,7 @@ public class InvTransfer{
                     ", b.nLedgerNo" +
                     ", c.sBarCodex" +
                     ", c.sDescript" +
-                    ", IFNULL(d.sBarCodex, '') xBarCodex" + 
+                    ", IFNULL(d.sBarCodex, '') sBarCodex" + 
                     ", a.dExpiryDt" +
                     ", e.sMeasurNm" +
                     ", a.sParentID" +
@@ -2461,7 +2461,7 @@ public class InvTransfer{
     private String getSQ_Stocks(){
         String lsSQL = "SELECT " +
                             "  a.sStockIDx" +
-                            ", a.sBarCodex xBarcodex" + 
+                            ", a.sBarCodex" + 
                             ", a.sDescript" + 
                             ", a.sBriefDsc" + 
                             ", a.sAltBarCd" + 
