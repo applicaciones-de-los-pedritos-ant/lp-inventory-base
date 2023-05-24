@@ -972,36 +972,19 @@ public class InvTransfer{
             setErrMsg(loInvTrans.getErrMsg());
             return false;
         }
-        
-        //TODO
-            //update branch order info
-    
         return acceptInvExpiration(fdReceived);
     }
     
     private boolean acceptInvExpiration(Date fdTransact){
         String lsSQL;
         ResultSet loRS;
-//            lsSQL = "SELECT" +
-//                    "  sStockIDx" + 
-//                    ", dExpiryDt" + 
-//                    ", n" + 
-//                " FROM Inv_Master_Expiration" +
-//                " WHERE sStockIDx = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx()) + 
-//                    " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd) +
-//                    " AND nQtyOnHnd > 0" +
-//                " ORDER BY dExpiryDt ASC";
-//            
-        
+
         InvExpiration loInvTrans = new InvExpiration(poGRider, poGRider.getBranchCode());
         loInvTrans.InitTransaction();
         
         for (int lnCtr = 0; lnCtr <= paDetailExpiration.size() - 1; lnCtr ++){
             if (paDetailExpiration.get(lnCtr).getStockIDx().equals("")) break;
-//            loInvTrans.setDetail(lnCtr, "sStockIDx", paDetailExpiration.get(lnCtr).getColumn("sStockIDx"));
-//            loInvTrans.setDetail(lnCtr, "dExpiryDt", paDetailExpiration.get(lnCtr).getColumn("dExpiryDt"));
-//            loInvTrans.setDetail(lnCtr, "nQtyInxxx", paDetailExpiration.get(lnCtr).getColumn("nReceived"));
-
+            
             loInvTrans.setDetail(lnCtr, "sStockIDx", paDetailExpiration.get(lnCtr).getStockIDx());
             loInvTrans.setDetail(lnCtr, "dExpiryDt", paDetailExpiration.get(lnCtr).getDExpiryDt());
             loInvTrans.setDetail(lnCtr, "nQtyInxxx", paDetailExpiration.get(lnCtr).getNReceived());
@@ -1012,10 +995,7 @@ public class InvTransfer{
             setErrMsg(loInvTrans.getErrMsg());
             return false;
         }
-        
-        //TODO
-            //update branch order info
-    
+
         return true;
     }
     
@@ -1547,7 +1527,8 @@ public class InvTransfer{
         if (!pbWithParent){
             if (getErrMsg().isEmpty()){
                 poGRider.commitTrans();
-            } else poGRider.rollbackTrans();
+            } else 
+                poGRider.rollbackTrans();
         }
         return lbResult;
     }
@@ -1907,7 +1888,10 @@ public class InvTransfer{
             loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
         }else {
             if (!fbSearch){
-                if (paDetailOthers.get(fnRow).getValue("sBarCodex").toString().equalsIgnoreCase(fsValue)) return true;
+                if (!fsValue.isEmpty()){
+                    if (paDetailOthers.get(fnRow).getValue("sBarCodex").toString().equalsIgnoreCase(fsValue)) return true;
+                }
+                    
                 loJSON = showFXDialog.jsonSearch(poGRider, 
                                                     lsSQL, 
                                                     fsValue, 
@@ -1916,8 +1900,10 @@ public class InvTransfer{
                                                     lsColCrit, 
                                                     0);
             } else{
-                if (paDetailOthers.get(fnRow).getValue("sDescript").equals(fsValue)) return true;
-
+                if (!fsValue.isEmpty()){
+                    if (paDetailOthers.get(fnRow).getValue("sDescript").equals(fsValue)) return true;
+                }
+                
                 loJSON = showFXDialog.jsonSearch(poGRider, 
                                                     lsSQL, 
                                                     fsValue, 

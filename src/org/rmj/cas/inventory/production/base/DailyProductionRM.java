@@ -98,8 +98,8 @@ public class DailyProductionRM{
     }
 
     public boolean deleteDetail(int fnRow) {
-        paDetail.remove(fnRow);
-        paDetailOthers.remove(fnRow);
+        paDetail.remove(fnRow - 1);
+        paDetailOthers.remove(fnRow - 1);
         
         if (paDetail.isEmpty()){
             paDetail.add(new UnitDailyProductionInv());
