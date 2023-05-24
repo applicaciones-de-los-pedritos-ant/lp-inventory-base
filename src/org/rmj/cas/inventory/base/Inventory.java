@@ -136,12 +136,12 @@ public class Inventory{
         JSONObject loJSON;
         
         loJSON = showFXDialog.jsonSearch(poGRider, 
-                                            lsSQL, 
-                                            fsValue, 
-                                            lsHeader, 
-                                            lsColName, 
-                                            lsColCrit, 
-                                            fbByCode ? 6 : fbSearch ? 1 : 5);
+                                           lsSQL, 
+                                                fsValue, 
+                                         lsHeader, 
+                                        lsColName, 
+                                        lsColCrit, 
+                                                fbByCode ? 6 : fbSearch ? 1 : 5);
         
         if(loJSON == null)
             return false;
@@ -784,7 +784,7 @@ public class Inventory{
     
     public String getSQ_Master(){
         return "SELECT " +
-                " a.sStockIDx " +
+                "  a.sStockIDx " +
                 ", a.sBarCodex " +
                 ", a.sDescript " +
                 ", a.sBriefDsc " +
