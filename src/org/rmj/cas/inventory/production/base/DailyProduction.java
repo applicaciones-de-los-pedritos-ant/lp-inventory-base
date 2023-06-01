@@ -27,6 +27,7 @@ import org.rmj.cas.inventory.others.pojo.UnitDailyProductionDetailOthers;
 import org.rmj.cas.inventory.production.pojo.UnitDailyProductionDetail;
 import org.rmj.cas.inventory.production.pojo.UnitDailyProductionMaster;
 import org.rmj.appdriver.agentfx.callback.IMasterDetail;
+import org.rmj.appdriver.constants.UserRight;
 import org.rmj.cas.inventory.base.InvExpiration;
 import org.rmj.cas.inventory.base.InvTransfer;
 import org.rmj.cas.inventory.others.pojo.UnitDailyProductionInvOthers;
@@ -735,6 +736,11 @@ public class DailyProduction{
             return lbResult;
         }
         
+        if (poGRider.getUserLevel() < UserRight.SUPERVISOR){
+            setMessage("User is not allowed confirming transaction.");
+            return lbResult;
+        }
+        
         String lsSQL = "UPDATE " + loObject.getTable() + 
                         " SET  cTranStat = " + SQLUtil.toSQL(TransactionStatus.STATE_CLOSED) + 
                             ", sModified = " + SQLUtil.toSQL(psUserIDxx) +
@@ -959,10 +965,6 @@ public class DailyProduction{
     }
     
     public boolean SearchInv(int fnRow, int fnCol, String fsValue, boolean fbSearch, boolean fbByCode){
-//        String lsHeader = "Brand»Description»Unit»Model»Inv. Type»Barcode»Stock ID";
-//        String lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»xInvTypNm»sBarCodex»sStockIDx";
-//        String lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»d.sDescript»a.sBarCodex»a.sStockIDx";
-
         String lsHeader = "Barcode»Description»Inv. Type»Brand»Qty on Hand»Stock ID";
         String lsColName = "a.sBarCodex»sDescript»xInvTypNm»xBrandNme»e.nQtyOnHnd»sStockIDx";
         String lsColCrit = "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»e.nQtyOnHnd»a.sStockIDx";
@@ -977,7 +979,7 @@ public class DailyProduction{
         switch(fnCol){
             case 3:
                 lsSQL = MiscUtil.addCondition(getStocksWExpiraiton(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
-                System.out.println(lsSQL);
+
                 if (fbByCode){
                     if (paInvOthers.get(fnRow).getValue("sStockIDx").equals(fsValue)) return true;
                     
@@ -1497,62 +1499,53 @@ public class DailyProduction{
     
     private String getStocksWExpiraiton(){
         String lsSQL = "SELECT " +
-                    "  a.sStockIDx" +
-                    ", a.sBarCodex" + 
-                    ", a.sDescript" + 
-                    ", a.sBriefDsc" + 
-                    ", a.sAltBarCd" + 
-                    ", a.sCategCd1" + 
-                    ", a.sCategCd2" + 
-                    ", a.sCategCd3" + 
-                    ", a.sCategCd4" + 
-                    ", a.sBrandCde" + 
-                    ", a.sModelCde" + 
-                    ", a.sColorCde" + 
-                    ", a.sInvTypCd" + 
-                    ", a.nUnitPrce" + 
-                    ", a.nSelPrice" + 
-                    ", a.nDiscLev1" + 
-                    ", a.nDiscLev2" + 
-                    ", a.nDiscLev3" + 
-                    ", a.nDealrDsc" + 
-                    ", a.cComboInv" + 
-                    ", a.cWthPromo" + 
-                    ", a.cSerialze" + 
-                    ", a.cUnitType" + 
-                    ", a.cInvStatx" + 
-                    ", a.sSupersed" + 
-                    ", a.cRecdStat" + 
-                    ", b.sDescript xBrandNme" + 
-                    ", c.sDescript xModelNme" + 
-                    ", d.sDescript xInvTypNm" + 
-                    ", f.sMeasurNm" +
-                    ", e.nQtyOnHnd" +
-                " FROM Inventory a" + 
-                        " LEFT JOIN Brand b" + 
-                            " ON a.sBrandCde = b.sBrandCde" + 
-                        " LEFT JOIN Model c" + 
-                            " ON a.sModelCde = c.sModelCde" + 
-                        " LEFT JOIN Inv_Type d" + 
-                            " ON a.sInvTypCd = d.sInvTypCd" +
-                        " LEFT JOIN Measure f" +
-                            " ON a.sMeasurID = f.sMeasurID" +
-                    ", Inv_Master e" + 
-                    ", Inv_Master_Expiration g" +
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                " WHERE a.sStockIDx = e.sStockIDx" + 
-                    " AND e.sStockIDx = g.sStockIDx " +
-                    " AND a.sInvTypCd = 'RwMt'" +
-                    " AND e.sBranchCd = " + SQLUtil.toSQL(psBranchCd)+
-                    " GROUP BY a.sStockIDx";
+                            "  a.sStockIDx" +
+                            ", a.sBarCodex" + 
+                            ", a.sDescript" + 
+                            ", a.sBriefDsc" + 
+                            ", a.sAltBarCd" + 
+                            ", a.sCategCd1" + 
+                            ", a.sCategCd2" + 
+                            ", a.sCategCd3" + 
+                            ", a.sCategCd4" + 
+                            ", a.sBrandCde" + 
+                            ", a.sModelCde" + 
+                            ", a.sColorCde" + 
+                            ", a.sInvTypCd" + 
+                            ", a.nUnitPrce" + 
+                            ", a.nSelPrice" + 
+                            ", a.nDiscLev1" + 
+                            ", a.nDiscLev2" + 
+                            ", a.nDiscLev3" + 
+                            ", a.nDealrDsc" + 
+                            ", a.cComboInv" + 
+                            ", a.cWthPromo" + 
+                            ", a.cSerialze" + 
+                            ", a.cUnitType" + 
+                            ", a.cInvStatx" + 
+                            ", a.sSupersed" + 
+                            ", a.cRecdStat" + 
+                            ", b.sDescript xBrandNme" + 
+                            ", c.sDescript xModelNme" + 
+                            ", d.sDescript xInvTypNm" + 
+                            ", f.sMeasurNm" +
+                            ", e.nQtyOnHnd" +
+                        " FROM Inventory a" + 
+                                " LEFT JOIN Brand b" + 
+                                    " ON a.sBrandCde = b.sBrandCde" + 
+                                " LEFT JOIN Model c" + 
+                                    " ON a.sModelCde = c.sModelCde" + 
+                                " LEFT JOIN Inv_Type d" + 
+                                    " ON a.sInvTypCd = d.sInvTypCd" +
+                                " LEFT JOIN Measure f" +
+                                    " ON a.sMeasurID = f.sMeasurID" +
+                            ", Inv_Master e" + 
+                            ", Inv_Master_Expiration g" +
+                        " WHERE a.sStockIDx = e.sStockIDx" + 
+                            " AND e.sStockIDx = g.sStockIDx " +
+                            " AND a.sInvTypCd = 'RwMt'" +
+                            " AND e.sBranchCd = " + SQLUtil.toSQL(psBranchCd)+
+                        " GROUP BY a.sStockIDx";
         
         return lsSQL;
     }
