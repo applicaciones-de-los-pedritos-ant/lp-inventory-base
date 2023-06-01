@@ -802,8 +802,7 @@ public class InvRequest{
             if (!poGRider.getErrMsg().isEmpty()){
                 setErrMsg(poGRider.getErrMsg());
             } else setErrMsg("Unable to close transaction.");  
-        }
-//        } else lbResult = saveInvTrans();
+        } else lbResult = true;
         
         if (!pbWithParent){
             if (getErrMsg().isEmpty()){

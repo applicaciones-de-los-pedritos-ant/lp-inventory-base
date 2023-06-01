@@ -27,6 +27,7 @@ import org.rmj.cas.inventory.pojo.UnitInvMaster;
 import org.rmj.cas.inventory.pojo.UnitInvAdjustmentDetail;
 import org.rmj.cas.inventory.pojo.UnitInvAdjustmentMaster;
 import org.rmj.appdriver.agentfx.callback.IMasterDetail;
+import org.rmj.appdriver.constants.UserRight;
 
 public class InvAdjustment{
     public InvAdjustment(GRider foGRider, String fsBranchCD, boolean fbWithParent){
@@ -718,6 +719,11 @@ public class InvAdjustment{
         
         if (!loObject.getTranStat().equalsIgnoreCase(TransactionStatus.STATE_OPEN)){
             setMessage("Unable to close closed/cancelled/posted/voided transaction.");
+            return lbResult;
+        }
+        
+        if (poGRider.getUserLevel() < UserRight.SUPERVISOR){
+            setMessage("User is not allowed confirming transaction.");
             return lbResult;
         }
         

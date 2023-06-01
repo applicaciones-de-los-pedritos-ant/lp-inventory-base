@@ -18,6 +18,7 @@ import org.rmj.appdriver.agentfx.CommonUtils;
 import org.rmj.appdriver.agentfx.ui.showFXDialog;
 import org.rmj.appdriver.constants.EditMode;
 import org.rmj.appdriver.constants.TransactionStatus;
+import org.rmj.appdriver.constants.UserRight;
 
 /**
  *
@@ -809,6 +810,10 @@ public class ProductionRequest {
             return false;
         }
        
+        if (p_oApp.getUserLevel() < UserRight.SUPERVISOR){
+            p_sMessage = "User is not allowed confirming transaction.";
+            return false;
+        }
         
         String lsTransNox = (String) getMaster("sTransNox");
         
@@ -833,16 +838,10 @@ public class ProductionRequest {
         
         p_sMessage = "";
         
-     
         if (((String) getMaster("cTranStat")).equals("2")){
             p_sMessage = "Transaction was already posted..";
             return false;
         }  
-        
-        if (((String) getMaster("cTranStat")).equals("0")){
-            p_sMessage = "Unable to post unconfirmed transactions.";
-            return false;
-        }
         
         if (((String) getMaster("cTranStat")).equals("3")){
             p_sMessage = "Unable to post cancelled transactions.";
@@ -901,12 +900,15 @@ public class ProductionRequest {
         return true;
     }
     
-    private boolean isEntryOK() throws SQLException{    
-        
-        
+    private boolean isEntryOK() throws SQLException{                   
         //validate detail
         if (getItemCount() == 0){
             p_sMessage = "No Item detail detected.";
+            return false;
+        }
+        
+        if (((String) p_oMaster.getString("sIssuingx")).isEmpty()){
+            p_sMessage = "Issuing entity is not set.";
             return false;
         }
         
@@ -960,38 +962,44 @@ public class ProductionRequest {
                 " WHERE a.sReqstdBy = b.sEmployID";
         
         lsSQL = MiscUtil.addCondition(lsSQL, lsCondition);
+        
+        if (!"PK01;PR01;P0W2".contains(p_sBranchCd)){
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox LIKE " + SQLUtil.toSQL(p_sBranchCd + "%"));
+        }
+        
         return lsSQL;
     }
     private String getSQL_Detail(){
         String lsSQL = "";
                
         lsSQL = "SELECT " + 
-                " a.sTransNox" +
-                ", a.sStockIDx" +
-                ", a.nQuantity" +
-                ", a.nEntryNox" +
-                ", c.sBarCodex" +
-                ", b.nQtyOnHnd" +
-                ", c.sDescript" + 
-                ", IFNULL(d.sDescript,'') xBrandNme" + 
-                ", IFNULL(e.sDescript,'') xModelNme" + 
-                ", IFNULL(f.sDescript,'') xInvTypNm" + 
-                ", g.sMeasurNm " +
-                " FROM " +DETAIL_TABLE + " a " +
-                " , Inv_Master b " + 
-                " LEFT JOIN Inventory c " + 
-                "   ON b.sStockIDx = c.sStockIDx " +
-                " LEFT JOIN Brand d" + 
-                    " ON c.sBrandCde = d.sBrandCde" + 
-                " LEFT JOIN Model e" + 
-                    " ON c.sModelCde = e.sModelCde" + 
-                " LEFT JOIN Inv_Type f" + 
-                    " ON c.sInvTypCd = f.sInvTypCd" +
-                " LEFT JOIN Measure g" + 
-                    " ON c.sMeasurID = g.sMeasurID " +
-                " WHERE f.sInvTypCd = 'FsGd' "+
-                "   AND b.sBranchCD = " + SQLUtil.toSQL(p_oApp.getBranchCode()) + 
-                "   AND a.sStockIDx = b.sStockIDx ";
+                    "  a.sTransNox" +
+                    ", a.sStockIDx" +
+                    ", a.nQuantity" +
+                    ", a.nEntryNox" +
+                    ", b.sBarCodex" +
+                    ", IFNULL(c.nQtyOnHnd, 0) nQtyOnHnd" +
+                    ", b.sDescript" + 
+                    ", IFNULL(d.sDescript,'') xBrandNme" + 
+                    ", IFNULL(e.sDescript,'') xModelNme" + 
+                    ", IFNULL(f.sDescript,'') xInvTypNm" + 
+                    ", g.sMeasurNm " +
+                " FROM " + DETAIL_TABLE + " a " +
+                    ", Inventory b" +
+                    " LEFT JOIN Inv_Master c" +
+                        " ON b.sStockIDx = c.sStockIDx" + 
+                            " AND c.sBranchCD = " + SQLUtil.toSQL(p_oApp.getBranchCode()) +
+                    " LEFT JOIN Brand d" + 
+                        " ON b.sBrandCde = d.sBrandCde" + 
+                    " LEFT JOIN Model e" + 
+                        " ON b.sModelCde = e.sModelCde" + 
+                    " LEFT JOIN Inv_Type f" + 
+                        " ON b.sInvTypCd = f.sInvTypCd" +
+                    " LEFT JOIN Measure g" + 
+                        " ON b.sMeasurID = g.sMeasurID " +
+                " WHERE a.sStockIDx = b.sStockIDx" +
+                    " AND f.sInvTypCd = 'FsGd'";
+        
         return lsSQL;
     }
     private String getSQ_Stocks(){

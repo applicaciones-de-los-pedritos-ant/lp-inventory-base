@@ -668,9 +668,7 @@ public class InvTransfer{
             setErrMsg(loInvTrans.getErrMsg());
             return false;
         }
-        
-        //TODO
-            //update branch order info
+
         if (!lsStockNo.equals("")){
             if (postStockRequest(lsStockNo)){
                 return false;
@@ -719,11 +717,7 @@ public class InvTransfer{
                     " ORDER BY dExpiryDt";
             
             loRS = poGRider.executeQuery(lsSQL);
-            /**
-             * jovan
-             * since 06-21-21
-             * comment for debugging/revision of code
-             */
+
             try {
                 if(MiscUtil.RecordCount(loRS)==0){
                     if(!paDetailOthers.get(lnCtr).getValue("sParentID").toString().isEmpty()){
@@ -809,10 +803,7 @@ public class InvTransfer{
                                     ", nReceived = 0" +
                                     ", dExpiryDt = " + SQLUtil.toSQL(loRS.getDate("dExpiryDt"))+      
                                     ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate());
-                        
-                        /**
-                         * ", dExpiryDt = " + SQLUtil.toSQL(loRS.getDate("dExpiryDt"))+      
-                         */
+
                         if(poGRider.executeQuery(lsSQL, "Inv_Transfer_Detail_Expiration", "", "") == 0){
                             if(!poGRider.getErrMsg().isEmpty())
                                 setErrMsg(poGRider.getErrMsg());
@@ -821,7 +812,6 @@ public class InvTransfer{
                         }
                         
                         if(lnQtyOut<=loRS.getInt("nQtyOnHnd")){
-//                            return saveInvExpiration(poData.getTransact());
                             break;
                         }
                         lnQtyOut =  (double)Math.round((lnQtyOut - loRS.getInt("nQtyOnHnd"))*100)/100;
@@ -830,31 +820,6 @@ public class InvTransfer{
             } catch (SQLException ex) {
                 Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
             }
-//            try {
-//                    while (loRS.next()){
-//                        lsSQL = "INSERT INTO Inv_Transfer_Detail_Expiration SET" +          
-//                                    "  sTransNox = " + SQLUtil.toSQL(paDetail.get(lnCtr).getTransNox()) +
-//                                    ", nEntryNox = " + SQLUtil.toSQL(paDetail.get(lnCtr).getEntryNox()) +
-//                                    ", sStockIDx = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx()) +
-//                                    ", nQtyOnHnd = " + SQLUtil.toSQL(loRS.getInt("nQtyOnHnd")) +                        
-//                                    ", nQuantity = " + SQLUtil.toSQL(paDetail.get(lnCtr).getQuantity()) +                        
-//                                    ", nReceived = 0" +
-//                                    ", dExpiryDt = " + SQLUtil.toSQL(paDetail.get(lnCtr).getDateExpiry())+      
-//                                    ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate());
-//                        
-//                        /**
-//                         * ", dExpiryDt = " + SQLUtil.toSQL(loRS.getDate("dExpiryDt"))+      
-//                         */
-//                        if(poGRider.executeQuery(lsSQL, "Inv_Transfer_Detail_Expiration", "", "") == 0){
-//                            if(!poGRider.getErrMsg().isEmpty())
-//                                setErrMsg(poGRider.getErrMsg());
-//                            else 
-//                                setMessage("No record updated");
-//                        }
-//                    }
-//            } catch (SQLException ex) {
-//                Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
-//            }
         }
         
         return saveInvExpiration(poData.getTransact());
@@ -1012,34 +977,16 @@ public class InvTransfer{
         lnTemp=0;
         for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr ++){
             if (paDetail.get(lnCtr).getStockIDx().equals("")) break;
-            /**
-             * jovan
-             * since 06-21-21
-             * comment part of debugging
-             **/
             
-//            if (paDetail.get(lnCtr).getParentID().equals("")){
-                lsSQL = "SELECT" +
-                    "  sStockIDx" + 
-                    ", dExpiryDt" + 
-                    ", nQtyOnHnd" + 
-                " FROM Inv_Master_Expiration" +
-                " WHERE sStockIDx = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx()) + 
-                    " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd) +
-                    " AND nQtyOnHnd > 0" +
-                " ORDER BY dExpiryDt ASC";
-//            }else{
-//                lsSQL = "SELECT dExpiryDt, SUM(nQtyOnHnd) nQtyOnHnd FROM (SELECT * FROM Inv_Master_Expiration" +
-//                                " WHERE sStockIDx = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx()) +
-//                                    " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd) +
-//                                    " AND nQtyOnHnd > 0" +
-//                                " UNION SELECT * FROM (SELECT * FROM Inv_Master_Expiration" +
-//                                    " WHERE sStockIDx = " + SQLUtil.toSQL(paDetail.get(lnCtr).getParentID()) +
-//                                        " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd) +
-//                                        " AND nQtyOnHnd > 0 ORDER BY dExpiryDt LIMIT 1)xxx) xxxTable" +
-//                                " GROUP BY dExpiryDt" +
-//                                " ORDER BY dExpiryDt";  
-//            }
+            lsSQL = "SELECT" +
+                "  sStockIDx" + 
+                ", dExpiryDt" + 
+                ", nQtyOnHnd" + 
+            " FROM Inv_Master_Expiration" +
+            " WHERE sStockIDx = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx()) + 
+                " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd) +
+                " AND nQtyOnHnd > 0" +
+            " ORDER BY dExpiryDt ASC";
                 
             loRS = poGRider.executeQuery(lsSQL);
             try {
@@ -1066,16 +1013,6 @@ public class InvTransfer{
                             }else{
                                 lnQuantity = lnQtyOut;
                             }
-                            
-//                            lsSQL = "INSERT INTO Inv_Transfer_Detail_Expiration SET" +          
-//                                        "  sTransNox = " + SQLUtil.toSQL(paDetail.get(lnCtr).getTransNox()) +
-//                                        ", nEntryNox = " + SQLUtil.toSQL(paDetail.get(lnCtr).getEntryNox()) +                        
-//                                        ", sStockIDx = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx()) +
-//                                        ", nQtyOnHnd = " + SQLUtil.toSQL(loRSSub.getDouble("nQtyOnHnd")) +
-//                                        ", nQuantity = " + SQLUtil.toSQL(lnQuantity) +                        
-//                                        ", nReceived = 0" +
-//                                        ", dExpiryDt = " + SQLUtil.toSQL(loRSSub.getDate("dExpiryDt"))+      
-//                                        ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate());
 
                             loInvTrans.setDetail(lnTemp, "nQtyOutxx", lnQuantity);
                             loInvTrans.setDetail(lnTemp, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
@@ -1110,15 +1047,6 @@ public class InvTransfer{
                         loInvTrans.setDetail(lnTemp, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
                         loInvTrans.setDetail(lnTemp, "dExpiryDt", poGRider.getSysDate());
                     }
-                
-//                loInvTrans.setDetail(lnTemp, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
-//                loInvTrans.setDetail(lnTemp, "dExpiryDt", paDetail.get(lnCtr).getDateExpiry());
-//                loInvTrans.setDetail(lnTemp, "nQtyOutxx",Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()) -  Double.valueOf(paDetail.get(lnCtr).getQuantity().toString()));
-                
-//                if (!loInvTrans.Delivery(fdTransact, EditMode.ADDNEW)){
-//                    setMessage(loInvTrans.getMessage());
-//                    setErrMsg(loInvTrans.getErrMsg());
-//                    return false;
 //                }
                 }else{
                     lnTempQTY=Double.valueOf(paDetail.get(lnCtr).getQuantity().toString());
