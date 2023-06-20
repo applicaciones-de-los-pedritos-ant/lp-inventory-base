@@ -53,21 +53,13 @@ public class DailyProduction{
         String lsSQL = getSQ_DailyProducton();
         JSONObject loJSON;
         
-        if (fbByCode){
-            lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox = " +  SQLUtil.toSQL(fsValue));
-            
-            ResultSet loRS = poGRider.executeQuery(lsSQL);
-            
-            loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
-        } else{
-            loJSON = showFXDialog.jsonSearch(poGRider, 
-                                                lsSQL, 
-                                                fsValue, 
-                                                lsHeader, 
-                                                lsColName, 
-                                                lsColCrit, 
-                                                0);
-        }
+        loJSON = showFXDialog.jsonSearch(poGRider, 
+                                            lsSQL, 
+                                            fsValue, 
+                                            lsHeader, 
+                                            lsColName, 
+                                            lsColCrit, 
+                                            fbByCode ? 0 : 1);
         
         if(loJSON == null)
             return false;
@@ -1197,12 +1189,17 @@ public class DailyProduction{
         InvExpiration loInvTrans = new InvExpiration(poGRider, poGRider.getBranchCode());
         loInvTrans.InitTransaction();
         
+        
+        boolean lbProcess = false;
+        
         if(fbInvIn ==false){
             for (int lnCtr = 0; lnCtr <= paInv.size() - 1; lnCtr ++){
                 if (paInv.get(lnCtr).getStockIDx().equals("")) break;
                 loInvTrans.setDetail(lnCtr, "sStockIDx", paInv.get(lnCtr).getStockIDx());
                 loInvTrans.setDetail(lnCtr, "dExpiryDt", paInv.get(lnCtr).getDateExpiryDt());
                 loInvTrans.setDetail(lnCtr, "nQtyOutxx", paInv.get(lnCtr).getQtyUsed());
+                
+                lbProcess = true;
             }
         }else{
             for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr ++){
@@ -1210,26 +1207,23 @@ public class DailyProduction{
                 loInvTrans.setDetail(lnCtr, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
                 loInvTrans.setDetail(lnCtr, "dExpiryDt", paDetail.get(lnCtr).getDateExpiryDt());
                 loInvTrans.setDetail(lnCtr, "nQtyInxxx", paDetail.get(lnCtr).getQuantity());
+            
+                lbProcess = true;
             }
         }
         
         if (fbInvIn==true){
-            if (!loInvTrans.DailyProduction_IN(fdTransact, EditMode.ADDNEW)){
-                setMessage(loInvTrans.getMessage());
-                setErrMsg(loInvTrans.getErrMsg());
-                return false;
+            if (lbProcess){
+                if (!loInvTrans.DailyProduction_IN(fdTransact, EditMode.ADDNEW)){
+                    setMessage(loInvTrans.getMessage());
+                    setErrMsg(loInvTrans.getErrMsg());
+                    return false;
+                }
             }
         }else{
-//            if (!loInvTrans.DailyProduction_OUT(fdTransact, EditMode.ADDNEW)){
-//                setMessage(loInvTrans.getMessage());
-//                setErrMsg(loInvTrans.getErrMsg());
-                return saveInvExpirationSub(fdTransact);
-//            }
+            return saveInvExpirationSub(fdTransact);
         }
-        
-        //TODO
-            //update branch order info
-    
+
         return true;
     }
     
@@ -1239,6 +1233,7 @@ public class DailyProduction{
         int lnRow;
         int lnTemp;
         double lnTempQTY;
+        boolean lbProcess = false;        
         
         InvExpiration loInvTrans = new InvExpiration(poGRider, poGRider.getBranchCode());
         loInvTrans.InitTransaction();
@@ -1246,6 +1241,7 @@ public class DailyProduction{
         lnTemp=0;
         for (int lnCtr = 0; lnCtr <= paInv.size() - 1; lnCtr ++){
             if (paInv.get(lnCtr).getStockIDx().equals("")) break;
+            
             lsSQL = "SELECT" +
                 "  sStockIDx" + 
                 ", dExpiryDt" + 
@@ -1257,16 +1253,18 @@ public class DailyProduction{
             " ORDER BY dExpiryDt ASC";
                 
             loRS = poGRider.executeQuery(lsSQL);
+
             try {
                 if (MiscUtil.RecordCount(loRS) == 0){             
                     loInvTrans.setDetail(lnTemp, "nQtyOutxx", paInv.get(lnCtr).getQtyUsed());
                     loInvTrans.setDetail(lnTemp, "sStockIDx", paInv.get(lnCtr).getStockIDx());
                     loInvTrans.setDetail(lnTemp, "dExpiryDt", fdTransact);     
                 }else{
-                    lnTempQTY=Double.valueOf(paInv.get(lnCtr).getQtyUsed().toString());
+                    lnTempQTY = Double.valueOf(paInv.get(lnCtr).getQtyUsed().toString());
                     loRS.first();
+                    
                     for (lnRow = 0; lnRow <= MiscUtil.RecordCount(loRS) - 1; lnRow ++){
-                        if(lnTempQTY<=loRS.getInt("nQtyOnHnd")){
+                        if(lnTempQTY <= loRS.getInt("nQtyOnHnd")){
                             loInvTrans.setDetail(lnTemp, "nQtyOutxx", lnTempQTY);
                             loInvTrans.setDetail(lnTemp, "sStockIDx", paInv.get(lnCtr).getStockIDx());
                             loInvTrans.setDetail(lnTemp, "dExpiryDt", loRS.getDate("dExpiryDt"));
@@ -1279,9 +1277,11 @@ public class DailyProduction{
                             loInvTrans.setDetail(lnTemp, "dExpiryDt", loRS.getDate("dExpiryDt"));
                             
                             lnTempQTY =  lnTempQTY - loRS.getInt("nQtyOnHnd");
-                        }    
+                        }
+                        
                         lnTemp++;
                         loRS.next();
+                        lbProcess = true;
                     }
                 }
             } catch (SQLException ex) {
@@ -1289,12 +1289,14 @@ public class DailyProduction{
             }
         }
         
-        if (!loInvTrans.DailyProduction_OUT(fdTransact, EditMode.ADDNEW)){
-            setMessage(loInvTrans.getMessage());
-            setErrMsg(loInvTrans.getErrMsg());
-            return false;
+        if (lbProcess){
+            if (!loInvTrans.DailyProduction_OUT(fdTransact, EditMode.ADDNEW)){
+                setMessage(loInvTrans.getMessage());
+                setErrMsg(loInvTrans.getErrMsg());
+                return false;
+            }
         }
-    
+            
         return true;
     }
         
@@ -1490,7 +1492,7 @@ public class DailyProduction{
                             " ON a.sMeasurID = f.sMeasurID" +
                     ", Inv_Master e" +
                 " WHERE a.sStockIDx = e.sStockIDx" + 
-                    " AND a.sInvTypCd = 'FsGd'" + 
+                    " AND a.sInvTypCd IN ('FsGd', 'PREC')" + 
                     " AND e.sBranchCd = " + SQLUtil.toSQL(psBranchCd);
         
         return lsSQL;
