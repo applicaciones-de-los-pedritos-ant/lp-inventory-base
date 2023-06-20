@@ -39,7 +39,7 @@ import org.rmj.cas.inventory.others.pojo.UnitInvTransferDetailExpiration;
 import org.rmj.cas.inventory.pojo.UnitInvMaster;
 import org.rmj.cas.inventory.pojo.UnitInvTransferDetail;
 import org.rmj.cas.inventory.pojo.UnitInvTransferMaster;
-import org.rmj.cas.parameter.agent.XMBranch;
+import org.rmj.lp.parameter.agent.XMBranch;
 import org.rmj.appdriver.agentfx.callback.IMasterDetail;
 
 public class InvTransfer{
@@ -1401,7 +1401,7 @@ public class InvTransfer{
         
         String lsSQL = "UPDATE " + loObject.getTable() + 
                         " SET  cTranStat = " + SQLUtil.toSQL(TransactionStatus.STATE_CLOSED) + 
-                            ", sModified = " + SQLUtil.toSQL(psUserIDxx) +
+                            ", sApproved = " +SQLUtil.toSQL(psUserIDxx) +
                             ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate()) + 
                         " WHERE sTransNox = " + SQLUtil.toSQL(loObject.getTransNox());
         

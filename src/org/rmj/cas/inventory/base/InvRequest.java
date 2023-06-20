@@ -36,9 +36,9 @@ import org.rmj.cas.inventory.base.views.SubUnitController;
 import org.rmj.cas.inventory.others.pojo.UnitInvRequestOthers;
 import org.rmj.cas.inventory.pojo.UnitInvRequestDetail;
 import org.rmj.cas.inventory.pojo.UnitInvRequestMaster;
-import org.rmj.cas.parameter.agent.XMBranch;
+import org.rmj.lp.parameter.agent.XMBranch;
 import org.rmj.appdriver.agentfx.callback.IMasterDetail;
-import org.rmj.cas.parameter.agent.XMInventoryType;
+import org.rmj.lp.parameter.agent.XMInventoryType;
 
 public class InvRequest{
     public InvRequest(GRider foGRider, String fsBranchCD, boolean fbWithParent){
