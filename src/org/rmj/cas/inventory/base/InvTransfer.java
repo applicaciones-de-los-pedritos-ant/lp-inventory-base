@@ -1158,6 +1158,15 @@ public class InvTransfer{
         return true;
     }
 
+    public boolean updateRecord() {
+        if(pnEditMode != EditMode.READY) {
+         return false;
+      }
+      else{
+         pnEditMode = EditMode.UPDATE;
+         return true;
+      }
+    }
     public boolean saveTransaction() {
         String lsSQL = "";
         boolean lbUpdate = false;
