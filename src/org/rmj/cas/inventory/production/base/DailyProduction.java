@@ -402,6 +402,15 @@ public class DailyProduction{
         return loDetail;
     }
 
+    public boolean updateRecord() {
+        if(pnEditMode != EditMode.READY) {
+         return false;
+      }
+      else{
+         pnEditMode = EditMode.UPDATE;
+         return true;
+      }
+    }
     public boolean saveTransaction() {
         String lsSQL = "";
         int lnCtr;
