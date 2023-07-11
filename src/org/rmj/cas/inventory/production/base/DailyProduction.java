@@ -246,6 +246,8 @@ public class DailyProduction{
                 return paInvOthers.get(fnRow).getValue(fsCol);
             case "sMeasurNm":
                 return paInvOthers.get(fnRow).getValue(fsCol);
+            case "sBrandNme":
+                return paInvOthers.get(fnRow).getValue(fsCol);
             default:
                 return null;
         }
@@ -344,6 +346,7 @@ public class DailyProduction{
                 
                 loOth = new UnitDailyProductionDetailOthers();
                 loOth.setValue("sStockIDx", loRS.getString("sStockIDx"));
+                loOth.setValue("sBrandNme", loRS.getString("xBrandNme"));
                 loOth.setValue("sBarCodex", loRS.getString("sBarCodex"));
                 loOth.setValue("sDescript", loRS.getString("sDescript"));
                 if (loRS.getString("sMeasurNm")!=null){
@@ -392,6 +395,7 @@ public class DailyProduction{
                 loOth.setValue("sBarCodex", loRS.getString("sBarCodex"));
                 loOth.setValue("sDescript", loRS.getString("sDescript"));
                 loOth.setValue("sMeasurNm", loRS.getString("sMeasurNm"));
+                loOth.setValue("sBrandNme", loRS.getString("xBrandNme"));
                 paInvOthers.add(loOth);
             }
         } catch (SQLException e) {
@@ -1017,6 +1021,7 @@ public class DailyProduction{
                     paInvOthers.get(fnRow).setValue("sBarCodex", "");
                     paInvOthers.get(fnRow).setValue("sDescript", "");
                     paInvOthers.get(fnRow).setValue("sMeasurNm", "");
+                    paInvOthers.get(fnRow).setValue("sBrandNme", "");
                     
                     return false;
                 }else{
@@ -1026,6 +1031,7 @@ public class DailyProduction{
                     paInvOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
                     paInvOthers.get(fnRow).setValue("sDescript", (String) loJSON.get("sDescript"));
                     paInvOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+                    paInvOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
                     
                     return true;
                 }  
@@ -1380,10 +1386,13 @@ public class DailyProduction{
                     ", c.sDescript" +
                     ", a.nGoalQtyx" +
                     ", d.sMeasurNm" +
+                    ", IFNULL(e.sDescript, '') xBrandNme" +
                 " FROM Daily_Production_Detail a" +
                     ", Inv_Master b" +
                         " LEFT JOIN Inventory c" +
                             " ON b.sStockIDx = c.sStockIDx" +
+                    " LEFT JOIN Brand e" + 
+                        " ON c.sBrandCde = e.sBrandCde" + 
                         " LEFT JOIN Measure d" +
                             " ON c.sMeasurID = d.sMeasurID" +
                 " WHERE a.sStockIDx = b.sStockIDx" +
@@ -1396,18 +1405,22 @@ public class DailyProduction{
                     ", a.nEntryNox" +
                     ", a.sStockIDx" +
                     ", a.nQtyReqrd" +
-                    ", a.nQtyUsedx" +
+                    ", IFNULL(a.nQtyUsedx,'0') nQtyUsedx" +
                     ", a.dExpiryDt" +
                     ", a.dModified" +
                     ", c.sBarCodex" +
                     ", c.sDescript" +
-                    ", IFNULL(d.sMeasurNm, 'NONE') sMeasurNm" +
+                    ", IFNULL(e.sMeasurNm, 'NONE') sMeasurNm" +
+                    ", IFNULL(d.sDescript,'') xBrandNme  " +
                 " FROM Daily_Production_Inventory a" +
                     ", Inv_Master b" +
                         " LEFT JOIN Inventory c" +
-                            " LEFT JOIN Measure d" +
-                                " ON c.sMeasurID = d.sMeasurID" +
                             " ON b.sStockIDx = c.sStockIDx" +
+                    "   LEFT JOIN Brand d  " +
+                    "      ON c.sBrandCde = d.sBrandCde  " +
+                
+                    "  LEFT JOIN Measure e" +
+                    "      ON c.sMeasurID = e.sMeasurID" +
                 " WHERE a.sStockIDx = b.sStockIDx" +
                     " AND b.sBranchCD = " + SQLUtil.toSQL(poGRider.getBranchCode());
     }

@@ -245,6 +245,7 @@ public class InvWaste{
                 loOcc.setValue("sNotesxxx", loRS.getString("sNotesxxx"));
                 loOcc.setValue("dExpiryDt", loRS.getDate("dExpiryDt"));
                 loOcc.setValue("dModified", loRS.getDate("dModified"));
+                loOcc.setValue("sBrandNme", loRS.getString("xBrandNme"));
                 loDetail.add(loOcc);
                 
                 loOth = new UnitInvWasteDetailOthers();
@@ -375,7 +376,7 @@ public class InvWaste{
                     loNewEnt.setEntryNox(lnCtr + 1);
                     loNewEnt.setDateModified(poGRider.getServerDate());
 
-                    lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt);
+                    lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, "sBrandNme");
 
                     if (!lsSQL.equals("")){
                         if(poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0){
@@ -400,7 +401,8 @@ public class InvWaste{
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, 
                                                 (GEntity) laSubUnit.get(lnCtr), 
                                                 "sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(1)) +
-                                                " AND nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)));
+                                                " AND nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)),
+                                                "sBrandNme");
 
                     } else{
                         loNewEnt.setStockIDx(fsTransNox);
@@ -680,6 +682,7 @@ public class InvWaste{
                 if (loJSON != null){
                     setDetail(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
                     setDetail(fnRow, "nInvCostx", Double.valueOf((String) loJSON.get("nUnitPrce")));
+                    setDetail(fnRow, "sBrandNme", (String) loJSON.get("xBrandNme"));
                     
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
                     paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
@@ -690,6 +693,7 @@ public class InvWaste{
                     return true;
                 } else{
                     setDetail(fnRow, fnCol, "");
+                    setDetail(fnRow, "sBrandNme", "");
                     
                     paDetailOthers.get(fnRow).setValue("sStockIDx", "");
                     paDetailOthers.get(fnRow).setValue("sBarCodex", "");
@@ -888,10 +892,13 @@ public class InvWaste{
                     ", a.dExpiryDt" +
                     ", b.nQtyOnHnd xQtyOnHnd" +
                     ", d.sMeasurNm" +
+                    ", e.sDescript xBrandNme" +
                 " FROM Inv_Waste_Detail a" +
                     ", Inv_Master b" +
                         " LEFT JOIN Inventory c" +
                             " ON b.sStockIDx = c.sStockIDx" +
+                        " LEFT JOIN Brand e" + 
+                            " ON c.sBrandCde = e.sBrandCde" +
                         " LEFT JOIN Measure d" +
                             " ON c.sMeasurID = d.sMeasurID" +
                 " WHERE a.sStockIDx = b.sStockIDx" +

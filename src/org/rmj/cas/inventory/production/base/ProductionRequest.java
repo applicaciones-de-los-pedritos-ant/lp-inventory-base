@@ -486,7 +486,7 @@ public class ProductionRequest {
                                                 , lsSQL
                                                 , fsValue
                                                 , "Barcode»Description»Inv. Type»Brand»Model»Stock ID"
-                                                , "sBarCodex»sDescript»xInvTypNm»sBrandNme»xModelNme»sStockIDx"
+                                                , "sBarCodex»sDescript»xInvTypNm»xBrandNme»xModelNme»sStockIDx"
                                                 , "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»c.sDescript»a.sStockIDx"
                                                 , 0);
            
@@ -496,7 +496,7 @@ public class ProductionRequest {
                 p_oDetail.updateObject("sBarCodex", (String) loJSON.get("sBarCodex"));
                 p_oDetail.updateObject("nQtyOnHnd", (String) loJSON.get("nQtyOnHnd"));
                 p_oDetail.updateObject("sDescript", (String) loJSON.get("sDescript"));
-                p_oDetail.updateObject("xBrandNme", (String) loJSON.get("sBrandNme"));
+                p_oDetail.updateObject("xBrandNme", (String) loJSON.get("xBrandNme"));
                 p_oDetail.updateObject("xModelNme", (String) loJSON.get("xModelNme"));
                 p_oDetail.updateObject("xInvTypNm", (String) loJSON.get("xInvTypNm"));
                 
@@ -525,7 +525,7 @@ public class ProductionRequest {
             p_oDetail.updateString("sBarCodex",  loRS.getString("sBarCodex"));
             p_oDetail.updateString("nQtyOnHnd",  loRS.getString("nQtyOnHnd"));
             p_oDetail.updateString("sDescript",  loRS.getString("sDescript"));
-            p_oDetail.updateString("xBrandNme",  loRS.getString("sBrandNme"));
+            p_oDetail.updateString("xBrandNme",  loRS.getString("xBrandNme"));
             p_oDetail.updateString("xModelNme",  loRS.getString("xModelNme"));
             p_oDetail.updateString("xInvTypNm",  loRS.getString("xInvTypNm"));
         }
@@ -545,7 +545,7 @@ public class ProductionRequest {
                 lsSQL, 
                 fsValue, 
                 "Barcode»Description»Inv. Type»Brand»Model»Stock ID", 
-                "sBarCodex»sDescript»xInvTypNm»sBrandNme»xModelNme»sStockIDx", 
+                "sBarCodex»sDescript»xInvTypNm»xBrandNme»xModelNme»sStockIDx", 
                 "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»c.sDescript»a.sStockIDx", 
                 1);
             
@@ -554,7 +554,7 @@ public class ProductionRequest {
                 p_oDetail.updateObject("sBarCodex", (String) loJSON.get("sBarCodex"));
                 p_oDetail.updateObject("nQtyOnHnd", (String) loJSON.get("nQtyOnHnd"));
                 p_oDetail.updateObject("sDescript", (String) loJSON.get("sDescript"));
-                p_oDetail.updateObject("xBrandNme", (String) loJSON.get("sBrandNme"));
+                p_oDetail.updateObject("xBrandNme", (String) loJSON.get("xBrandNme"));
                 p_oDetail.updateObject("xModelNme", (String) loJSON.get("xModelNme"));
                 p_oDetail.updateObject("xInvTypNm", (String) loJSON.get("xInvTypNm"));
                 
@@ -584,7 +584,7 @@ public class ProductionRequest {
             p_oDetail.updateString("sBarCodex",  loRS.getString("sBarCodex"));
             p_oDetail.updateString("nQtyOnHnd",  loRS.getString("nQtyOnHnd"));
             p_oDetail.updateString("sDescript",  loRS.getString("sDescript"));
-            p_oDetail.updateString("xBrandNme",  loRS.getString("sBrandNme"));
+            p_oDetail.updateString("xBrandNme",  loRS.getString("xBrandNme"));
             p_oDetail.updateString("xModelNme",  loRS.getString("xModelNme"));
             p_oDetail.updateString("xInvTypNm",  loRS.getString("xInvTypNm"));
         }
@@ -1030,7 +1030,7 @@ public class ProductionRequest {
                             ", a.cInvStatx" + 
                             ", a.sSupersed" + 
                             ", a.cRecdStat" + 
-                            ", IFNULL(b.sDescript,'') sBrandNme" + 
+                            ", IFNULL(b.sDescript,'') xBrandNme" + 
                             ", IFNULL(c.sDescript,'') xModelNme" + 
                             ", IFNULL(d.sDescript,'') xInvTypNm" + 
                             ", e.nQtyOnHnd" +

@@ -149,6 +149,7 @@ public class InvCount{
             case "sDescript":
             case "sLocatnNm":
             case "sMeasurNm":
+            case "sBrandNme":
                 return paDetailOthers.get(fnRow).getValue(fsCol);
             default:
                 return null;
@@ -252,6 +253,7 @@ public class InvCount{
                 loOth.setValue("sBarCodex", loRS.getString("sBarCodex"));
                 loOth.setValue("sDescript", loRS.getString("sDescript"));
                 loOth.setValue("sLocatnNm", loRS.getString("xLocatnNm"));
+                loOth.setValue("sBrandNme", loRS.getString("xBrandNme"));
                 if (loRS.getString("sMeasurNm")!=null){
                    loOth.setValue("sMeasurNm", loRS.getString("sMeasurNm"));
                 }else{
@@ -862,6 +864,7 @@ public class InvCount{
                     paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
                     paDetailOthers.get(fnRow).setValue("sDescript", (String) loJSON.get("sDescript"));
                     paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+                    paDetailOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
                     
                     return true;
                 } else{
@@ -872,6 +875,7 @@ public class InvCount{
                     paDetailOthers.get(fnRow).setValue("sBarCodex", "");
                     paDetailOthers.get(fnRow).setValue("sDescript", "");
                     paDetailOthers.get(fnRow).setValue("sMeasurNm", "");
+                    paDetailOthers.get(fnRow).setValue("sBrandNme", "");
                     
                     return false;
                 }
@@ -1145,12 +1149,15 @@ public class InvCount{
                     ", IFNULL(d.sDescript, '') xLocatnNm" +
                     ", a.dExpiryDt" +
                     ", e.sMeasurNm" +
+                    ", f.sDescript xBrandNme" +
                 " FROM Inv_Count_Detail a" +
                         " LEFT JOIN Inv_Location d" +
                             " ON a.sLocatnCd = d.sLocatnCd" + 
                     ", Inv_Master b" +
                         " LEFT JOIN Inventory c" +
                             " ON b.sStockIDx = c.sStockIDx" +
+                        " LEFT JOIN Brand f" + 
+                            " ON c.sBrandCde = f.sBrandCde" +
                          " LEFT JOIN Measure e" + 
                             " ON c.sMeasurID = e.sMeasurID" + 
                 " WHERE a.sStockIDx = b.sStockIDx" +
