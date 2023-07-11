@@ -203,6 +203,7 @@ public class InvTransfer{
             case "sOrigDesc":
             case "sOrderNox":
             case "sMeasurNm":
+            case "sBrandNme":
                 return paDetailOthers.get(fnRow).getValue(fsCol);
             default:
                 return null;
@@ -434,6 +435,8 @@ public class InvTransfer{
                 loOth.setValue("nReorderx", 0);
                 loOth.setValue("nLedgerNo", loRS.getInt("nLedgerNo"));
                 loOth.setValue("sOrigCode", loRS.getString("sBarCodex"));
+                loOth.setValue("sBrandNme", loRS.getString("xBrandNme"));
+//                System.out.println();
                 if (loRS.getString("sMeasurNm")!=null){
                    loOth.setValue("sMeasurNm", loRS.getString("sMeasurNm"));
                 }else{
@@ -1786,12 +1789,14 @@ public class InvTransfer{
                     setDetail(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
                     paDetailOthers.get(fnRow).setValue("sOrigCode", (String) loJSON.get("sBarCodex"));
                     paDetailOthers.get(fnRow).setValue("sOrigDesc", (String) loJSON.get("sDescript"));
+                    paDetailOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
                     
                     return true;
                 } else{
                     setDetail(fnRow, fnCol, "");
                     paDetailOthers.get(fnRow).setValue("sOrigCode", "");
                     paDetailOthers.get(fnRow).setValue("sOrigDesc", "");
+                    paDetailOthers.get(fnRow).setValue("sBrandNme", "");
                     
                     return false;
                 }
@@ -1867,6 +1872,7 @@ public class InvTransfer{
             paDetailOthers.get(fnRow).setValue("nLedgerNo", Integer.valueOf((String) loJSON.get("nLedgerNo")));
             paDetailOthers.get(fnRow).setValue("sInvTypNm", (String) loJSON.get("xInvTypNm"));
             paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+            paDetailOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
 
             //for selection of sub unit
             if (Double.valueOf((String) loJSON.get("nQtyOnHnd")) > 0) 
@@ -1892,6 +1898,7 @@ public class InvTransfer{
             paDetailOthers.get(fnRow).setValue("nLedgerNo", 0);
             paDetailOthers.get(fnRow).setValue("xQuantity", 0);
             paDetailOthers.get(fnRow).setValue("sMeasurNm", "");
+            paDetailOthers.get(fnRow).setValue("sBrandNme", "");
             return false;
         }
     }
@@ -1962,6 +1969,7 @@ public class InvTransfer{
             paDetailOthers.get(fnRow).setValue("nLedgerNo", Integer.valueOf((String) loJSON.get("nLedgerNo")));
             paDetailOthers.get(fnRow).setValue("sInvTypNm", (String) loJSON.get("xInvTypNm"));
             paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+            paDetailOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
 
             //for selection of sub unit
             if (Double.valueOf((String) loJSON.get("nQtyOnHnd")) > 0) 
@@ -1987,6 +1995,7 @@ public class InvTransfer{
             paDetailOthers.get(fnRow).setValue("nLedgerNo", 0);
             paDetailOthers.get(fnRow).setValue("xQuantity", 0);
             paDetailOthers.get(fnRow).setValue("sMeasurNm", "");
+            paDetailOthers.get(fnRow).setValue("sBrandNme", "");
             return false;
         }
     }
@@ -2174,12 +2183,15 @@ public class InvTransfer{
                     ", a.sParentID" +
                     ", a.nParntQty" +
                     ", a.nSbItmQty" +
+                    ", f.sDescript xBrandNme" +
                 " FROM Inv_Transfer_Detail a" + 
                         " LEFT JOIN Inventory d" + 
                             " ON a.sOrigIDxx = d.sStockIDx" + 
                     ", Inv_Master b" +
                         " LEFT JOIN Inventory c" + 
                             " ON b.sStockIDx = c.sStockIDx" +
+                        " LEFT JOIN Brand f" + 
+                            " ON c.sBrandCde = f.sBrandCde" +
                         " LEFT JOIN Measure e" + 
                             " ON c.sMeasurID = e.sMeasurID" + 
                 " WHERE a.sStockIDx = b.sStockIDx" + 
@@ -2471,6 +2483,7 @@ public class InvTransfer{
                 paDetailOthers.get(lnCtr).setValue("nLedgerNo", loRS.getInt("nLedgerNo"));
                 paDetailOthers.get(lnCtr).setValue("sInvTypNm", loRS.getString("xInvTypNm"));
                 paDetailOthers.get(lnCtr).setValue("sMeasurNm", loRS.getString("sMeasurNm"));
+                paDetailOthers.get(lnCtr).setValue("sBrandNme", loRS.getString("xBrandNme"));
                 System.out.println("lnCtr = " + lnCtr);
                 System.out.println("RecordCount = " + MiscUtil.RecordCount(loRS));
 //                 

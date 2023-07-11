@@ -310,6 +310,7 @@ public class InvAdjustment{
                 loOcc.setValue("nInvCostx", loRS.getDouble("nInvCostx"));
                 loOcc.setValue("dExpiryDt", loRS.getDate("dExpiryDt"));
                 loOcc.setValue("dModified", loRS.getDate("dModified"));
+                loOcc.setValue("sBrandNme", loRS.getString("xBrandNme"));
                 loDetail.add(loOcc);
                 
                 //load other info
@@ -611,7 +612,7 @@ public class InvAdjustment{
                     
                     loNewEnt.setDateModified(poGRider.getServerDate());
 
-                    lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt);
+                    lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,"sBrandNme");
 
                     if (!lsSQL.equals("")){
                         if(poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0){
@@ -636,13 +637,14 @@ public class InvAdjustment{
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, 
                                                 (GEntity) laSubUnit.get(lnCtr), 
                                                 "sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(1)) +
-                                                " AND nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)));
+                                                " AND nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)),
+                                                "sBrandNme");
 
                     } else{
                         loNewEnt.setStockIDx(fsTransNox);
                         loNewEnt.setEntryNox(lnCtr + 1);
                         loNewEnt.setDateModified(poGRider.getServerDate());
-                        lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt);
+                        lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,"sBrandNme");
                     }
                     
                     if (!lsSQL.equals("")){
@@ -853,6 +855,7 @@ public class InvAdjustment{
                 if (loJSON != null){
                     setDetail(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
                     setDetail(fnRow, 6, Double.valueOf((String) loJSON.get("nUnitPrce")));
+                    setDetail(fnRow, "sBrandNme", (String) loJSON.get("xBrandNme"));
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
                     paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
                     paDetailOthers.get(fnRow).setValue("sDescript", (String) loJSON.get("sDescript"));
@@ -870,6 +873,7 @@ public class InvAdjustment{
                     setDetail(fnRow, fnCol, "");
                     setDetail(fnRow, "nCredtQty", 0);
                     setDetail(fnRow, "nDebitQty", 0);
+                    setDetail(fnRow, "sBrandNme", "");
                     
                     paDetailOthers.get(fnRow).setValue("sStockIDx", "");
                     paDetailOthers.get(fnRow).setValue("sBarCodex", "");
@@ -905,6 +909,7 @@ public class InvAdjustment{
                 
                 if (loJSON != null){
                     setDetail(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
+                    setDetail(fnRow, "sBrandNme", (String) loJSON.get("xBrandNme"));
                     paDetailOthers.get(fnRow).setValue("sOrigCode", (String) loJSON.get("sBarCodex"));
                     paDetailOthers.get(fnRow).setValue("sOrigDesc", (String) loJSON.get("sDescript"));
                     paDetailOthers.get(fnRow).setValue("nQtyOnHnd", Double.valueOf((String) loJSON.get("nQtyOnHnd")));
@@ -1011,12 +1016,15 @@ public class InvAdjustment{
                     ", c.sDescript" +
                     ", IFNULL(d.sBarCodex, '') xBarCodex" + 
                      ", e.sMeasurNm" +
+                    ", f.sDescript xBrandNme" +
                 " FROM Inv_Adjustment_Detail a" + 
                         " LEFT JOIN Inventory d" + 
                             " ON a.sStockIDx = d.sStockIDx" + 
                     ", Inv_Master b" +
                         " LEFT JOIN Inventory c" + 
                             " ON b.sStockIDx = c.sStockIDx" + 
+                        " LEFT JOIN Brand f" + 
+                            " ON c.sBrandCde = f.sBrandCde" +
                         " LEFT JOIN Measure e" + 
                             " ON c.sMeasurID = e.sMeasurID" + 
                 " WHERE a.sStockIDx = b.sStockIDx" + 

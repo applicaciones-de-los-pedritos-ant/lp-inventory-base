@@ -145,6 +145,7 @@ public class InvRequest{
             case "sOrigDesc":
             case "sOrderNox":
             case "sMeasurNm":
+            case "sBrandNme":
                 return paDetailOthers.get(fnRow).getValue(fsCol);
             default:
                 return null;
@@ -264,6 +265,7 @@ public class InvRequest{
                 loOth.setValue("nBackOrdr", loRS.getInt("nBackOrdr"));
                 loOth.setValue("nReorderx", 0);
                 loOth.setValue("nLedgerNo", loRS.getInt("nLedgerNo"));
+                loOth.setValue("sBrandNme", loRS.getString("xBrandNme"));
                 if (loRS.getString("sMeasurNm")!=null){
                    loOth.setValue("sMeasurNm", loRS.getString("sMeasurNm"));
                 }else{
@@ -1111,6 +1113,7 @@ public class InvRequest{
                     paDetailOthers.get(fnRow).setValue("nLedgerNo", Integer.valueOf((String) loJSON.get("nLedgerNo")));
                     paDetailOthers.get(fnRow).setValue("sInvTypNm", (String) loJSON.get("sInvTypNm"));
                     paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+                    paDetailOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
 
                     return true;
                 } else{
@@ -1130,6 +1133,7 @@ public class InvRequest{
                     paDetailOthers.get(fnRow).setValue("nLedgerNo", 0);
                     paDetailOthers.get(fnRow).setValue("xQuantity", 0);
                     paDetailOthers.get(fnRow).setValue("sMeasurNm", "");
+                    paDetailOthers.get(fnRow).setValue("sBrandNme", "");
                     return false;
                 }
             case 2:
@@ -1170,6 +1174,7 @@ public class InvRequest{
                     paDetailOthers.get(fnRow).setValue("nLedgerNo", Integer.valueOf((String) loJSON.get("nLedgerNo")));
                     paDetailOthers.get(fnRow).setValue("sInvTypNm", (String) loJSON.get("sInvTypNm"));
                     paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+                    paDetailOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
                     
                     return true;
                 } else{
@@ -1189,6 +1194,7 @@ public class InvRequest{
                     paDetailOthers.get(fnRow).setValue("nLedgerNo", 0);
                     paDetailOthers.get(fnRow).setValue("xQuantity", 0);
                     paDetailOthers.get(fnRow).setValue("sMeasurNm", "");
+                    paDetailOthers.get(fnRow).setValue("sBrandNme", "");
                     return false;
                 }
             default:
@@ -1320,10 +1326,13 @@ public class InvRequest{
                     ", c.sBarCodex" +
                     ", c.sDescript" +
                     ", d.sMeasurNm" +
+                    ", IFNULL(e.sDescript, '') xBrandNme" +
                 " FROM Inv_Stock_Request_Detail a" + 
                     ", Inv_Master b" +
                         " LEFT JOIN Inventory c" + 
                             " ON b.sStockIDx = c.sStockIDx" +
+                    " LEFT JOIN Brand e" + 
+                        " ON c.sBrandCde = e.sBrandCde" + 
                         " LEFT JOIN Measure d" + 
                             " ON c.sMeasurID = d.sMeasurID" + 
                 " WHERE a.sStockIDx = b.sStockIDx" + 
