@@ -47,7 +47,7 @@ public class InvAdjustment{
         String lsColName = "sTransNox»dTransact»sRemarksx";
         String lsColCrit = "a.sTransNox»»a.dTransact»a.sRemarksx";
         String lsSQL = MiscUtil.addCondition(getSQ_InvAdjustment(), "LEFT(a.sTransNox,4) = " + SQLUtil.toSQL(psBranchCd));
-        
+        System.out.println(lsSQL);
         JSONObject loJSON = showFXDialog.jsonSearch(poGRider, 
                                                     lsSQL, 
                                                     fsValue, 
@@ -295,6 +295,7 @@ public class InvAdjustment{
         
         String lsSQL = MiscUtil.addCondition(getSQ_Detail(), "sTransNox = " + SQLUtil.toSQL(fsTransNox));
         try {
+            
             ResultSet loRS = poGRider.executeQuery(lsSQL);  
             
             for (int lnCtr = 1; lnCtr <= MiscUtil.RecordCount(loRS); lnCtr ++){
@@ -601,7 +602,7 @@ public class InvAdjustment{
                     
                     loNewEnt.setTransNox(fsTransNox);
                     loNewEnt.setEntryNox(lnCtr + 1);
-                    
+//                    
 //                    ResultSet loRS = getExpiration(loNewEnt.getStockIDx());
 //                    try {
 //                        loRS.absolute(1);
@@ -609,7 +610,7 @@ public class InvAdjustment{
 //                    } catch (SQLException ex) {
 //                        Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
 //                    }
-                    
+//                    
                     loNewEnt.setDateModified(poGRider.getServerDate());
 
                     lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,"sBrandNme");
@@ -636,8 +637,8 @@ public class InvAdjustment{
                         
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, 
                                                 (GEntity) laSubUnit.get(lnCtr), 
-                                                "sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(1)) +
-                                                " AND nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)),
+                                                " nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)) +
+                                                " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)),
                                                 "sBrandNme");
 
                     } else{
@@ -656,20 +657,20 @@ public class InvAdjustment{
                         } 
                     }
                 } else{
-//                    for(int lnCtr2 = lnCtr; lnCtr2 <= laSubUnit.size()-1; lnCtr2++){
-//                        lsSQL = "DELETE FROM " + poDetail.getTable()+
-//                                " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getStockIDx()) +
-//                                    " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox());
-//
-//                        if (!lsSQL.equals("")){
-//                            if(poGRider.executeQuery(lsSQL, poDetail.getTable(), "", "") == 0){
-//                                if(!poGRider.getErrMsg().isEmpty()){
-//                                    setErrMsg(poGRider.getErrMsg());
-//                                    return false;
-//                                }
-//                            } 
-//                        }
-//                    }
+                    for(int lnCtr2 = lnCtr; lnCtr2 <= laSubUnit.size()-1; lnCtr2++){
+                        lsSQL = "DELETE FROM " + poDetail.getTable()+
+                                " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getStockIDx()) +
+                                    " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox());
+
+                        if (!lsSQL.equals("")){
+                            if(poGRider.executeQuery(lsSQL, poDetail.getTable(), "", "") == 0){
+                                if(!poGRider.getErrMsg().isEmpty()){
+                                    setErrMsg(poGRider.getErrMsg());
+                                    return false;
+                                }
+                            } 
+                        }
+                    }
                     break;
                 }
             }

@@ -682,7 +682,7 @@ public class InvRequest{
                     loNewEnt.setEntryNox(lnCtr + 1);
                     loNewEnt.setDateModified(poGRider.getServerDate());
 
-                    lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt);
+                    lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,"sBrandNme");
 
                     if (!lsSQL.equals("")){
                         if(poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0){
@@ -705,15 +705,16 @@ public class InvRequest{
                         if (loNewEnt.getEntryNox() != lnCtr+1) loNewEnt.setEntryNox(lnCtr+1);
                         
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, 
-                                                (GEntity) laSubUnit.get(lnCtr), 
-                                                "sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(1)) +
-                                                " AND nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)));
+                                                (GEntity) laSubUnit.get(lnCtr),  
+                                                " nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)) + 
+                                                " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)),
+                                                "sBrandNme");
 
                     } else{
                         loNewEnt.setStockID(fsTransNox);
                         loNewEnt.setEntryNox(lnCtr + 1);
                         loNewEnt.setDateModified(poGRider.getServerDate());
-                        lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt);
+                        lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,  "sBrandNme");
                     }
                     
                     if (!lsSQL.equals("")){
