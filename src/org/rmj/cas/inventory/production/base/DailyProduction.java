@@ -329,6 +329,7 @@ public class DailyProduction{
         String lsSQL;
         
         lsSQL=MiscUtil.addCondition(getSQ_Detail(),"sTransNox = " + SQLUtil.toSQL(fsTransNox));
+        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
         try {
             for (int lnCtr = 1; lnCtr <= MiscUtil.RecordCount(loRS); lnCtr ++){
@@ -515,7 +516,7 @@ public class DailyProduction{
                     loNewEnt.setDateModified(poGRider.getServerDate());
 //                    loNewEnt.setDateExpiryDt(paDetail.get(lnCtr).getDateExpiryDt());
 
-                    lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt);
+                    lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, "sBrandNme");
 
                     if (!lsSQL.equals("")){
                         if(poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0){
@@ -536,17 +537,19 @@ public class DailyProduction{
                 if (!loNewEnt.getStockIDx().equals("")){
                     if (lnCtr <= laSubUnit.size()-1){
                         if (loNewEnt.getEntryNox() != lnCtr+1) loNewEnt.setEntryNox(lnCtr+1);
-                        
+                        System.out.println("sStockIDx = " + loNewEnt.getValue(3));
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, 
                                                 (GEntity) laSubUnit.get(lnCtr), 
-                                                "sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(1)) +
-                                                " AND nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)));
+                                                " sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)) +
+                                                " AND nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)) ,
+                                                "sBrandNme");
+                        System.out.println(lsSQL);
 
                     } else{
                         loNewEnt.setStockIDx(fsTransNox);
                         loNewEnt.setEntryNox(lnCtr + 1);
                         loNewEnt.setDateModified(poGRider.getServerDate());
-                        lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt);
+                        lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, "sBrandNme");
                     }
                     
                     if (!lsSQL.equals("")){
@@ -637,7 +640,7 @@ public class DailyProduction{
                         
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, 
                                                 (GEntity) laSubUnit.get(lnCtr), 
-                                                "sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(1)) +
+                                                "sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)) +
                                                 " AND nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)));
 
                     } else{
@@ -1026,6 +1029,7 @@ public class DailyProduction{
                     return false;
                 }else{
                     setInv(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
+                    setDetail(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
                     
                     paInvOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
                     paInvOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));

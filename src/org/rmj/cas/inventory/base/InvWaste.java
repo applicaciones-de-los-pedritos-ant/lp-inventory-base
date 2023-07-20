@@ -400,8 +400,8 @@ public class InvWaste{
                         
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, 
                                                 (GEntity) laSubUnit.get(lnCtr), 
-                                                "sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(1)) +
-                                                " AND nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)),
+                                                " nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)) + 
+                                                " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)),
                                                 "sBrandNme");
 
                     } else{
