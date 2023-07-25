@@ -77,7 +77,7 @@ public class InventoryTrans {
                 System.out.println("LEDGER2 :" + fsValue);
                 poRSMaster.get(fnRow).setDateExpire((Date) fsValue); break;
             case "npurchase":
-                poRSMaster.get(fnRow).setPurchase((double) fsValue); break;
+                poRSMaster.get(fnRow).setPurchase(Double.parseDouble(fsValue.toString())); break;
         }
     }
     
