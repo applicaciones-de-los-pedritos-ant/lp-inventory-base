@@ -412,7 +412,7 @@ public class InvCount{
                                                 "sBrandNme");
 
                     } else{
-                        loNewEnt.setStockIDx(fsTransNox);
+                        loNewEnt.setTransNox(fsTransNox);
                         loNewEnt.setEntryNox(lnCtr + 1); 
                         loNewEnt.setDateModified(poGRider.getServerDate());
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,"sBrandNme");

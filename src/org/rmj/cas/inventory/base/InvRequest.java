@@ -711,7 +711,7 @@ public class InvRequest{
                                                 "sBrandNme");
 
                     } else{
-                        loNewEnt.setStockID(fsTransNox);
+                        loNewEnt.setTransNox(fsTransNox);
                         loNewEnt.setEntryNox(lnCtr + 1);
                         loNewEnt.setDateModified(poGRider.getServerDate());
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,  "sBrandNme");
