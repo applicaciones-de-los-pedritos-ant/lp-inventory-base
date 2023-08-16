@@ -4,8 +4,10 @@
  */
 package org.rmj.cas.inventory.production.base;
 
+import com.mysql.jdbc.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetFactory;
@@ -19,6 +21,8 @@ import org.rmj.appdriver.agentfx.ui.showFXDialog;
 import org.rmj.appdriver.constants.EditMode;
 import org.rmj.appdriver.constants.TransactionStatus;
 import org.rmj.appdriver.constants.UserRight;
+import org.rmj.cas.inventory.others.pojo.UnitDailyProductionDetailOthers;
+import org.rmj.cas.inventory.production.pojo.UnitDailyProductionDetail;
 
 /**
  *
@@ -735,16 +739,26 @@ public class ProductionRequest {
             //set transaction number on records
             String lsTransNox = (String) getMaster("sTransNox");
             
+            CachedRowSet laSubUnit = loadTransactionDetail(lsTransNox);
             lnCtr = 1;
+            System.out.println(" laSubUnit = " + laSubUnit.size());
             p_oDetail.beforeFirst();
             while (p_oDetail.next()){
                 if(!p_oDetail.getString("sStockIDx").isEmpty()){
-                    lsSQL = MiscUtil.rowset2SQL(p_oDetail, 
-                                            DETAIL_TABLE, 
-                                            "sBarCodex;sDescript;xBrandNme;xModelNme;xInvTypNm;sMeasurNm;nQtyOnHnd" ,
-                                            "sTransNox = " + SQLUtil.toSQL(lsTransNox) +
-                                                " AND nEntryNox = " + p_oDetail.getInt("nEntryNox"));
-                
+                    if (lnCtr <= laSubUnit.size()){
+                        lsSQL = MiscUtil.rowset2SQL(p_oDetail, 
+                                                DETAIL_TABLE, 
+                                                "sBarCodex;sDescript;xBrandNme;xModelNme;xInvTypNm;sMeasurNm;nQtyOnHnd" ,
+                                                "sTransNox = " + SQLUtil.toSQL(lsTransNox) +
+                                                    " AND nEntryNox = " + p_oDetail.getInt("nEntryNox"));
+                    }else{
+                        p_oDetail.updateObject("sTransNox", lsTransNox);
+                        p_oDetail.updateObject("nEntryNox", lnCtr);
+                        p_oDetail.updateRow();
+                        lsSQL = MiscUtil.rowset2SQL(p_oDetail, DETAIL_TABLE, "sBarCodex;sDescript;xBrandNme;xModelNme;xInvTypNm;sMeasurNm;nQtyOnHnd");
+                   
+                    }
+
                     if (!lsSQL.isEmpty()){
                         if (p_oApp.executeQuery(lsSQL, DETAIL_TABLE, p_sBranchCd, lsTransNox.substring(0, 4)) <= 0){
                             if (!p_bWithParent) p_oApp.rollbackTrans();
@@ -926,7 +940,22 @@ public class ProductionRequest {
         return true;
     }
     
-    
+    private CachedRowSet loadTransactionDetail(String fsTransNox) throws SQLException{
+        CachedRowSet foDetail;
+        String lsSQL;
+       
+        ResultSet loRS;
+        RowSetFactory factory = RowSetProvider.newFactory();
+        
+        
+        //open detail
+        lsSQL=MiscUtil.addCondition(getSQL_Detail(),"sTransNox = " + SQLUtil.toSQL(fsTransNox));
+        loRS = p_oApp.executeQuery(lsSQL);
+        foDetail = factory.createCachedRowSet();
+        foDetail.populate(loRS);
+        MiscUtil.close(loRS);
+        return foDetail;
+    }
     private String getSQL_Master(){
         String lsSQL = "";
         
