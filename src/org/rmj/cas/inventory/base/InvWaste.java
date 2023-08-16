@@ -408,7 +408,7 @@ public class InvWaste{
                         loNewEnt.setTransNox(fsTransNox);
                         loNewEnt.setEntryNox(lnCtr + 1);
                         loNewEnt.setDateModified(poGRider.getServerDate());
-                        lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt);
+                        lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,"sBrandNme");
                     }
                     
                     if (!lsSQL.equals("")){

@@ -217,7 +217,7 @@ public class DailyProduction{
                     }else paInv.get(fnRow).setValue(fnCol, poGRider.getServerDate());
                 } else paInv.get(fnRow).setValue(fnCol, foData);   
                 
-//                DetailRetreived(fnCol);
+                DetailRetreived(fnCol);
             }
         }
     }
@@ -644,7 +644,7 @@ public class DailyProduction{
                                                 " AND nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2)));
 
                     } else{
-                        loNewEnt.setStockIDx(fsTransNox);
+                        loNewEnt.setTransNox(fsTransNox);
                         loNewEnt.setEntryNox(lnCtr + 1);
                         loNewEnt.setDateModified(poGRider.getServerDate());
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt);

@@ -187,9 +187,10 @@ public class InvAdjustment{
             ResultSet loRS = poGRider.executeQuery(lsSQL);
         
             if (MiscUtil.RecordCount(loRS) != lnMasRow){
-                lsSQL = MiscUtil.makeSelect(new UnitInvAdjustmentDetail());
+                lsSQL = MiscUtil.makeSelect(new UnitInvAdjustmentDetail()).replaceAll(", sBrandNme", "");
+                
                 lsSQL = MiscUtil.addCondition(lsSQL, "sTransNox = " + SQLUtil.toSQL(fsValue));
-
+                System.out.println(lsSQL);
                 loRS = poGRider.executeQuery(lsSQL);
                 
                 ResultSet loRSx;
