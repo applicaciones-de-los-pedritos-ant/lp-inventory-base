@@ -1311,6 +1311,7 @@ public class InvTransfer{
                 if (!loNewEnt.getStockIDx().equals("")){
                     if (lnCtr <= laSubUnit.size()-1){
                         if (loNewEnt.getEntryNox() != lnCtr+1) loNewEnt.setEntryNox(lnCtr+1);
+                        if(loNewEnt.getTransNox().isEmpty())loNewEnt.setTransNox(fsTransNox);
                         
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, 
                                                 (GEntity) laSubUnit.get(lnCtr), 
@@ -1349,6 +1350,20 @@ public class InvTransfer{
                         }
                     }
                     break;
+                }
+            }
+            if(lnCtr == laSubUnit.size() - 1){
+                lsSQL = "DELETE FROM " + poDetail.getTable()+
+                        " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getStockIDx()) +
+                            " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox());
+
+                if (!lsSQL.equals("")){
+                    if(poGRider.executeQuery(lsSQL, poDetail.getTable(), "", "") == 0){
+                        if(!poGRider.getErrMsg().isEmpty()){
+                            setErrMsg(poGRider.getErrMsg());
+                            return false;
+                        }
+                    } 
                 }
             }
         }
@@ -1908,6 +1923,7 @@ public class InvTransfer{
         String lsColName = "";
         String lsColCrit = "";
         String lsSQL = "";
+        String lsCondition = "";
         
         JSONObject loJSON;
         ResultSet loRS;
@@ -1919,6 +1935,12 @@ public class InvTransfer{
         lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»sBarCodex»sStockIDx";
         lsColCrit = "b.sDescript»a.sDescript»g.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
         lsSQL = MiscUtil.addCondition(getSQ_StocksByRequest(), "e.sTransNox = " + SQLUtil.toSQL(paDetailOthers.get(fnRow).getValue("sOrderNox")));
+        if(ItemCount()>0){
+            for(int lnCtr = 0; lnCtr < ItemCount(); lnCtr++){
+                lsCondition += ", " + SQLUtil.toSQL(getDetail(lnCtr, "sStockIDx"));
+            }
+            lsCondition = " AND a.sStockIDx NOT IN (" + lsCondition.substring(2) + ") GROUP BY a.sStockIDx";
+        }
         if (fbByCode){
             if (paDetailOthers.get(fnRow).getValue("sStockIDx").equals(fsValue)) return true;
 
