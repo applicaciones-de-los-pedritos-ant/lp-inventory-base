@@ -22,6 +22,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.AlgorithmParametersSpi;
 import org.json.simple.JSONObject;
 import org.rmj.appdriver.constants.EditMode;
 import org.rmj.appdriver.constants.RecordStatus;
@@ -96,7 +97,6 @@ public class InvTransfer{
         if(loJSON == null)
             return false;
         else
-            System.out.println(loJSON.get("sTransNox") + " olala");
             return openTransaction((String) loJSON.get("sTransNox"));
     }
     
@@ -296,6 +296,23 @@ public class InvTransfer{
                                 System.err.println(loInvMaster.getMessage());
                                 return false;
                             }
+                            
+                            lsSQL = "SELECT cRecdStat FROM Inventory WHERE sStockIDx = " + SQLUtil.toSQL(loRS.getString("sStockIDx"));
+                            ResultSet loRSz = poGRider.executeQuery(lsSQL);
+                            
+                            if (loRSz.next()){
+                                if (loRSz.getString("cRecdStat").equals("0")){
+                                    //reactivate the item
+                                    lsSQL = "UPDATE Inventory SET cRecdStat = '1' WHERE sStockIDx = " + SQLUtil.toSQL(loRS.getString("sStockIDx"));
+                                    
+                                    if (poGRider.executeQuery(lsSQL, "Inventory", psBranchCd, "") <= 0){
+                                        System.err.println(poGRider.getErrMsg());
+                                        return false;
+                                    }
+                                }
+                            }
+                            
+                            
                         }
                     }
                 }
