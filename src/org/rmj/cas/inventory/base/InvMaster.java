@@ -315,13 +315,18 @@ public class InvMaster {
                                 ", a.nQtyInxxx" +
                                 ", a.nQtyOutxx" +
                                 ", a.nQtyOnHnd" +
+                                ", d.sBranchNm" +
                         " FROM Inv_Ledger a" +
                                 " LEFT JOIN xxxSource_Transaction b" +
                                         " ON a.sSourceCd = b.sSourceCd" +
+                                " LEFT JOIN Inv_Transfer_Master c" +
+                                        " ON a.sSourceNo = c.sTransNox" +
+                                " LEFT JOIN Branch d" +
+                                        " ON c.sBranchCd = d.sBranchCd" +
                         " WHERE a.sBranchCd = " + SQLUtil.toSQL(poData.getBranchCd()) + 
                                 " AND a.sStockIDx = " + SQLUtil.toSQL(poData.getStockIDx()) + 
                         " ORDER BY a.dTransact ASC, a.nLedgerNo ASC";
-
+        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
         System.err.println(lsSQL);
         
@@ -359,7 +364,7 @@ public class InvMaster {
     }
     
     private UnitInvMaster openRecord(String fsValue) {
-        UnitInvMaster loData = null;
+        UnitInvMaster loData = null;    
         
         Connection loConn = null;
         loConn = setConnection();   
