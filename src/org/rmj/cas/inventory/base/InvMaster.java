@@ -322,7 +322,7 @@ public class InvMaster {
                                 " LEFT JOIN Inv_Transfer_Master c" +
                                         " ON a.sSourceNo = c.sTransNox" +
                                 " LEFT JOIN Branch d" +
-                                        " ON c.sBranchCd = d.sBranchCd" +
+                                        " ON c.sDestinat = d.sBranchCd" +
                         " WHERE a.sBranchCd = " + SQLUtil.toSQL(poData.getBranchCd()) + 
                                 " AND a.sStockIDx = " + SQLUtil.toSQL(poData.getStockIDx()) + 
                         " ORDER BY a.dTransact ASC, a.nLedgerNo ASC";
@@ -419,12 +419,12 @@ public class InvMaster {
     
     public boolean UpdateRecord() {
         if(pnEditMode != EditMode.READY) {
-         return false;
-      }
-      else{
-         pnEditMode = EditMode.UPDATE;
-         return true;
-      }
+            return false;
+        }
+        else{
+            pnEditMode = EditMode.UPDATE;
+            return true;
+        }
     }
     
     public boolean SaveRecord(){
