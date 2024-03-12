@@ -1092,7 +1092,7 @@ public class InvRequest{
                 }else {
                     if (!fbSearch){
 //                        if (paDetailOthers.get(fnRow).getValue("sBarCodex").toString().equalsIgnoreCase(fsValue)) return true;
-                        
+//                        lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
                         loJSON = showFXDialog.jsonSearch(poGRider, 
                                                             lsSQL, 
                                                             fsValue, 
@@ -1103,6 +1103,7 @@ public class InvRequest{
                     } else{
 //                        if (paDetailOthers.get(fnRow).getValue("sDescript").toString().equalsIgnoreCase(fsValue)) return true;
                         
+//                        lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
                         loJSON = showFXDialog.jsonSearch(poGRider, 
                                                             lsSQL, 
                                                             fsValue, 
@@ -1113,6 +1114,7 @@ public class InvRequest{
                     }
                         
                 }
+                System.out.println(lsSQL);
                 
                 if (loJSON != null){
                     setDetail(fnRow, "sStockIDx", (String) loJSON.get("sStockIDx"));
@@ -1153,9 +1155,10 @@ public class InvRequest{
                     return false;
                 }
             case 2:
-                lsHeader = "Brand»Description»Unit»Model»Qty On Hnd»Inv. Type»Barcode»Stock ID";
-                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»sBarCodex»sStockIDx";
-                lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
+                lsHeader = "Barcode»Description»Brand»Unit»Qty. on hand»Inv. Type";
+                lsColName = "sBarCodex»sDescript»xBrandNme»sMeasurNm»nQtyOnHnd»xInvTypNm";
+                lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»e.nQtyOnHnd»d.sDescript";
+                
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
                 
                 if (fbByCode){
