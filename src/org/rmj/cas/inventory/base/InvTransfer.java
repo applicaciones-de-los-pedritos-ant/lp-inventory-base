@@ -144,7 +144,10 @@ public class InvTransfer{
                             confirmSelectParent(fnRow);
                           
                             if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
-                                 paDetail.get(fnRow).setValue(fnCol, foData);
+                                ShowMessageFX.Error("This item has no inventory available.",
+                                    pxeModuleName, "Please confirm!!!");
+                                paDetail.get(fnRow).setValue(fnCol, 0);
+//                                 paDetail.get(fnRow).setValue(fnCol, foData);
 //                                setDetail(fnRow, "nQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
                             }else{
                                  paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
@@ -153,9 +156,13 @@ public class InvTransfer{
 //                            paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
                         }else{
                             paDetail.get(fnRow).setValue(fnCol, foData);
+                            
+                            
                         }
 //                        addDetail();
-                    }else paDetail.get(fnRow).setValue(fnCol, 0);
+                    }else{
+                        paDetail.get(fnRow).setValue(fnCol, 0);
+                    }
                 } else if (fnCol == poDetail.getColumn("nInvCostx")){
                     if (foData instanceof Number){
                         paDetail.get(fnRow).setValue(fnCol, foData);
@@ -1675,6 +1682,7 @@ public class InvTransfer{
     private String showSelectParent(ResultSet foRS, 
                                      String fsBarCodex,
                                      String fsDescript,
+                                     
                                      String fsMeasurNm,
                                      String fsInvTypNm){
         SubUnitController loSubUnit = new SubUnitController();
