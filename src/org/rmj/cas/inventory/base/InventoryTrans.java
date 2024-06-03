@@ -74,7 +74,6 @@ public class InventoryTrans {
             case "nqtyorder":
                 poRSMaster.get(fnRow).setQtyOrder(Double.valueOf(fsValue.toString())); break;
             case "dexpirydt":
-                System.out.println("LEDGER2 :" + fsValue);
                 poRSMaster.get(fnRow).setDateExpire((Date) fsValue); break;
             case "npurchase":
                 poRSMaster.get(fnRow).setPurchase(Double.parseDouble(fsValue.toString())); break;
@@ -96,6 +95,28 @@ public class InventoryTrans {
                             Date fdTransDate,
                             int fnUpdateMode){
         psSourceCd = InvConstants.DELIVERY;
+        psSourceNo = fsSourceNo;
+        pdTransact = fdTransDate;
+        pnEditMode = fnUpdateMode;
+        
+        return saveTransaction();
+    }
+    
+        public boolean AcceptDeliveryDiscrepancy(String fsSourceNo,
+                                    Date fdTransDate,
+                                    int fnUpdateMode){
+        psSourceCd = InvConstants.ACCEPT_DELIVERY_DISCREPANCY;
+        psSourceNo = fsSourceNo;
+        pdTransact = fdTransDate;
+        pnEditMode = fnUpdateMode;
+    
+        return saveTransaction();
+    }
+    
+    public boolean DeliveryDiscrepancy(String fsSourceNo,
+                            Date fdTransDate,
+                            int fnUpdateMode){
+        psSourceCd = InvConstants.DELIVERY_DISCREPANCY;
         psSourceNo = fsSourceNo;
         pdTransact = fdTransDate;
         pnEditMode = fnUpdateMode;
@@ -324,6 +345,30 @@ public class InventoryTrans {
             
             switch (psSourceCd){
                 case InvConstants.ACCEPT_DELIVERY:
+//                    poRSProcessd.get(lnRow).setQtyInxxx( poRSProcessd.get(lnRow).getQtyInxxx().doubleValue()
+//                                                        +  poRSMaster.get(lnCtr).getQuantity().doubleValue());
+//                    if (pbWarehous){
+//                        if (poRSMaster.get(lnCtr).getReplacID().equals("")){
+//                            poRSProcessd.get(lnRow).setQtyOrder(poRSProcessd.get(lnRow).getQtyOrder().doubleValue()
+//                                                                - poRSMaster.get(lnCtr).getQuantity().doubleValue());
+//                        }
+//                    } 
+                    
+                    poRSProcessd.get(lnRow).setQtyInxxx( poRSProcessd.get(lnRow).getQtyInxxx().doubleValue()
+                                                        +  poRSMaster.get(lnCtr).getQuantity().doubleValue());//alway based on order
+                    if (pbWarehous){
+                        if (poRSMaster.get(lnCtr).getReplacID().equals("")){
+                            poRSProcessd.get(lnRow).setQtyOrder(poRSProcessd.get(lnRow).getQtyOrder().doubleValue()
+                                                                - poRSMaster.get(lnCtr).getQuantity().doubleValue());
+                        }
+                    } 
+                    
+                    
+                    break;
+                    case InvConstants.ACCEPT_DELIVERY_DISCREPANCY:
+                        
+                        System.err.println("qtyin" +poRSProcessd.get(lnRow).getQtyInxxx());
+                        System.err.println("qtyinput?" +poRSProcessd.get(lnRow).getQuantity());
                     poRSProcessd.get(lnRow).setQtyInxxx( poRSProcessd.get(lnRow).getQtyInxxx().doubleValue()
                                                         +  poRSMaster.get(lnCtr).getQuantity().doubleValue());
                     if (pbWarehous){
@@ -349,6 +394,16 @@ public class InventoryTrans {
                                                         + poRSMaster.get(lnCtr).getQuantity().doubleValue());
                     break;
                 case InvConstants.DELIVERY:
+//                    poRSProcessd.get(lnRow).setDateExpire(poRSMaster.get(lnCtr).getDateExpire());
+                    poRSProcessd.get(lnRow).setQtyOutxx(poRSProcessd.get(lnRow).getQtyOutxx().doubleValue()
+                                                        + poRSMaster.get(lnCtr).getQuantity().doubleValue());
+                    
+                    if (poRSMaster.get(lnCtr).getReplacID().equals("")){
+                        poRSProcessd.get(lnRow).setQtyIssue(poRSProcessd.get(lnRow).getQtyIssue().doubleValue()
+                                                            + poRSMaster.get(lnCtr).getQuantity().doubleValue());
+                    }
+                    break;
+                    case InvConstants.DELIVERY_DISCREPANCY:
 //                    poRSProcessd.get(lnRow).setDateExpire(poRSMaster.get(lnCtr).getDateExpire());
                     poRSProcessd.get(lnRow).setQtyOutxx(poRSProcessd.get(lnRow).getQtyOutxx().doubleValue()
                                                         + poRSMaster.get(lnCtr).getQuantity().doubleValue());
@@ -537,6 +592,7 @@ public class InventoryTrans {
                 }
                 
                 switch (psSourceCd){
+                    case InvConstants.ACCEPT_DELIVERY_DISCREPANCY:
                     case InvConstants.ACCEPT_DELIVERY:
                         if (!pbWarehous){
                             poRSProcessd.get(lnRow).setQtyOrder(poRSProcessd.get(lnRow).getQtyOrder().doubleValue()
@@ -544,6 +600,11 @@ public class InventoryTrans {
                         }
                         break;
                     case InvConstants.DELIVERY:
+                    case InvConstants.DELIVERY_DISCREPANCY:
+                        
+                        poRSProcessd.get(lnRow).setQtyIssue(poRSProcessd.get(lnRow).getQtyIssue().doubleValue()
+                                                            + poRSMaster.get(lnCtr).getQuantity().doubleValue());
+                        break;
                     case InvConstants.JOB_ORDER:
                         poRSProcessd.get(lnRow).setQtyIssue(poRSProcessd.get(lnRow).getQtyIssue().doubleValue()
                                                             + poRSMaster.get(lnCtr).getQuantity().doubleValue());
@@ -626,6 +687,7 @@ public class InventoryTrans {
         
         for (int lnCtr = 0; lnCtr <= poRSProcessd.size()-1; lnCtr++){
             if (psSourceCd.equals(InvConstants.ACCEPT_DELIVERY) ||
+                psSourceCd.equals(InvConstants.ACCEPT_DELIVERY_DISCREPANCY) ||
                 psSourceCd.equals(InvConstants.ACCEPT_WARRANTY_TRANSFER) ||
                 psSourceCd.equals(InvConstants.BRANCH_ORDER) ||
                 psSourceCd.equals(InvConstants.BRANCH_ORDER_CONFIRM) ||
@@ -637,6 +699,7 @@ public class InventoryTrans {
                 psSourceCd.equals(InvConstants.DAILY_PRODUCTION_IN) ||
                 psSourceCd.equals(InvConstants.DAILY_PRODUCTION_OUT) ||
                 psSourceCd.equals(InvConstants.DELIVERY) ||
+                psSourceCd.equals(InvConstants.DELIVERY_DISCREPANCY) ||
                 psSourceCd.equals(InvConstants.DEBIT_MEMO)){
                 
                 lbNewInvxx = poRSProcessd.get(lnCtr).IsNewParts().equals("1");

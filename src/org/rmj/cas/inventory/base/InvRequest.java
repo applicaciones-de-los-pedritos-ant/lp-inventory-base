@@ -1423,7 +1423,7 @@ public class InvRequest{
         String lsSQL = "SELECT " +
                             "  a.sTransNox" +
                             ", b.sBranchNm" +
-                            ", a.dTransact" +
+                            ", DATE_FORMAT(a.dTransact, '%m/%d/%Y') AS dTransact"  +
                             ", c.sBranchNm" + 
                         " FROM Inv_Stock_Request_Master a" +
                             " LEFT JOIN Branch b" +

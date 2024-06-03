@@ -7,6 +7,8 @@
 package org.rmj.cas.inventory.constants.basefx;
 
 public class InvConstants {
+    
+    public static final String ACCEPT_DELIVERY_DISCREPANCY = "AcDc";
     public static final String ACCEPT_DELIVERY = "AcDl";
     public static final String ACCEPT_PACKAGE = "AcPc";
     public static final String ACCEPT_WARRANTY_TO_SERVICE_CENTER = "AWSC";
@@ -23,6 +25,7 @@ public class InvConstants {
     public static final String DAILY_PRODUCTION_OUT = "DPrO";
     public static final String DEBIT_MEMO = "DM";
     public static final String DELIVERY = "Dlvr";
+    public static final String DELIVERY_DISCREPANCY = "Dcvr";
     public static final String JOB_ORDER = "JO";
     public static final String JOB_ORDER_REPLACEMENT = "JORp";
     public static final String PACKAGE_RETURN = "PcRt";

@@ -831,9 +831,13 @@ public class InvAdjustment{
         
         switch(fnCol){
             case 3:
-                lsHeader = "Brand»Description»Unit»Model»Qty On Hnd»Inv. Type»Barcode»Stock ID";
-                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»sBarCodex»sStockIDx";
-                lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
+//                lsHeader = "Brand»Description»Unit»Model»Qty On Hnd»Inv. Type»Barcode»Stock ID";
+//                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»sBarCodex»sStockIDx";
+//                lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
+                
+                lsHeader = "Barcode»Description»Brand»Unit»Qty on Hand»Stock ID»Model»Inv. Type";
+                lsColName = "a.sBarCodex»a.sDescript»xBrandNme»f.sMeasurNm»e.nQtyOnHnd»sStockIDx»xModelNme»xInvTypNm";
+                lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»e.nQtyOnHnd»a.sStockIDx»xModelNme»d.sDescript";
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
                 
                 if (fbByCode){
@@ -905,6 +909,10 @@ public class InvAdjustment{
                 lsHeader = "Barcode»Description»Inv. Type»Brand»Model»Stock ID";
                 lsColName = "sBarCodex»sDescript»xInvTypNm»xBrandNme»xModelNme»sStockIDx";
                 lsColCrit = "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»c.sDescript»a.sStockIDx";
+                
+                lsHeader = "Barcode»Description»Brand»Unit»Qty on Hand»Stock ID»Model»Inv. Type";
+                lsColName = "a.sBarCodex»a.sDescript»xBrandNme»f.sMeasurNm»e.nQtyOnHnd»sStockIDx»xModelNme»xInvTypNm";
+                lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»e.nQtyOnHnd»a.sStockIDx»xModelNme»d.sDescript";
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
                 
                 if (fbByCode){
