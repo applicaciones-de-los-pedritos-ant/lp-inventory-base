@@ -2081,10 +2081,11 @@ public class InvTransfer {
         System.err.println(lsSQL);
 
         if (loJSON != null) {
+            System.out.println(loJSON.toString());
             setDetail(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
 //            setDetail(fnRow, "nInvCostx", Double.valueOf((String) loJSON.get("nSelprice")));
 
-            double nInvCostx = loJSON.get("nSelprice") != null ? Double.valueOf((String) loJSON.get("nSelprice")) : 0.0;
+            double nInvCostx = loJSON.get("nUnitPrce") != null ? Double.valueOf((String) loJSON.get("nUnitPrce")) : 0.0;
             // Set the detail value
             setDetail(fnRow, "nInvCostx", nInvCostx);
 

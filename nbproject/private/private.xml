@@ -10,7 +10,11 @@
         </group>
         <group/>
         <group name="integsys-lp">
-            <file>file:/C:/Users/Maynard/Documents/GitHub/lp-inventory-base/src/org/rmj/cas/inventory/base/InvMaster.java</file>
+            <file>file:/C:/Users/Maynard/Documents/GitHub/lp-inventory-base/src/org/rmj/cas/inventory/base/InvCount.java</file>
+            <file>file:/C:/Users/Maynard/Documents/GitHub/lp-inventory-base/src/org/rmj/cas/inventory/base/InvTransfer.java</file>
+        </group>
+        <group name="e-documentscanner">
+            <file>file:/C:/Users/Maynard/Documents/GitHub/lp-inventory-base/src/org/rmj/cas/inventory/base/InvCount.java</file>
             <file>file:/C:/Users/Maynard/Documents/GitHub/lp-inventory-base/src/org/rmj/cas/inventory/base/InvTransfer.java</file>
         </group>
     </open-files>
