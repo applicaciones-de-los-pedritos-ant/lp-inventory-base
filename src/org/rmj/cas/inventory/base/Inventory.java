@@ -129,9 +129,14 @@ public class Inventory{
     }
     
     public boolean BrowseRecord(String fsValue, boolean fbByCode, boolean fbSearch){
-        String lsHeader = "Brand»Description»Unit»Model»Inv. Type»Barcode»Stock ID";
-        String lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»xInvTypNm»sBarCodex»sStockIDx";
-        String lsColCrit = "b.sDescript»a.sDescript»e.sMeasurNm»c.sDescript»d.sDescript»a.sBarCodex»a.sStockIDx";
+//        String lsHeader = "Brand»Description»Unit»Model»Inv. Type»Barcode»Stock ID";
+//        String lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»xInvTypNm»sBarCodex»sStockIDx";
+//        String lsColCrit = "b.sDescript»a.sDescript»e.sMeasurNm»c.sDescript»d.sDescript»a.sBarCodex»a.sStockIDx";
+        
+        
+        String lsHeader = "Barcode»Description»Brand»Unit»Model»Inv. Type»Stock ID";
+        String lsColName = "sBarCodex»sDescript»xBrandNme»sMeasurNm»xModelNme»xInvTypNm»sStockIDx";
+        String lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»e.sMeasurNm»c.sDescript»d.sDescript»a.sStockIDx";
         String lsSQL = getSQ_Inventory();
         JSONObject loJSON;
         
@@ -141,7 +146,7 @@ public class Inventory{
                                          lsHeader, 
                                         lsColName, 
                                         lsColCrit, 
-                                                fbByCode ? 6 : fbSearch ? 1 : 5);
+                                                fbByCode ? 6 : fbSearch ? 1 : 0);
         
         if(loJSON == null)
             return false;
@@ -711,9 +716,14 @@ public class Inventory{
                 lsSQL = MiscUtil.addCondition(getSQ_Inventory(), 
                                                 "sStockIDx <> " + SQLUtil.toSQL(poData.getStockIDx()) + 
                                                 " AND a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
-                lsHeader = "Brand»Description»Unit»Model»Inv. Type»Barcode»Stock ID";
-                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»xInvTypNm»sBarCodex»sStockIDx";
-                lsColCrit = "b.sDescript»a.sDescript»e.sMeasurNm»c.sDescript»d.sDescript»a.sBarCodex»a.sStockIDx";
+//                lsHeader = "Brand»Description»Unit»Model»Inv. Type»Barcode»Stock ID";
+//                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»xInvTypNm»sBarCodex»sStockIDx";
+//                lsColCrit = "b.sDescript»a.sDescript»e.sMeasurNm»c.sDescript»d.sDescript»a.sBarCodex»a.sStockIDx";
+                
+                
+         lsHeader = "Barcode»Description»Brand»Unit»Model»Inv. Type»Stock ID";
+         lsColName = "sBarCodex»sDescript»xBrandNme»sMeasurNm»xModelNme»xInvTypNm»sStockIDx";
+         lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»e.sMeasurNm»c.sDescript»d.sDescript»a.sStockIDx";
                 
                 if (fbByCode){
                     lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx = " + SQLUtil.toSQL(fsValue));
@@ -731,12 +741,12 @@ public class Inventory{
                                                         lsHeader, 
                                                         lsColName, 
                                                         lsColCrit, 
-                                                        fbSearch ? 1 : 5);
+                                                        fbSearch ? 1 : 0);
                 }
                 
                 if (loJSON != null){
                     setSubUnit(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
-                    setSubUnit(fnRow, 5 , (String) loJSON.get("sMeasurNm"));
+//                    setSubUnit(fnRow, 5 , (String) loJSON.get("sMeasurNm"));
                     
                     if (fbSearch) 
                         return (String) loJSON.get("sDescript");

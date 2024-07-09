@@ -6,7 +6,6 @@
 package org.rmj.cas.inventory.base;
 
 import com.mysql.jdbc.Connection;
-import com.mysql.jdbc.SQLError;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -52,13 +51,13 @@ public class InvCount{
     
     public boolean BrowseRecord(String fsValue, boolean fbByCode){
         String lsHeader = "Trans. No»Inv. Type»Date";
-        String lsColName = "a.sTransNox»b.sDescript»a.dTransact";
+        String lsColName = "a.sTransNox»b.sDescript»dTransact";
         String lsColCrit = "a.sTransNox»b.sDescript»a.dTransact";
         String lsSQL = getSQ_InvCount();
         JSONObject loJSON;
         
         if (fbByCode){
-            lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox = " +  SQLUtil.toSQL(fsValue));
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox LIKE " +  SQLUtil.toSQL(fsValue));
             
             ResultSet loRS = poGRider.executeQuery(lsSQL);
             
@@ -253,7 +252,7 @@ public class InvCount{
                 loOth.setValue("sBarCodex", loRS.getString("sBarCodex"));
                 loOth.setValue("sDescript", loRS.getString("sDescript"));
                 loOth.setValue("sLocatnNm", loRS.getString("xLocatnNm"));
-                loOth.setValue("sBrandNme", loRS.getString("xBrandNme"));
+                loOth.setValue("sBrandNme", (loRS.getString("xBrandNme")!= null ? loRS.getString("xBrandNme") : ""));
                 if (loRS.getString("sMeasurNm")!=null){
                    loOth.setValue("sMeasurNm", loRS.getString("sMeasurNm"));
                 }else{
@@ -835,9 +834,13 @@ public class InvCount{
             case 3:                
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
                 
-                lsHeader = "Brand»Description»Unit»Model»Inv. Type»Barcode»Stock ID";
-                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»xInvTypNm»sBarCodex»sStockIDx";
-                lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»d.sDescript»a.sBarCodex»a.sStockIDx";
+//                lsHeader = "Brand»Description»Unit»Model»Inv. Type»Barcode»Stock ID";
+//                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»xInvTypNm»sBarCodex»sStockIDx";
+//                lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»d.sDescript»a.sBarCodex»a.sStockIDx";
+                
+                lsHeader = "Barcode»Description»Brand»Unit»Qty on Hand»Stock ID»Model»Inv. Type";
+                lsColName = "a.sBarCodex»a.sDescript»xBrandNme»f.sMeasurNm»e.nQtyOnHnd»sStockIDx»xModelNme»xInvTypNm";
+                lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»e.nQtyOnHnd»a.sStockIDx»xModelNme»d.sDescript";
                 
                 if (fbByCode){
                     if (paDetailOthers.get(fnRow).getValue("sStockIDx").equals(fsValue)) return true;
@@ -880,7 +883,7 @@ public class InvCount{
                     paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
                     paDetailOthers.get(fnRow).setValue("sDescript", (String) loJSON.get("sDescript"));
                     paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
-                    paDetailOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
+                    paDetailOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme")!= null ? (String) loJSON.get("xBrandNme") : "");
                     
                     return true;
                 } else{
@@ -1203,7 +1206,7 @@ public class InvCount{
         String lsSQL = "SELECT " +
                             "  a.sTransNox" +
                             ", b.sDescript" + 
-                            ", a.dTransact" + 
+                            ", DATE_FORMAT(a.dTransact, '%m/%d/%Y') AS dTransact"  + 
                         " FROM Inv_Count_Master a" + 
                             " LEFT JOIN Inv_Type b" + 
                                 " ON a.sInvTypCd = b.sInvTypCd" + 
