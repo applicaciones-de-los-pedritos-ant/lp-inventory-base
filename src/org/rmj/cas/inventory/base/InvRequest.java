@@ -130,6 +130,38 @@ public class InvRequest {
                     } else {
                         paDetail.get(fnRow).setValue(fnCol, 0);
                     }
+                } else if (fnCol == poDetail.getColumn("nApproved")) {
+                    if (foData instanceof Number) {
+                        paDetail.get(fnRow).setValue(fnCol, foData);
+                    } else {
+                        paDetail.get(fnRow).setValue(fnCol, 0);
+                    }
+                } else if (fnCol == poDetail.getColumn("nCancelld")) {
+                    if (foData instanceof Number) {
+                        paDetail.get(fnRow).setValue(fnCol, foData);
+                    } else {
+                        paDetail.get(fnRow).setValue(fnCol, 0);
+                    }
+                } else if (fnCol == poDetail.getColumn("nIssueQty")) {
+                    if (foData instanceof Number) {
+                        paDetail.get(fnRow).setValue(fnCol, foData);
+                    } else {
+                        paDetail.get(fnRow).setValue(fnCol, 0);
+                    }
+                } else if (fnCol == poDetail.getColumn("nOrderQty")) {
+                    if (foData instanceof Number) {
+                        paDetail.get(fnRow).setValue(fnCol, foData);
+                    } else {
+                        paDetail.get(fnRow).setValue(fnCol, 0);
+                    }
+
+                } else if (fnCol == poDetail.getColumn("nOnTranst")) {
+                    if (foData instanceof Number) {
+                        paDetail.get(fnRow).setValue(fnCol, foData);
+                    } else {
+                        paDetail.get(fnRow).setValue(fnCol, 0);
+                    }
+
                 } else {
                     paDetail.get(fnRow).setValue(fnCol, foData);
                 }
@@ -140,8 +172,43 @@ public class InvRequest {
         }
     }
 
+    public void setDetailOther(int fnRow, int fnCol, Object foData) {
+        if (pnEditMode != EditMode.UNKNOWN) {
+            // Don't allow specific fields to assign values
+            if (!(fnCol == paDetailOthers.get(fnRow).getColumn("sTransNox")
+                    || fnCol == paDetailOthers.get(fnRow).getColumn("nEntryNox")
+                    || fnCol == paDetailOthers.get(fnRow).getColumn("dModified"))) {
+
+                if (fnCol == paDetailOthers.get(fnRow).getColumn("nApproved")) {
+                    if (foData instanceof Number) {
+                        paDetailOthers.get(fnRow).setValue(fnCol, foData);
+                    } else {
+                        paDetailOthers.get(fnRow).setValue(fnCol, 0);
+                    }
+                } else if (fnCol == paDetailOthers.get(fnRow).getColumn("nIssueQty")) {
+                    if (foData instanceof Number) {
+                        paDetailOthers.get(fnRow).setValue(fnCol, foData);
+                    } else {
+                        paDetailOthers.get(fnRow).setValue(fnCol, 0);
+                    }
+                } else if (fnCol == paDetailOthers.get(fnRow).getColumn("nOrderQty")) {
+                    if (foData instanceof Number) {
+                        paDetailOthers.get(fnRow).setValue(fnCol, foData);
+                    } else {
+                        paDetailOthers.get(fnRow).setValue(fnCol, 0);
+                    }
+
+                }
+            }
+        }
+    }
+
     public void setDetail(int fnRow, String fsCol, Object foData) {
         setDetail(fnRow, poDetail.getColumn(fsCol), foData);
+    }
+
+    public void setDetailOther(int fnRow, String fsCol, Object foData) {
+        setDetailOther(fnRow, paDetailOthers.get(fnRow).getColumn(fsCol), foData);
     }
 
     public Object getDetailOthers(int fnRow, String fsCol) {
@@ -160,6 +227,9 @@ public class InvRequest {
             case "sOrderNox":
             case "sMeasurNm":
             case "sBrandNme":
+            case "nApproved":
+            case "nIssueQty":
+            case "nOrderQty":
                 return paDetailOthers.get(fnRow).getValue(fsCol);
             default:
                 return null;
@@ -265,7 +335,20 @@ public class InvRequest {
                 loOcc.setValue("sTransNox", loRS.getString("sTransNox"));
                 loOcc.setValue("nEntryNox", loRS.getInt("nEntryNox"));
                 loOcc.setValue("sStockIDx", loRS.getString("sStockIDx"));
-                loOcc.setValue("nQuantity", loRS.getInt("nQuantity"));
+                loOcc.setValue("nQuantity", loRS.getDouble("nQuantity"));
+                loOcc.setValue("nRecOrder", loRS.getDouble("nRecOrder"));
+                loOcc.setValue("nQtyOnHnd", loRS.getDouble("nQtyOnHnd"));
+                loOcc.setValue("nResvOrdr", loRS.getDouble("nResvOrdr"));
+                loOcc.setValue("nBackOrdr", loRS.getDouble("nBackOrdr"));
+                loOcc.setValue("nOnTranst", loRS.getDouble("nOnTranst"));
+                loOcc.setValue("nAvgMonSl", loRS.getDouble("nAvgMonSl"));
+                loOcc.setValue("nMaxLevel", loRS.getDouble("nMaxLevel"));
+                loOcc.setValue("nApproved", loRS.getDouble("nApproved"));
+                loOcc.setValue("nCancelld", loRS.getDouble("nCancelld"));
+                loOcc.setValue("nIssueQty", loRS.getDouble("nIssueQty"));
+                loOcc.setValue("nOrderQty", loRS.getDouble("nOrderQty"));
+                loOcc.setValue("nAllocQty", loRS.getDouble("nAllocQty"));
+                loOcc.setValue("nReceived", loRS.getDouble("nReceived"));
                 loOcc.setValue("sNotesxxx", loRS.getString("sNotesxxx"));
                 loOcc.setValue("dModified", loRS.getDate("dModified"));
                 loDetail.add(loOcc);
@@ -275,10 +358,13 @@ public class InvRequest {
                 loOth.setValue("sStockIDx", loRS.getString("sStockIDx"));
                 loOth.setValue("sBarCodex", loRS.getString("sBarCodex"));
                 loOth.setValue("sDescript", loRS.getString("sDescript"));
-                loOth.setValue("nQtyOnHnd", loRS.getInt("nQtyOnHnd"));
-                loOth.setValue("xQtyOnHnd", loRS.getInt("xQtyOnHnd"));
-                loOth.setValue("nResvOrdr", loRS.getInt("nResvOrdr"));
-                loOth.setValue("nBackOrdr", loRS.getInt("nBackOrdr"));
+                loOth.setValue("nQtyOnHnd", loRS.getDouble("nQtyOnHnd"));
+                loOth.setValue("xQtyOnHnd", loRS.getDouble("xQtyOnHnd"));
+                loOth.setValue("nResvOrdr", loRS.getDouble("nResvOrdr"));
+                loOth.setValue("nBackOrdr", loRS.getDouble("nBackOrdr"));
+                loOth.setValue("nApproved", loRS.getDouble("nApproved") - loRS.getDouble("nIssueQty"));
+                loOth.setValue("nIssueQty", 0.0);
+                loOth.setValue("nOrderQty", 0.0);
                 loOth.setValue("nReorderx", 0);
                 loOth.setValue("nLedgerNo", loRS.getInt("nLedgerNo"));
                 loOth.setValue("sBrandNme", loRS.getString("xBrandNme"));
@@ -297,282 +383,6 @@ public class InvRequest {
         return loDetail;
     }
 
-//    private boolean saveInvTrans(){
-//        String lsSQL = "";
-//        ResultSet loRS = null;
-//        int lnCtr;
-//        
-//        InventoryTrans loInvTrans = new InventoryTrans(poGRider, poGRider.getBranchCode());
-//        
-//        /*---------------------------------------------------------------------------------
-//         *   Credit from mother unit
-//         *---------------------------------------------------------------------------------*/
-//        loInvTrans.InitTransaction();
-//        for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr ++){
-//            if (!paDetailOthers.get(lnCtr).getValue("sParentID").equals("")){
-//                lsSQL = "SELECT" +
-//                            "  nQtyOnHnd" +
-//                            ", nResvOrdr" +
-//                            ", nBackOrdr" +
-//                            ", nLedgerNo" +
-//                        " FROM Inv_Master" + 
-//                        " WHERE sStockIDx = " + SQLUtil.toSQL(paDetailOthers.get(lnCtr).getValue("sParentID")) + 
-//                            " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd);
-//
-//                loRS = poGRider.executeQuery(lsSQL);
-//                
-//                loInvTrans.setDetail(lnCtr, "sStockIDx", paDetailOthers.get(lnCtr).getValue("sParentID"));
-//                loInvTrans.setDetail(lnCtr, "nQuantity", paDetailOthers.get(lnCtr).getValue("xParntQty"));
-//                loInvTrans.setDetail(lnCtr, "dExpiryDt", paDetail.get(lnCtr).getDateExpiry());
-//                
-//                if (MiscUtil.RecordCount(loRS) == 0){
-//                    loInvTrans.setDetail(lnCtr, "nQtyOnHnd", 0);
-//                    loInvTrans.setDetail(lnCtr, "nResvOrdr", 0);
-//                    loInvTrans.setDetail(lnCtr, "nBackOrdr", 0);
-//                } else{
-//                    try {
-//                        loRS.first();
-//                        loInvTrans.setDetail(lnCtr, "nQtyOnHnd", loRS.getInt("nQtyOnHnd"));
-//                        loInvTrans.setDetail(lnCtr, "nResvOrdr", loRS.getInt("nResvOrdr"));
-//                        loInvTrans.setDetail(lnCtr, "nBackOrdr", loRS.getInt("nBackOrdr"));
-//                        loInvTrans.setDetail(lnCtr, "nLedgerNo", loRS.getInt("nLedgerNo"));
-//                    } catch (SQLException e) {
-//                        setMessage("Please inform MIS Department.");
-//                        setErrMsg(e.getMessage());
-//                        return false;
-//                    }
-//                }
-//                
-////                if (!loInvTrans.CreditMemo(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)){
-////                    setMessage(loInvTrans.getMessage());
-////                    setErrMsg(loInvTrans.getErrMsg());
-////                    return false;
-////                }
-//                if (!loInvTrans.Delivery(poData.getTransNox(), poData.getTransact(), EditMode.ADDNEW)){
-//                    setMessage(loInvTrans.getMessage());
-//                    setErrMsg(loInvTrans.getErrMsg());
-//                    return false;
-//                }
-//            }
-//        }
-//        
-//        
-//        /*---------------------------------------------------------------------------------
-//         *   Debit to child unit
-//         *---------------------------------------------------------------------------------*/
-//        loInvTrans.InitTransaction();
-//        for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr ++){
-//            if (!paDetailOthers.get(lnCtr).getValue("sParentID").equals("")){
-//                lsSQL = "SELECT" +
-//                            "  nQtyOnHnd" +
-//                            ", nResvOrdr" +
-//                            ", nBackOrdr" +
-//                            ", nLedgerNo" +
-//                        " FROM Inv_Master" + 
-//                        " WHERE sStockIDx = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx()) + 
-//                            " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd);
-//
-//                loRS = poGRider.executeQuery(lsSQL);
-//                
-//                loInvTrans.setDetail(lnCtr, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
-//                loInvTrans.setDetail(lnCtr, "dExpiryDt", paDetail.get(lnCtr).getDateExpiry());
-//                loInvTrans.setDetail(lnCtr, "nQuantity", paDetailOthers.get(lnCtr).getValue("xQuantity"));
-//                
-//                if (MiscUtil.RecordCount(loRS) == 0){
-//                    loInvTrans.setDetail(lnCtr, "nQtyOnHnd", 0);
-//                    loInvTrans.setDetail(lnCtr, "nResvOrdr", 0);
-//                    loInvTrans.setDetail(lnCtr, "nBackOrdr", 0);
-//                } else{
-//                    try {
-//                        loRS.first();
-//                        loInvTrans.setDetail(lnCtr, "nQtyOnHnd", loRS.getInt("nQtyOnHnd"));
-//                        loInvTrans.setDetail(lnCtr, "nResvOrdr", loRS.getInt("nResvOrdr"));
-//                        loInvTrans.setDetail(lnCtr, "nBackOrdr", loRS.getInt("nBackOrdr"));
-//                        loInvTrans.setDetail(lnCtr, "nLedgerNo", loRS.getInt("nLedgerNo"));
-//                    } catch (SQLException e) {
-//                        setMessage("Please inform MIS Department.");
-//                        setErrMsg(e.getMessage());
-//                        return false;
-//                    }
-//                }
-//                
-//                if (!loInvTrans.DebitMemo(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)){
-//                    setMessage(loInvTrans.getMessage());
-//                    setErrMsg(loInvTrans.getErrMsg());
-//                    return false;
-//                }
-//            }
-//        }
-//        
-//        /*---------------------------------------------------------------------------------
-//         *   Save inventory trans of the items
-//         *---------------------------------------------------------------------------------*/
-//        loInvTrans.InitTransaction();
-//        for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr ++){
-//            if (paDetail.get(lnCtr).getStockIDx().equals("")) break;
-//            
-//            lsSQL = "SELECT" +
-//                        "  nQtyOnHnd" +
-//                        ", nResvOrdr" +
-//                        ", nBackOrdr" +
-//                        ", nLedgerNo" +
-//                    " FROM Inv_Master" + 
-//                    " WHERE sStockIDx = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx()) + 
-//                        " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd);
-//
-//            loRS = poGRider.executeQuery(lsSQL);
-//            
-//            loInvTrans.setDetail(lnCtr, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
-//            loInvTrans.setDetail(lnCtr, "sReplacID", paDetail.get(lnCtr).getOrigIDxx());
-//            loInvTrans.setDetail(lnCtr, "nQuantity", paDetail.get(lnCtr).getQuantity());
-//            loInvTrans.setDetail(lnCtr, "dExpiryDt", paDetail.get(lnCtr).getDateExpiry());
-//                
-//            if (MiscUtil.RecordCount(loRS) == 0){
-//                loInvTrans.setDetail(lnCtr, "nQtyOnHnd", 0);
-//                loInvTrans.setDetail(lnCtr, "nResvOrdr", 0);
-//                loInvTrans.setDetail(lnCtr, "nBackOrdr", 0);
-//            } else{
-//                try {
-//                    loRS.first();
-//                    loInvTrans.setDetail(lnCtr, "nQtyOnHnd", loRS.getInt("nQtyOnHnd"));
-//                    loInvTrans.setDetail(lnCtr, "nResvOrdr", loRS.getInt("nResvOrdr"));
-//                    loInvTrans.setDetail(lnCtr, "nBackOrdr", loRS.getInt("nBackOrdr"));
-//                    loInvTrans.setDetail(lnCtr, "nLedgerNo", loRS.getInt("nLedgerNo"));
-//                } catch (SQLException e) {
-//                    setMessage("Please inform MIS Department.");
-//                    setErrMsg(e.getMessage());
-//                    return false;
-//                }
-//            }
-//        }
-//        
-//        if (!loInvTrans.Delivery(poData.getTransNox(), poData.getTransact(), EditMode.ADDNEW)){
-//            setMessage(loInvTrans.getMessage());
-//            setErrMsg(loInvTrans.getErrMsg());
-//            return false;
-//        }
-//        
-//        //TODO
-//            //update branch order info
-//    
-//        return saveTransExpDetail();
-//    }
-//    private boolean unsaveInvTrans(){
-//        InventoryTrans loInvTrans = new InventoryTrans(poGRider, poGRider.getBranchCode());
-//        loInvTrans.InitTransaction();
-//        
-//        for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr ++){
-//            loInvTrans.setDetail(lnCtr, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
-//            loInvTrans.setDetail(lnCtr, "nQtyOnHnd", paDetailOthers.get(lnCtr).getValue("nQtyOnHnd"));
-//            loInvTrans.setDetail(lnCtr, "nResvOrdr", paDetailOthers.get(lnCtr).getValue("nResvOrdr"));
-//            loInvTrans.setDetail(lnCtr, "nBackOrdr", paDetailOthers.get(lnCtr).getValue("nBackOrdr"));
-//            loInvTrans.setDetail(lnCtr, "nLedgerNo", paDetailOthers.get(lnCtr).getValue("nLedgerNo"));
-//        }
-//        
-//        if (!loInvTrans.Delivery(poData.getTransNox(), poGRider.getServerDate(), EditMode.DELETE)){
-//            setMessage(loInvTrans.getMessage());
-//            setErrMsg(loInvTrans.getErrMsg());
-//            return false;
-//        }
-//        
-//        //TODO
-//            //update branch order info
-//    
-//        return true;
-//    }
-//    private boolean unpostInvTrans(){
-//        InventoryTrans loInvTrans = new InventoryTrans(poGRider, poGRider.getBranchCode());
-//        loInvTrans.InitTransaction();
-//        
-//        for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr ++){
-//            loInvTrans.setDetail(lnCtr, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
-//            loInvTrans.setDetail(lnCtr, "nQtyOnHnd", paDetailOthers.get(lnCtr).getValue("nQtyOnHnd"));
-//            loInvTrans.setDetail(lnCtr, "nResvOrdr", paDetailOthers.get(lnCtr).getValue("nResvOrdr"));
-//            loInvTrans.setDetail(lnCtr, "nBackOrdr", paDetailOthers.get(lnCtr).getValue("nBackOrdr"));
-//            loInvTrans.setDetail(lnCtr, "nLedgerNo", paDetailOthers.get(lnCtr).getValue("nLedgerNo"));
-//        }
-//        
-//        if (!loInvTrans.AcceptDelivery(poData.getTransNox(), poGRider.getServerDate(), EditMode.DELETE)){
-//            setMessage(loInvTrans.getMessage());
-//            setErrMsg(loInvTrans.getErrMsg());
-//            return false;
-//        }
-//        
-//        //TODO
-//            //update branch order info
-//    
-//        return true;
-//    }
-//    private boolean postInvTrans(Date fdReceived){
-//        String lsSQL = "";
-//        ResultSet loRS = null;
-//        int lnCtr;
-//        
-//        InventoryTrans loInvTrans = new InventoryTrans(poGRider, poGRider.getBranchCode());
-//              
-//        /*---------------------------------------------------------------------------------
-//         *   Save inventory trans of the items
-//         *---------------------------------------------------------------------------------*/
-//        loInvTrans.InitTransaction();
-//        for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr ++){
-//            if (paDetail.get(lnCtr).getStockIDx().equals("")) break;
-//            
-//            lsSQL = "SELECT" +
-//                        "  nQtyOnHnd" +
-//                        ", nResvOrdr" +
-//                        ", nBackOrdr" +
-//                        ", nLedgerNo" +
-//                    " FROM Inv_Master" + 
-//                    " WHERE sStockIDx = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx()) + 
-//                        " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd);
-//
-//            loRS = poGRider.executeQuery(lsSQL);
-//            
-//            loInvTrans.setDetail(lnCtr, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
-//            loInvTrans.setDetail(lnCtr, "sReplacID", paDetail.get(lnCtr).getOrigIDxx());
-//            loInvTrans.setDetail(lnCtr, "nQuantity", paDetail.get(lnCtr).getReceived());
-//                
-//            if (MiscUtil.RecordCount(loRS) == 0){
-//                loInvTrans.setDetail(lnCtr, "nQtyOnHnd", 0);
-//                loInvTrans.setDetail(lnCtr, "nResvOrdr", 0);
-//                loInvTrans.setDetail(lnCtr, "nBackOrdr", 0);
-//            } else{
-//                try {
-//                    loRS.first();
-//                    loInvTrans.setDetail(lnCtr, "nQtyOnHnd", loRS.getInt("nQtyOnHnd"));
-//                    loInvTrans.setDetail(lnCtr, "nResvOrdr", loRS.getInt("nResvOrdr"));
-//                    loInvTrans.setDetail(lnCtr, "nBackOrdr", loRS.getInt("nBackOrdr"));
-//                    loInvTrans.setDetail(lnCtr, "nLedgerNo", loRS.getInt("nLedgerNo"));
-//                } catch (SQLException e) {
-//                    setMessage("Please inform MIS Department.");
-//                    setErrMsg(e.getMessage());
-//                    return false;
-//                }
-//            }
-//            
-//            lsSQL = "UPDATE Inv_Transfer_Detail SET" + 
-//                        " nReceived = " + paDetail.get(lnCtr).getReceived() + 
-//                    " WHERE sTransNox = " + SQLUtil.toSQL(paDetail.get(lnCtr).getTransNox()) +
-//                        " AND sStockIDx = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx());
-//        
-//            if (poGRider.executeQuery(lsSQL, "Inv_Transfer_Detail", "", "") == 0){
-//                if (!poGRider.getErrMsg().isEmpty()){
-//                    setErrMsg(poGRider.getErrMsg());
-//                }
-//            }
-//        }
-//        
-//        if (!loInvTrans.AcceptDelivery(poData.getTransNox(),fdReceived, EditMode.ADDNEW)){
-//            setMessage(loInvTrans.getMessage());
-//            setErrMsg(loInvTrans.getErrMsg());
-//            return false;
-//        }
-//        
-//        //TODO
-//            //update branch order info
-//    
-//        return acceptInvExpiration(fdReceived);
-//    }
     public boolean updateRecord() {
         if (pnEditMode != EditMode.READY) {
             return false;
@@ -639,8 +449,9 @@ public class InvRequest {
         } else {
             //Load previous transaction
             loOldEnt = loadTransaction(poData.getTransNox());
-
-            loNewEnt.setEntryNox(ItemCount());
+            if (!pbWithParent) {
+                loNewEnt.setEntryNox(ItemCount());
+            }
             loNewEnt.setDateModified(poGRider.getServerDate());
 
             lbUpdate = saveDetail(loNewEnt.getTransNox());
@@ -722,49 +533,101 @@ public class InvRequest {
                 }
             }
         } else {
-            ArrayList<UnitInvRequestDetail> laSubUnit = loadTransactionDetail(poData.getTransNox());
+            if (!pbWithParent) {
+                ArrayList<UnitInvRequestDetail> laSubUnit = loadTransactionDetail(poData.getTransNox());
 
-            for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
-                loNewEnt = paDetail.get(lnCtr);
+                for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
+                    loNewEnt = paDetail.get(lnCtr);
 
-                if (!loNewEnt.getStockID().equals("")) {
-                    if (lnCtr <= laSubUnit.size() - 1) {
-                        if (loNewEnt.getEntryNox() != lnCtr + 1) {
-                            loNewEnt.setEntryNox(lnCtr + 1);
-                        }
-                        if (loNewEnt.getTransNox().isEmpty()) {
+                    if (!loNewEnt.getStockID().equals("")) {
+                        if (lnCtr <= laSubUnit.size() - 1) {
+                            if (loNewEnt.getEntryNox() != lnCtr + 1) {
+                                loNewEnt.setEntryNox(lnCtr + 1);
+                            }
+                            if (loNewEnt.getTransNox().isEmpty()) {
+                                loNewEnt.setTransNox(fsTransNox);
+                            }
+
+                            lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,
+                                    (GEntity) laSubUnit.get(lnCtr),
+                                    " nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2))
+                                    + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)),
+                                    "sBrandNme");
+
+                        } else {
                             loNewEnt.setTransNox(fsTransNox);
+                            loNewEnt.setEntryNox(lnCtr + 1);
+                            loNewEnt.setDateModified(poGRider.getServerDate());
+                            lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, "sBrandNme");
                         }
 
-                        lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,
-                                (GEntity) laSubUnit.get(lnCtr),
-                                " nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2))
-                                + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)),
-                                "sBrandNme");
-
+                        if (!lsSQL.equals("")) {
+                            if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
+                                if (!poGRider.getErrMsg().isEmpty()) {
+                                    setErrMsg(poGRider.getErrMsg());
+                                    return false;
+                                }
+                            }
+                        }
                     } else {
-                        loNewEnt.setTransNox(fsTransNox);
-                        loNewEnt.setEntryNox(lnCtr + 1);
-                        loNewEnt.setDateModified(poGRider.getServerDate());
-                        lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, "sBrandNme");
+                        for (int lnCtr2 = lnCtr; lnCtr2 <= laSubUnit.size() - 1; lnCtr2++) {
+                            lsSQL = "DELETE FROM " + poDetail.getTable()
+                                    + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getStockID())
+                                    + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox());
+
+                            if (!lsSQL.equals("")) {
+                                if (poGRider.executeQuery(lsSQL, poDetail.getTable(), "", "") == 0) {
+                                    if (!poGRider.getErrMsg().isEmpty()) {
+                                        setErrMsg(poGRider.getErrMsg());
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                        break;
                     }
+                }
+                if (lnCtr == laSubUnit.size() - 1) {
+                    lsSQL = "DELETE FROM " + poDetail.getTable()
+                            + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getStockID())
+                            + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox());
 
                     if (!lsSQL.equals("")) {
-                        if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
+                        if (poGRider.executeQuery(lsSQL, poDetail.getTable(), "", "") == 0) {
                             if (!poGRider.getErrMsg().isEmpty()) {
                                 setErrMsg(poGRider.getErrMsg());
                                 return false;
                             }
                         }
                     }
-                } else {
-                    for (int lnCtr2 = lnCtr; lnCtr2 <= laSubUnit.size() - 1; lnCtr2++) {
-                        lsSQL = "DELETE FROM " + poDetail.getTable()
-                                + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getStockID())
-                                + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox());
+                }
+            } else {
+                // When pbWithParent is true, do not delete or update EntryNox
+                ArrayList<UnitInvRequestDetail> laSubUnit = loadTransactionDetail(poData.getTransNox());
+
+                for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
+                    loNewEnt = paDetail.get(lnCtr);
+
+                    if (!loNewEnt.getStockID().equals("")) {
+                        if (lnCtr <= laSubUnit.size() - 1) {
+                            if (loNewEnt.getTransNox().isEmpty()) {
+                                loNewEnt.setTransNox(fsTransNox);
+                            }
+
+                            lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,
+                                    (GEntity) laSubUnit.get(lnCtr),
+                                    " nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2))
+                                    + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)),
+                                    "sBrandNme");
+
+                        } else {
+                            loNewEnt.setTransNox(fsTransNox);
+                            loNewEnt.setDateModified(poGRider.getServerDate());
+                            lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt, "sBrandNme");
+                        }
 
                         if (!lsSQL.equals("")) {
-                            if (poGRider.executeQuery(lsSQL, poDetail.getTable(), "", "") == 0) {
+                            if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
                                 if (!poGRider.getErrMsg().isEmpty()) {
                                     setErrMsg(poGRider.getErrMsg());
                                     return false;
@@ -772,22 +635,8 @@ public class InvRequest {
                             }
                         }
                     }
-                    break;
                 }
-            }
-            if (lnCtr == laSubUnit.size() - 1) {
-                lsSQL = "DELETE FROM " + poDetail.getTable()
-                        + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getStockID())
-                        + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox());
 
-                if (!lsSQL.equals("")) {
-                    if (poGRider.executeQuery(lsSQL, poDetail.getTable(), "", "") == 0) {
-                        if (!poGRider.getErrMsg().isEmpty()) {
-                            setErrMsg(poGRider.getErrMsg());
-                            return false;
-                        }
-                    }
-                }
             }
         }
 
@@ -1593,6 +1442,10 @@ public class InvRequest {
         setErrMsg("");
         setMessage("");
 
+//        if (poData.getBranchCd().isEmpty() || poData.getBranchCd() ==""){
+//        psWarnMsg = "Unable to search Detail. Please Select a Requesting Branch.";
+//            return false;
+//        }
         switch (fnCol) {
             case 1:
                 lsHeader = "Barcode»Description»Brand»Unit»Qty. on hand»Inv. Type";
@@ -1643,9 +1496,31 @@ public class InvRequest {
 
                 if (loJSON != null) {
                     setDetail(fnRow, "sStockIDx", (String) loJSON.get("sStockIDx"));
-                    setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nQtyOnHnd")));
                     setDetail(fnRow, "nQuantity", 0.00);
+                    String ToBranchCd = poData.getBranchCd();
+                    boolean lbOtherReq = false;
+                    if (!ToBranchCd.isEmpty() || ToBranchCd != "") {
+                        if (ToBranchCd.equalsIgnoreCase(psBranchCd)) {
+                            lbOtherReq = true;
+                        }
 
+                    }
+
+                    // Set values based on the value of lbOtherReq
+                    if (lbOtherReq) {
+                        setDetail(fnRow, "nQtyOnHnd", 0.00);
+                        setDetail(fnRow, "nResvOrdr", 0.00);
+                        setDetail(fnRow, "nBackOrdr", 0.00);
+                        setDetail(fnRow, "nFloatQty", 0.00);
+                        setDetail(fnRow, "nRecOrder", 0.00);
+
+                    } else {
+                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nQtyOnHnd")));
+                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nResvOrdr")));
+                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nBackOrdr")));
+                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nFloatQty")));
+                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nRecOrder")));
+                    }
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
                     paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
                     paDetailOthers.get(fnRow).setValue("sDescript", (String) loJSON.get("sDescript"));
@@ -1657,6 +1532,7 @@ public class InvRequest {
                     paDetailOthers.get(fnRow).setValue("sInvTypNm", (String) loJSON.get("sInvTypNm"));
                     paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
                     paDetailOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
+                    paDetailOthers.get(fnRow).setValue("sCategCd1", (String) loJSON.get("sCategCd1"));
 
                     return true;
                 } else {
@@ -1705,8 +1581,32 @@ public class InvRequest {
 
                 if (loJSON != null) {
                     setDetail(fnRow, "sStockIDx", (String) loJSON.get("sStockIDx"));
-                    setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nQtyOnHnd")));
                     setDetail(fnRow, "nQuantity", 0.00);
+                    
+                    String ToBranchCd = poData.getBranchCd();
+                    boolean lbOtherReq = false;
+                    if (!ToBranchCd.isEmpty() || ToBranchCd != "") {
+                        if (ToBranchCd.equalsIgnoreCase(psBranchCd)) {
+                            lbOtherReq = true;
+                        }
+
+                    }
+
+                    // Set values based on the value of lbOtherReq
+                    if (lbOtherReq) {
+                        setDetail(fnRow, "nQtyOnHnd", 0.00);
+                        setDetail(fnRow, "nResvOrdr", 0.00);
+                        setDetail(fnRow, "nBackOrdr", 0.00);
+                        setDetail(fnRow, "nFloatQty", 0.00);
+                        setDetail(fnRow, "nRecOrder", 0.00);
+
+                    } else {
+                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nQtyOnHnd")));
+                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nResvOrdr")));
+                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nBackOrdr")));
+                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nFloatQty")));
+                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nRecOrder")));
+                    }
 
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
                     paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
@@ -1815,6 +1715,10 @@ public class InvRequest {
 
     public Object getMaster(String fsCol) {
         return getMaster(poData.getColumn(fsCol));
+    }
+
+    public Object getMaster() {
+        return poData;
     }
 
     public String getMessage() {
@@ -2168,6 +2072,7 @@ public class InvRequest {
     private String psErrMsgx = "";
     private String psFilePath = "";
     private boolean pbWithParent = false;
+    private boolean pbisDataUpdated = false;
     private int pnEditMode;
     private int pnTranStat = 0;
     private IMasterDetail poCallBack;

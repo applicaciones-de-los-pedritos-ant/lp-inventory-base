@@ -641,9 +641,9 @@ public class InventoryTrans {
             for (int lnCtr = 1; lnCtr <= MiscUtil.RecordCount(poRSDetail); lnCtr++){
                 poRSDetail.absolute(lnCtr);
                 lsMasSQL = "UPDATE Inv_Master SET" +
-                                "  nQtyOnHnd = nQtyOnHnd + " + (poRSDetail.getInt("nQtyOutxx") -  poRSDetail.getInt("nQtyInxxx")) +
-                                ", nBackOrdr = nBackOrdr - " + poRSDetail.getInt("nQtyOrder") +
-                                ", nResvOrdr = nResvOrdr + " + poRSDetail.getInt("nQtyIssue") +
+                                "  nQtyOnHnd = nQtyOnHnd + " + (poRSDetail.getDouble("nQtyOutxx") -  poRSDetail.getDouble("nQtyInxxx")) +
+                                ", nBackOrdr = nBackOrdr - " + poRSDetail.getDouble("nQtyOrder") +
+                                ", nResvOrdr = nResvOrdr + " + poRSDetail.getDouble("nQtyIssue") +
                                 ", nLedgerNo = " + (poRSDetail.getInt("nLedgerNo") - 1) +
                                 ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate()) +
                             " WHERE sStockIDx = " + SQLUtil.toSQL(poRSDetail.getString("sStockIDx")) +
