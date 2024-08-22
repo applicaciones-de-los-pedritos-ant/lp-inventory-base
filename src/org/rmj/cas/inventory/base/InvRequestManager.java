@@ -578,7 +578,7 @@ public class InvRequestManager {
                     }
 
                     if (lnApproved < (lnIssueQty + lnOrderQty)) {
-                        psWarnMsg = "Unable to save. The orderer quantity for an item exceeds the approved quantity.";
+                        psWarnMsg = "Unable to save. The ordered quantity for an item exceeds the approved quantity.";
                         return false;
                     }
                 }
