@@ -426,9 +426,9 @@ public class InvRequestManager {
         boolean lbUpdate = false;
 
         //validate
-        if (!isEntryOkay(fnIndex)) {
-            return false;
-        }
+//        if (!isEntryOkay(fnIndex)) {
+//            return false;
+//        }
         //save the selected modified data
         if (!pbWithParent) {
             poGRider.beginTrans();
@@ -514,8 +514,12 @@ public class InvRequestManager {
         double lnApproved = 0;
         double lnCancelld = 0;
         double lnIssueQty = 0;
+        double lnOldIssueQty = 0;
         double lnOrderQty = 0;
+        double lnOldOrderQty = 0;
+        double lnOnTrans = 0;
         String lsStockID = "";
+        String lsBarcode = "";
         boolean lbReqApproval = false;
         int lnItem = InvRequestListManager.get(fnIndex).ItemCount();
 
@@ -538,27 +542,35 @@ public class InvRequestManager {
                 break;
             case 1://Issuance Form
                 for (lnCtr = 0; lnCtr <= lnItem - 1; lnCtr++) {
+                    lnOnTrans = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nOnTranst").toString());
                     lnQuantity = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nQuantity").toString());
                     lnApproved = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nApproved").toString());
                     lnCancelld = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nCancelld").toString());
-                    lnIssueQty = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nIssueQty").toString());
+                    lnOldIssueQty = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nIssueQty").toString());
+                    lnIssueQty = Double.valueOf(InvRequestListManager.get(fnIndex).getDetailOthers(lnCtr, "nIssueQty").toString());
                     lnOrderQty = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nOrderQty").toString());
                     lsStockID = (String) InvRequestListManager.get(fnIndex).getDetail(lnCtr, "sStockIDx");
+                    lsBarcode = (String) InvRequestListManager.get(fnIndex).getDetailOthers(lnCtr, "sBarCodex");
 
                     InvMaster loInvMaster = GetIssueInventory(lsStockID, true);
 
                     if (lnIssueQty > 0) {
                         lnModified++;
+//                        if (lnApproved < (lnOldIssueQty + lnOrderQty)) {
+//                            lbReqApproval = true;
+//                            break;
+//                        }
                     }
 
-//                    if (lnApproved < (lnIssueQty + lnOrderQty)) {
-//                        psWarnMsg = "Unable to save. The Issue quantity for an item exceeds the approved quantity.";
-//                        return false;
-//                    }
-
+                    if (lnApproved < (lnOrderQty + lnOldIssueQty)) {
+                        psWarnMsg = "Unable to save. The Issue quantity for an item ( " + lsBarcode + " ) exceeds the approved quantity."
+                                + " Remaining qty : " + (lnApproved - lnOnTrans);
+                        return false;
+                    }
                     if (loInvMaster != null) {
-                        if (Double.valueOf(loInvMaster.getMaster("nQtyOnHnd").toString()) < lnIssueQty) {
-                            psWarnMsg = "Unable to save. The issued quantity for an item exceeds the available quantity.";
+                        double nQtyOnHand = Double.valueOf(loInvMaster.getMaster("nQtyOnHnd").toString());
+                        if (nQtyOnHand < lnIssueQty) {
+                            psWarnMsg = "Unable to save. The issued quantity for an item ( " + lsBarcode + " )  exceeds the available quantity.";
                             return false;
                         }
 
@@ -567,18 +579,22 @@ public class InvRequestManager {
                 break;
             case 2: //PO Form
                 for (lnCtr = 0; lnCtr <= lnItem - 1; lnCtr++) {
+                    lnOnTrans = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nOnTranst").toString());
                     lnQuantity = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nQuantity").toString());
                     lnApproved = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nApproved").toString());
                     lnCancelld = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nCancelld").toString());
                     lnIssueQty = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nIssueQty").toString());
-                    lnOrderQty = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nOrderQty").toString());
+                    lnOrderQty = Double.valueOf(InvRequestListManager.get(fnIndex).getDetailOthers(lnCtr, "nOrderQty").toString());
+                    lnOldOrderQty = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nOrderQty").toString());
+                    lsBarcode = (String) InvRequestListManager.get(fnIndex).getDetailOthers(lnCtr, "sBarCodex");
 
-                    if (lnIssueQty > 0) {
+                    if (lnOrderQty > 0) {
                         lnModified++;
                     }
 
-                    if (lnApproved < (lnIssueQty + lnOrderQty)) {
-                        psWarnMsg = "Unable to save. The ordered quantity for an item exceeds the approved quantity.";
+                    if (lnApproved < (lnIssueQty + lnOldOrderQty)) {
+                        psWarnMsg = "Unable to save. The Purchase quantity for an item ( " + lsBarcode + " ) exceeds the approved quantity."
+                                + " Remaining quantity : " + (lnApproved - lnOnTrans);
                         return false;
                     }
                 }

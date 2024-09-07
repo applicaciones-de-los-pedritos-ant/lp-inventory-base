@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -362,7 +363,7 @@ public class InvRequest {
                 loOth.setValue("xQtyOnHnd", loRS.getDouble("xQtyOnHnd"));
                 loOth.setValue("nResvOrdr", loRS.getDouble("nResvOrdr"));
                 loOth.setValue("nBackOrdr", loRS.getDouble("nBackOrdr"));
-                loOth.setValue("nApproved", loRS.getDouble("nApproved") - loRS.getDouble("nIssueQty"));
+                loOth.setValue("nApproved", loRS.getDouble("nApproved") - loRS.getDouble("nIssueQty")- loRS.getDouble("nOrderQty"));
                 loOth.setValue("nIssueQty", 0.0);
                 loOth.setValue("nOrderQty", 0.0);
                 loOth.setValue("nReorderx", 0);
@@ -931,15 +932,15 @@ public class InvRequest {
         try (FileInputStream fis = new FileInputStream(file); XSSFWorkbook wb = new XSSFWorkbook(fis)) {
 
             XSSFSheet sheet = wb.getSheetAt(0);
-            if (pnEditMode != EditMode.ADDNEW) {
-                psErrMsgx = "Invalid Edit Mode!";
-                wb.close();
-                return false;
-            }
+//            if (pnEditMode != EditMode.ADDNEW) {
+//                psErrMsgx = "Invalid Edit Mode!";
+//                wb.close();
+//                return false;
+//            }
             //Row 3 is first Detail on Template
             lnLastRow = sheet.getLastRowNum();
             if (lnLastRow <= 2) {
-                ShowMessageFX.Information(null, "Product Request has no detail to import", "Product Request Import", null);
+                setMessage("Product Request has no detail to import");
                 wb.close();
                 return false;
             }
@@ -963,7 +964,18 @@ public class InvRequest {
 
                 String lsTransNo = cellTransNo != null ? cellTransNo.getStringCellValue() : "";
                 String lsStockID = cellStockID != null ? cellStockID.getStringCellValue() : "";
-                String lsBarcode = cellBarcode != null ? cellBarcode.getStringCellValue() : "";
+                String lsBarcode = "";
+                if (cellBarcode != null) {
+                    switch (cellBarcode.getCellType()) {
+                        case STRING:
+                            lsBarcode = cellBarcode.getStringCellValue();
+                            break;
+                        case NUMERIC:
+                            // Convert numeric value to string
+                            lsBarcode = new BigDecimal(cellBarcode.getNumericCellValue()).toPlainString();
+                            break;
+                    }
+                }
                 String lsDescrption = cellDescription != null ? cellDescription.getStringCellValue() : "";
                 double lsQuantity = cellQuantity != null ? cellQuantity.getNumericCellValue() : 0;
 
@@ -978,6 +990,7 @@ public class InvRequest {
                 int lnRow = paDetail.size() - 1;
                 if (!lsBarcode.trim().isEmpty()) {
                     SearchDetail(lnRow, 1, lsBarcode, false, false);
+
                 } else if (!lsStockID.trim().isEmpty()) {
                     SearchDetail(lnRow, 1, lsStockID, false, true);
                 } else if (!lsStockID.trim().isEmpty()) {
@@ -996,7 +1009,7 @@ public class InvRequest {
             wb.close();
         }
         if (lnSuccesImport == 0) {
-            ShowMessageFX.Information(null, "Product Request has no detail to import", "Product Request Import", null);
+            setMessage("Product Request has no detail to import");
             return false;
 
         }
@@ -1072,11 +1085,14 @@ public class InvRequest {
             psErrMsgx = e.getMessage();
         }
 
-        psWarnMsg = "An error occurred during the process.";
+        ShowMessageFX.Information("An error occurred during the process.", "Product Request Export", null);
         return false;
     }
 
     public boolean getExportedFile(File fsSelectedfile) throws FileNotFoundException, IOException {
+
+        setErrMsg("");
+        setMessage("");
         int lnLastRow = 0;
         int lnSuccesImport = 0;
         File file = new File(fsSelectedfile.getAbsolutePath());
@@ -1087,7 +1103,7 @@ public class InvRequest {
             Row masterRow = sheet.getRow(4);
             lnLastRow = sheet.getLastRowNum();
             if (masterRow == null) {
-                ShowMessageFX.Information(null, "Product Request has no Master Transaction to import", "Product Request Export Utility", null);
+                setErrMsg("Product Request has no Master Transaction to import");
                 wb.close();
                 return false;
             }
@@ -1121,7 +1137,7 @@ public class InvRequest {
             if (newUtilTransaction(lsTransNo, lsDateFormat)) {
 
                 if (pnEditMode != EditMode.ADDNEW) {
-                    psErrMsgx = "Invalid Edit Mode!";
+                    setErrMsg("Invalid Edit Mode!");
                     wb.close();
                     return false;
                 }
@@ -1134,7 +1150,7 @@ public class InvRequest {
                 poData.setSourceNo(lsSourceNo);
 
                 if (lnLastRow <= 7) {
-                    ShowMessageFX.Information(null, "Product Request has no detail to import", "Product Request Import", null);
+                    setMessage("Product Request has no detail to import");
                     wb.close();
                     return false;
                 }
@@ -1195,7 +1211,7 @@ public class InvRequest {
                 wb.close();
             }
             if (lnSuccesImport == 0) {
-                ShowMessageFX.Information(null, "Product Request has no detail to Upload", "Product Request Upload", null);
+                setMessage("Product Request has no detail to Upload");
                 return false;
 
             }
@@ -1512,14 +1528,12 @@ public class InvRequest {
                         setDetail(fnRow, "nResvOrdr", 0.00);
                         setDetail(fnRow, "nBackOrdr", 0.00);
                         setDetail(fnRow, "nFloatQty", 0.00);
-                        setDetail(fnRow, "nRecOrder", 0.00);
 
                     } else {
                         setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nQtyOnHnd")));
-                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nResvOrdr")));
-                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nBackOrdr")));
-                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nFloatQty")));
-                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nRecOrder")));
+                        setDetail(fnRow, "nResvOrdr", Double.valueOf((String) loJSON.get("nResvOrdr")));
+                        setDetail(fnRow, "nBackOrdr", Double.valueOf((String) loJSON.get("nBackOrdr")));
+                        setDetail(fnRow, "nFloatQty", Double.valueOf((String) loJSON.get("nFloatQty")));
                     }
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
                     paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
@@ -1582,7 +1596,7 @@ public class InvRequest {
                 if (loJSON != null) {
                     setDetail(fnRow, "sStockIDx", (String) loJSON.get("sStockIDx"));
                     setDetail(fnRow, "nQuantity", 0.00);
-                    
+
                     String ToBranchCd = poData.getBranchCd();
                     boolean lbOtherReq = false;
                     if (!ToBranchCd.isEmpty() || ToBranchCd != "") {
@@ -1602,10 +1616,9 @@ public class InvRequest {
 
                     } else {
                         setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nQtyOnHnd")));
-                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nResvOrdr")));
-                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nBackOrdr")));
-                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nFloatQty")));
-                        setDetail(fnRow, "nQtyOnHnd", Double.valueOf((String) loJSON.get("nRecOrder")));
+                        setDetail(fnRow, "nResvOrdr", Double.valueOf((String) loJSON.get("nResvOrdr")));
+                        setDetail(fnRow, "nBackOrdr", Double.valueOf((String) loJSON.get("nBackOrdr")));
+                        setDetail(fnRow, "nFloatQty", Double.valueOf((String) loJSON.get("nFloatQty")));
                     }
 
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));

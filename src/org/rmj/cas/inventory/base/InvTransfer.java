@@ -709,9 +709,9 @@ public class InvTransfer {
         }
 
         if (!lsStockNo.equals("")) {
-            if (postStockRequest(lsStockNo)) {
-                return false;
-            }
+
+            return postStockRequest(lsStockNo);
+
         }
 
         return saveTransExpDetail();
@@ -1306,21 +1306,20 @@ public class InvTransfer {
     private boolean saveDetail(String fsTransNox) {
         setMessage("");
         int lnCtr;
-        
+
         for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
-        if (paDetail.isEmpty()) {
-            setMessage("Unable to save empty detail transaction.");
-            return false;
-        } else if (paDetail.get(0).getStockIDx().equals("")){
-            setMessage("Detail might not have zero quantity.");
-            return false;    
-        } else if (paDetail.get(0).getQuantity().doubleValue() == 0.00){
-            setMessage("Detail might not have zero quantity.");
-            return false;
-        }
+            if (paDetail.isEmpty()) {
+                setMessage("Unable to save empty detail transaction.");
+                return false;
+            } else if (paDetail.get(0).getStockIDx().equals("")) {
+                setMessage("Detail might not have zero quantity.");
+                return false;
+            } else if (paDetail.get(0).getQuantity().doubleValue() == 0.00) {
+                setMessage("Detail might not have zero quantity.");
+                return false;
+            }
         }
 
-        
         String lsSQL;
         UnitInvTransferDetail loNewEnt = null;
 
@@ -1332,7 +1331,7 @@ public class InvTransfer {
                 loNewEnt = paDetail.get(lnCtr);
 
                 if (!loNewEnt.getStockIDx().equals("")) {
-                    
+
                     loNewEnt.setTransNox(fsTransNox);
                     loNewEnt.setEntryNox(lnCtr + 1);
 
