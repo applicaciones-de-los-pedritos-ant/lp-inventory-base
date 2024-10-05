@@ -256,6 +256,11 @@ public class InvRequest {
         poData = new UnitInvRequestMaster();
         poData.setTransNox(MiscUtil.getNextCode(poData.getTable(), "sTransNox", true, loConn, psBranchCd));
         poData.setDateTransact(poGRider.getServerDate());
+        
+        
+       if (!poGRider.getBranchCode().contains("P0W1")) {
+            poData.setBranchCd(poGRider.getBranchCode());
+        }
 
         paDetail = new ArrayList<>();
         paDetailOthers = new ArrayList<>(); //detail other info storage
