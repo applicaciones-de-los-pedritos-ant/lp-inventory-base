@@ -709,9 +709,9 @@ public class InvTransfer {
         }
 
         if (!lsStockNo.equals("")) {
-            if (postStockRequest(lsStockNo)) {
-                return false;
-            }
+
+            return postStockRequest(lsStockNo);
+
         }
 
         return saveTransExpDetail();
@@ -801,10 +801,10 @@ public class InvTransfer {
                                 }
                             }
 
-                            if (lnQtyOut <= loRS.getInt("nQtyOnHnd")) {
+                            if (lnQtyOut <= loRS.getDouble("nQtyOnHnd")) {
                                 break;
                             }
-                            lnQtyOut = (double) Math.round((lnQtyOut - loRSSub.getInt("nQtyOnHnd")) * 100) / 100;
+                            lnQtyOut = (double) Math.round((lnQtyOut - loRSSub.getDouble("nQtyOnHnd")) * 100) / 100;
                         }
                     } else {
                         lsSQL = "INSERT INTO Inv_Transfer_Detail_Expiration SET"
@@ -853,10 +853,10 @@ public class InvTransfer {
                             }
                         }
 
-                        if (lnQtyOut <= loRS.getInt("nQtyOnHnd")) {
+                        if (lnQtyOut <= loRS.getDouble("nQtyOnHnd")) {
                             break;
                         }
-                        lnQtyOut = (double) Math.round((lnQtyOut - loRS.getInt("nQtyOnHnd")) * 100) / 100;
+                        lnQtyOut = (double) Math.round((lnQtyOut - loRS.getDouble("nQtyOnHnd")) * 100) / 100;
                     }
                 }
             } catch (SQLException ex) {
@@ -1076,7 +1076,7 @@ public class InvTransfer {
                                         loRSSub.getDate("dExpiryDt"));
                                 break;
                             }
-                            lnQtyOut = (double) Math.round((lnQtyOut - loRSSub.getInt("nQtyOnHnd")) * 100) / 100;
+                            lnQtyOut = (double) Math.round((lnQtyOut - loRSSub.getDouble("nQtyOnHnd")) * 100) / 100;
                             saveInvExpParent(fdTransact,
                                     paDetail.get(lnCtr).getParentID(),
                                     lnQuantity,
@@ -1098,7 +1098,7 @@ public class InvTransfer {
                     lnTempQTY = Double.valueOf(paDetail.get(lnCtr).getQuantity().toString());
                     loRS.first();
                     for (lnRow = 0; lnRow <= MiscUtil.RecordCount(loRS) - 1; lnRow++) {
-                        if (lnTempQTY <= loRS.getInt("nQtyOnHnd")) {
+                        if (lnTempQTY <= loRS.getDouble("nQtyOnHnd")) {
                             loInvTrans.setDetail(lnTemp, "nQtyOutxx", lnTempQTY);
                             loInvTrans.setDetail(lnTemp, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
                             loInvTrans.setDetail(lnTemp, "dExpiryDt", loRS.getDate("dExpiryDt"));
@@ -1111,11 +1111,11 @@ public class InvTransfer {
                             lnTemp++;
                             break;
                         } else {
-                            loInvTrans.setDetail(lnTemp, "nQtyOutxx", loRS.getInt("nQtyOnHnd"));
+                            loInvTrans.setDetail(lnTemp, "nQtyOutxx", loRS.getDouble("nQtyOnHnd"));
                             loInvTrans.setDetail(lnTemp, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
                             loInvTrans.setDetail(lnTemp, "dExpiryDt", loRS.getDate("dExpiryDt"));
 
-                            lnTempQTY = lnTempQTY - loRS.getInt("nQtyOnHnd");
+                            lnTempQTY = lnTempQTY - loRS.getDouble("nQtyOnHnd");
 
 //                            if (!loInvTrans.Delivery(fdTransact, EditMode.ADDNEW)){
 //                                setMessage(loInvTrans.getMessage());
@@ -1306,21 +1306,20 @@ public class InvTransfer {
     private boolean saveDetail(String fsTransNox) {
         setMessage("");
         int lnCtr;
-        
+
         for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
-        if (paDetail.isEmpty()) {
-            setMessage("Unable to save empty detail transaction.");
-            return false;
-        } else if (paDetail.get(0).getStockIDx().equals("")){
-            setMessage("Detail might not have zero quantity.");
-            return false;    
-        } else if (paDetail.get(0).getQuantity().doubleValue() == 0.00){
-            setMessage("Detail might not have zero quantity.");
-            return false;
-        }
+            if (paDetail.isEmpty()) {
+                setMessage("Unable to save empty detail transaction.");
+                return false;
+            } else if (paDetail.get(0).getStockIDx().equals("")) {
+                setMessage("Detail might not have zero quantity.");
+                return false;
+            } else if (paDetail.get(0).getQuantity().doubleValue() == 0.00) {
+                setMessage("Detail might not have zero quantity.");
+                return false;
+            }
         }
 
-        
         String lsSQL;
         UnitInvTransferDetail loNewEnt = null;
 
@@ -1332,7 +1331,7 @@ public class InvTransfer {
                 loNewEnt = paDetail.get(lnCtr);
 
                 if (!loNewEnt.getStockIDx().equals("")) {
-                    
+
                     loNewEnt.setTransNox(fsTransNox);
                     loNewEnt.setEntryNox(lnCtr + 1);
 
