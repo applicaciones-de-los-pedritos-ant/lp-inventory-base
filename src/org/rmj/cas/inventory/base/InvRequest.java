@@ -231,6 +231,7 @@ public class InvRequest {
             case "nApproved":
             case "nIssueQty":
             case "nOrderQty":
+            case "sInvTypCd":
                 return paDetailOthers.get(fnRow).getValue(fsCol);
             default:
                 return null;
@@ -331,6 +332,7 @@ public class InvRequest {
 
         String lsSQL = MiscUtil.addCondition(getSQ_Detail(), "sTransNox = " + SQLUtil.toSQL(fsTransNox));
         try {
+            System.out.println(lsSQL);
             ResultSet loRS = poGRider.executeQuery(lsSQL);
 
             for (int lnCtr = 1; lnCtr <= MiscUtil.RecordCount(loRS); lnCtr++) {
@@ -374,6 +376,7 @@ public class InvRequest {
                 loOth.setValue("nReorderx", 0);
                 loOth.setValue("nLedgerNo", loRS.getInt("nLedgerNo"));
                 loOth.setValue("sBrandNme", loRS.getString("xBrandNme"));
+                loOth.setValue("sInvTypCd", loRS.getString("sInvTypCd"));
                 if (loRS.getString("sMeasurNm") != null) {
                     loOth.setValue("sMeasurNm", loRS.getString("sMeasurNm"));
                 } else {
@@ -1539,6 +1542,7 @@ public class InvRequest {
                         setDetail(fnRow, "nResvOrdr", Double.valueOf((String) loJSON.get("nResvOrdr")));
                         setDetail(fnRow, "nBackOrdr", Double.valueOf((String) loJSON.get("nBackOrdr")));
                         setDetail(fnRow, "nFloatQty", Double.valueOf((String) loJSON.get("nFloatQty")));
+                        setDetail(fnRow, "sInvTypCd", Double.valueOf((String) loJSON.get("sInvTypCd")));
                     }
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
                     paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
@@ -1624,6 +1628,7 @@ public class InvRequest {
                         setDetail(fnRow, "nResvOrdr", Double.valueOf((String) loJSON.get("nResvOrdr")));
                         setDetail(fnRow, "nBackOrdr", Double.valueOf((String) loJSON.get("nBackOrdr")));
                         setDetail(fnRow, "nFloatQty", Double.valueOf((String) loJSON.get("nFloatQty")));
+                        setDetail(fnRow, "sInvTypCd", Double.valueOf((String) loJSON.get("sInvTypCd")));
                     }
 
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
@@ -1801,6 +1806,7 @@ public class InvRequest {
                 + ", c.sDescript"
                 + ", d.sMeasurNm"
                 + ", IFNULL(e.sDescript, '') xBrandNme"
+                + ", c.sInvTypCd"
                 + " FROM Inv_Stock_Request_Detail a"
                 + ", Inv_Master b"
                 + " LEFT JOIN Inventory c"
@@ -1810,7 +1816,6 @@ public class InvRequest {
                 + " LEFT JOIN Measure d"
                 + " ON c.sMeasurID = d.sMeasurID"
                 + " WHERE a.sStockIDx = b.sStockIDx"
-                + " AND b.sBranchCD = " + SQLUtil.toSQL(psBranchCd)
                 + " ORDER BY a.nEntryNox";
     }
 

@@ -11,51 +11,26 @@
 package org.rmj.cas.inventory.base;
 
 import com.mysql.jdbc.Connection;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.input.MouseEvent;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.simple.JSONObject;
 import org.rmj.appdriver.constants.EditMode;
-import org.rmj.appdriver.constants.RecordStatus;
-import org.rmj.appdriver.constants.TransactionStatus;
 import org.rmj.appdriver.GRider;
-import org.rmj.appdriver.iface.GEntity;
 import org.rmj.appdriver.MiscUtil;
 import org.rmj.appdriver.SQLUtil;
-import org.rmj.appdriver.agentfx.CommonUtils;
-import org.rmj.appdriver.agentfx.ShowMessageFX;
 import org.rmj.appdriver.agentfx.ui.showFXDialog;
-import org.rmj.cas.inventory.base.views.SubUnitController;
-import org.rmj.cas.inventory.others.pojo.UnitInvRequestOthers;
-import org.rmj.cas.inventory.pojo.UnitInvRequestDetail;
 import org.rmj.cas.inventory.pojo.UnitInvRequestMaster;
 import org.rmj.lp.parameter.agent.XMBranch;
 import org.rmj.appdriver.agentfx.callback.IMasterDetail;
 import org.rmj.appdriver.constants.UserRight;
+import org.rmj.cas.inventory.production.base.ProductionRequest;
 import org.rmj.lp.parameter.agent.XMCategory;
-import org.rmj.lp.parameter.agent.XMInventory;
 import org.rmj.lp.parameter.agent.XMInventoryType;
+import org.rmj.cas.inventory.others.pojo.UnitInvRequestOthers;
 
 public class InvRequestManager {
 
@@ -67,7 +42,7 @@ public class InvRequestManager {
     private String psBranchCd = "";
     private String psWarnMsg = "";
     private boolean pbWithParent = false;
-    private int pnFormType = 0;
+    private int pnFormType = 0;//0 Approval//1 Issuance //2 PurchaseOrder
     private int pnEditMode;
     private int pnTranStat = 0;
     private IMasterDetail poCallBack;
@@ -371,40 +346,57 @@ public class InvRequestManager {
                     double lnCancelld = Double.valueOf(instance.getDetail(lnCtr, "nCancelld").toString());
                     double lnIssueQty = Double.valueOf(instance.getDetail(lnCtr, "nIssueQty").toString());
                     double lnOrderQty = Double.valueOf(instance.getDetail(lnCtr, "nOrderQty").toString());
+                    String lsInvType = instance.getDetailOthers(lnCtr, "sInvTypCd").toString();
 
                     String lsStockid = (String) instance.getDetail(lnCtr, "sStockIDx");
                     //validator for form
                     switch (pnFormType) {
-                        case 0://approval form
-                            if (lnQuantity - (lnApproved + lnCancelld) > 0) {
-                                lnItem++;
-                                continue;
-                            } else {
-                                instance.deleteDetail(lnCtr);
-                                lnCtr -= 1;
-                                lnItemCount -= 1;
+                        case 0://stock approval form
+                            if (lsInvType.contains(System.getProperty("store.inventory.type.stock"))) {
+                                if (lnQuantity - (lnApproved + lnCancelld) > 0) {
+                                    lnItem++;
+                                    continue;
+                                }
                             }
-                            break;
-                        case 1://issuanceform
-                            if (lnApproved - (lnIssueQty + lnOrderQty) > 0) {
-                                lnItem++;
-                                continue;
-                            } else {
-                                instance.deleteDetail(lnCtr);
-                                lnCtr -= 1;
-                                lnItemCount -= 1;
-                            }
+                            instance.deleteDetail(lnCtr);
+                            lnCtr--;       // Decrement the counter since we're deleting an item
+                            lnItemCount--; // Adjust the total item count
                             break;
 
-                        case 2://purchasing form
-                            if (lnApproved - (lnIssueQty + lnOrderQty) > 0) {
-                                lnItem++;
-                                continue;
-                            } else {
-                                instance.deleteDetail(lnCtr);
-                                lnCtr -= 1;
-                                lnItemCount -= 1;
+                        case 1://stock issuanceform
+                            if (lsInvType.contains(System.getProperty("store.inventory.type.stock"))) {
+                                if (lnApproved - (lnIssueQty + lnOrderQty) > 0) {
+                                    lnItem++;
+                                    continue;
+                                }
                             }
+                            instance.deleteDetail(lnCtr);
+                            lnCtr--;       // Decrement the counter since we're deleting an item
+                            lnItemCount--; // Adjust the total item count
+                            break;
+
+                        case 2://stock purchasing form
+                            if (lsInvType.contains(System.getProperty("store.inventory.type.stock"))) {
+                                if (lnApproved - (lnIssueQty + lnOrderQty) > 0) {
+                                    lnItem++;
+                                    continue;
+                                }
+                            }
+                            instance.deleteDetail(lnCtr);
+                            lnCtr--;       // Decrement the counter since we're deleting an item
+                            lnItemCount--; // Adjust the total item count
+                            break;
+
+                        case 3://stock - finished good  approval form
+                            if (lsInvType.contains(System.getProperty("store.inventory.type.product"))) {
+                                if (lnQuantity - (lnApproved + lnCancelld) > 0) {
+                                    lnItem++;
+                                    continue;
+                                }
+                            }
+                            instance.deleteDetail(lnCtr);
+                            lnCtr--;       // Decrement the counter since we're deleting an item
+                            lnItemCount--; // Adjust the total item count
                             break;
 
                     }
@@ -421,26 +413,14 @@ public class InvRequestManager {
         return null;
     }
 
-    public boolean saveTransaction(int fnIndex) {
+    public boolean saveTransactionStock(int fnIndex) {
         String lsSQL = "";
         boolean lbUpdate = false;
 
-        //validate
-//        if (!isEntryOkay(fnIndex)) {
-//            return false;
-//        }
-        //save the selected modified data
         if (!pbWithParent) {
             poGRider.beginTrans();
         }
         lbUpdate = InvRequestListManager.get(fnIndex).saveTransaction();
-        if (lbUpdate) {
-            switch (pnFormType) {
-                case 1:
-                case 2:
-
-            }
-        }
         //other function before commit
         if (!pbWithParent) {
             if (!InvRequestListManager.get(fnIndex).getErrMsg().isEmpty()) {
@@ -451,6 +431,95 @@ public class InvRequestManager {
         }
 
         return lbUpdate;
+    }
+
+    public boolean saveTransactionProduct() {
+        try {
+            String lsSQL = "";
+            int lnItem;
+            boolean lbUpdate = false;
+            boolean lbModified = false;
+            boolean lbhasExist = false;
+
+            if (!pbWithParent) {
+                poGRider.beginTrans();
+            }
+            ProductionRequest loProductRequest = new ProductionRequest(poGRider, poGRider.getBranchCode(), true);
+            ArrayList<Integer> laModifiedRow = new ArrayList<>();
+            if (!loProductRequest.NewRecord()) {
+                psWarnMsg = "Unable to Save Product Request";
+                return false;
+            }
+
+            for (lnItem = 0; lnItem < InvRequestListManager.size(); lnItem++) {
+
+                lbModified = false;
+
+                // Collation on request
+                for (int lnRow = 0; lnRow < InvRequestListManager.get(lnItem).ItemCount(); lnRow++) {
+                    double lnApprovedQty = (Double) InvRequestListManager.get(lnItem).getDetail(lnRow, "nApproved");
+                    if (lnApprovedQty > 0) {
+                        String lStockID = (String) InvRequestListManager.get(lnItem).getDetail(lnRow, "sStockID");
+                        boolean lbHasExist = false;
+                        double lnExistQty = 0;
+                        int lnRowPR = -1;  // Initialize to an invalid row
+
+                        // Check if stock already exists in product request
+                        for (int lnRowCheck = 0; lnRowCheck < loProductRequest.getItemCount(); lnRowCheck++) {
+                            String existingStockID = (String) loProductRequest.getDetail(lnRowCheck, "sStockIDx");
+                            if (lStockID.equalsIgnoreCase(existingStockID)) {
+                                lnExistQty = (Double) loProductRequest.getDetail(lnRowCheck, "nQuantity");
+                                lbHasExist = true;
+                                lnRowPR = lnRowCheck;
+                                break;
+                            }
+                        }
+
+                        // If stock doesn't exist, add a new detail row
+                        if (!lbHasExist) {
+                            loProductRequest.addNewDetail();
+                            lnRowPR = loProductRequest.getItemCount() - 1;
+                            loProductRequest.setDetail(lnRowPR, "sStockIDx", lStockID);
+                            loProductRequest.setDetail(lnRowPR, "nQuantity", lnApprovedQty);
+                        } else {
+                            // Update the quantity of existing stock
+                            loProductRequest.setDetail(lnRowPR, "nQuantity", lnExistQty + lnApprovedQty);
+                        }
+
+                        lbModified = true;
+                    }
+                }
+
+                // Record modified rows for saving 
+                if (lbModified) {
+                    laModifiedRow.add(lnItem);
+                }
+            }
+            //save each stock 
+            for (int lnModifiedrow : laModifiedRow) {
+                lbUpdate = saveTransactionStock(laModifiedRow.get(lnModifiedrow));
+                if (!lbUpdate) {
+                    poGRider.rollbackTrans();
+                    psWarnMsg = InvRequestListManager.get(lnModifiedrow).getMessage();
+                    return false;
+                }
+            }
+            lbUpdate = loProductRequest.SaveRecord();
+            if (!lbUpdate) {
+                poGRider.rollbackTrans();
+                psWarnMsg = loProductRequest.getMessage();
+                return false;
+            }
+            if (!pbWithParent) {
+                poGRider.commitTrans();
+            }
+
+            return lbUpdate;
+        } catch (SQLException ex) {
+            Logger.getLogger(InvRequestManager.class.getName()).log(Level.SEVERE, null, ex);
+            psWarnMsg = ex.getMessage();
+            return false;
+        }
     }
 
     public XMCategory GetCategory(String fsValue, boolean fbByCode) {
@@ -596,6 +665,20 @@ public class InvRequestManager {
                         psWarnMsg = "Unable to save. The Purchase quantity for an item ( " + lsBarcode + " ) exceeds the approved quantity."
                                 + " Remaining quantity : " + (lnApproved - lnOnTrans);
                         return false;
+                    }
+                }
+
+            case 3://FG Approval Form
+                for (lnCtr = 0; lnCtr <= lnItem - 1; lnCtr++) {
+                    lnQuantity = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nQuantity").toString());
+                    lnApproved = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nApproved").toString());
+                    lnCancelld = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nCancelld").toString());
+                    if (lnApproved > 0) {
+                        lnModified++;
+                    }
+                    if (lnApproved > lnQuantity) {
+                        lbReqApproval = true;
+                        break;
                     }
                 }
                 break;

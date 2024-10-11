@@ -149,7 +149,7 @@ String path;
             if(trans.addNewDetail()){
                 System.out.println("count " + trans.getItemCount());
                 for(int x = 1; x <= trans.getItemCount(); x++){
-                    System.out.println("entryNox " + trans.getDetailI(x, "nEntryNox"));
+                    System.out.println("entryNox " + trans.getDetail(x, "nEntryNox"));
                     
                 }
             }else{
@@ -180,8 +180,8 @@ String path;
     public void test05getItemDetail(){
         try {     
             for(int x = 1; x <= trans.getItemCount(); x++){
-                    System.out.println("sStockIDx " + trans.getDetailI(x, "sStockIDx"));
-                    System.out.println("entryNox " + trans.getDetailI(x, "nEntryNox"));
+                    System.out.println("sStockIDx " + trans.getDetail(x, "sStockIDx"));
+                    System.out.println("entryNox " + trans.getDetail(x, "nEntryNox"));
                 }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -204,8 +204,8 @@ String path;
     public void test07getItemDetail(){
         try {     
             for(int x = 1; x <= trans.getItemCount(); x++){
-                    System.out.println("sStockIDx " + trans.getDetailI(x, "sStockIDx"));
-                    System.out.println("entryNox " + trans.getDetailI(x, "nEntryNox"));
+                    System.out.println("sStockIDx " + trans.getDetail(x, "sStockIDx"));
+                    System.out.println("entryNox " + trans.getDetail(x, "nEntryNox"));
                 }
         } catch (SQLException e) {
             e.printStackTrace();

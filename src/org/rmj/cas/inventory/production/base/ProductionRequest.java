@@ -208,7 +208,7 @@ public class ProductionRequest {
 
     }
 
-    public Object getDetailI(int fnRow, String fsIndex) throws SQLException {
+    public Object getDetail(int fnRow, String fsIndex) throws SQLException {
         return getDetail(fnRow, getColumnIndex(p_oDetail, fsIndex));
     }
 
