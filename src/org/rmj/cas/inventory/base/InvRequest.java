@@ -332,7 +332,7 @@ public class InvRequest {
 
         String lsSQL = MiscUtil.addCondition(getSQ_Detail(), "sTransNox = " + SQLUtil.toSQL(fsTransNox));
         try {
-            System.out.println(lsSQL);
+//            System.out.println(lsSQL);
             ResultSet loRS = poGRider.executeQuery(lsSQL);
 
             for (int lnCtr = 1; lnCtr <= MiscUtil.RecordCount(loRS); lnCtr++) {
@@ -358,6 +358,7 @@ public class InvRequest {
                 loOcc.setValue("nAllocQty", loRS.getDouble("nAllocQty"));
                 loOcc.setValue("nReceived", loRS.getDouble("nReceived"));
                 loOcc.setValue("sNotesxxx", loRS.getString("sNotesxxx"));
+                loOcc.setValue("sBatchNox", loRS.getString("sBatchNox"));
                 loOcc.setValue("dModified", loRS.getDate("dModified"));
                 loDetail.add(loOcc);
 
@@ -1542,7 +1543,7 @@ public class InvRequest {
                         setDetail(fnRow, "nResvOrdr", Double.valueOf((String) loJSON.get("nResvOrdr")));
                         setDetail(fnRow, "nBackOrdr", Double.valueOf((String) loJSON.get("nBackOrdr")));
                         setDetail(fnRow, "nFloatQty", Double.valueOf((String) loJSON.get("nFloatQty")));
-                        setDetail(fnRow, "sInvTypCd", Double.valueOf((String) loJSON.get("sInvTypCd")));
+                        setDetail(fnRow, "sInvTypCd", (String) loJSON.get("sInvTypCd"));
                     }
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
                     paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
@@ -1628,7 +1629,7 @@ public class InvRequest {
                         setDetail(fnRow, "nResvOrdr", Double.valueOf((String) loJSON.get("nResvOrdr")));
                         setDetail(fnRow, "nBackOrdr", Double.valueOf((String) loJSON.get("nBackOrdr")));
                         setDetail(fnRow, "nFloatQty", Double.valueOf((String) loJSON.get("nFloatQty")));
-                        setDetail(fnRow, "sInvTypCd", Double.valueOf((String) loJSON.get("sInvTypCd")));
+                        setDetail(fnRow, "sInvTypCd", (String) loJSON.get("sInvTypCd"));
                     }
 
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
@@ -1795,6 +1796,7 @@ public class InvRequest {
                 + ", a.nAllocQty"
                 + ", a.nReceived"
                 + ", a.sNotesxxx"
+                + ", a.sBatchNox"
                 + ", a.dModified"
                 + ", b.nQtyOnHnd"
                 + ", b.nQtyOnHnd + a.nQuantity xQtyOnHnd"

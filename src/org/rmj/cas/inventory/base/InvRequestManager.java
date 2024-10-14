@@ -227,6 +227,17 @@ public class InvRequestManager {
         }
     }
 
+    public boolean updateRecord() {
+        for (int lnCtr = 0; lnCtr <= InvRequestListManager.size() - 1; lnCtr++) {
+            if (InvRequestListManager.get(lnCtr).updateRecord()) {
+            } else {
+                return false;
+            }
+        }
+        pnEditMode = EditMode.UPDATE;
+        return true;
+    }
+
     public Object getDetailOthers(int fnIndex, int fnRow, String fsCol) {
         switch (fsCol) {
             case "sStockIDx":
@@ -275,7 +286,7 @@ public class InvRequestManager {
 
             }
             if (InvRequestListManager.size() <= 0) {
-                psWarnMsg = "No item to retrieve! " + poData.getMessage();
+                psWarnMsg = "No item to retrieve! " + getMessage();
                 pnEditMode = EditMode.UNKNOWN;
                 return false;
             }
@@ -409,6 +420,7 @@ public class InvRequestManager {
 
         } else {
             psWarnMsg = instance.getMessage();
+
         }
         return null;
     }
@@ -481,6 +493,9 @@ public class InvRequestManager {
                             lnRowPR = loProductRequest.getItemCount() - 1;
                             loProductRequest.setDetail(lnRowPR, "sStockIDx", lStockID);
                             loProductRequest.setDetail(lnRowPR, "nQuantity", lnApprovedQty);
+
+                            //set connection to product
+                            setDetail(lnItem, lnRow, "sBatchNox", loProductRequest.getMaster("sTranNox"));
                         } else {
                             // Update the quantity of existing stock
                             loProductRequest.setDetail(lnRowPR, "nQuantity", lnExistQty + lnApprovedQty);
