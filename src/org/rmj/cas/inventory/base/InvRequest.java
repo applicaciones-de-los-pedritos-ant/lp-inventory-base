@@ -257,9 +257,8 @@ public class InvRequest {
         poData = new UnitInvRequestMaster();
         poData.setTransNox(MiscUtil.getNextCode(poData.getTable(), "sTransNox", true, loConn, psBranchCd));
         poData.setDateTransact(poGRider.getServerDate());
-        
-        
-       if (!poGRider.getBranchCode().contains("P0W1")) {
+
+        if (!poGRider.getBranchCode().contains("P0W1")) {
             poData.setBranchCd(poGRider.getBranchCode());
         }
 
@@ -278,7 +277,7 @@ public class InvRequest {
             paDetail = loadTransactionDetail(fsTransNox);
 
             if (poData.getEntryNox() != paDetail.size()) {
-                setMessage("Transaction discrepancy detected... \n"
+                setMessage("Transaction discrepancy detected... \n" + fsTransNox + "entry nox" + poData.getEntryNox() + "size" + paDetail.size()
                         + "Detail count is not equal to the entry number...");
                 return false;
             }
@@ -371,9 +370,9 @@ public class InvRequest {
                 loOth.setValue("xQtyOnHnd", loRS.getDouble("xQtyOnHnd"));
                 loOth.setValue("nResvOrdr", loRS.getDouble("nResvOrdr"));
                 loOth.setValue("nBackOrdr", loRS.getDouble("nBackOrdr"));
-                loOth.setValue("nApproved", loRS.getDouble("nApproved") - loRS.getDouble("nIssueQty")- loRS.getDouble("nOrderQty"));
-                loOth.setValue("nIssueQty", 0.0);
-                loOth.setValue("nOrderQty", 0.0);
+                loOth.setValue("nApproved", loRS.getDouble("nApproved") - loRS.getDouble("nIssueQty") - loRS.getDouble("nOrderQty"));
+                loOth.setValue("nIssueQty", 0);
+                loOth.setValue("nOrderQty", 0);
                 loOth.setValue("nReorderx", 0);
                 loOth.setValue("nLedgerNo", loRS.getInt("nLedgerNo"));
                 loOth.setValue("sBrandNme", loRS.getString("xBrandNme"));
@@ -916,6 +915,9 @@ public class InvRequest {
         File selectedFile = fileChooser.showOpenDialog(fsParentWindow);
 
         String fileName = selectedFile.getName();
+        if (fileName == null){
+        return false;
+        }
         psFilePath = fileName;
         String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1, selectedFile.getName().length());
 
@@ -1818,6 +1820,7 @@ public class InvRequest {
                 + " LEFT JOIN Measure d"
                 + " ON c.sMeasurID = d.sMeasurID"
                 + " WHERE a.sStockIDx = b.sStockIDx"
+                + " AND b.sBranchCD = " + SQLUtil.toSQL(psBranchCd)
                 + " ORDER BY a.nEntryNox";
     }
 

@@ -469,18 +469,18 @@ public class InvRequestManager {
 
                 // Collation on request
                 for (int lnRow = 0; lnRow < InvRequestListManager.get(lnItem).ItemCount(); lnRow++) {
-                    double lnApprovedQty = (Double) InvRequestListManager.get(lnItem).getDetail(lnRow, "nApproved");
+                    double lnApprovedQty = Double.parseDouble(InvRequestListManager.get(lnItem).getDetail(lnRow, "nApproved").toString());
                     if (lnApprovedQty > 0) {
-                        String lStockID = (String) InvRequestListManager.get(lnItem).getDetail(lnRow, "sStockID");
+                        String lStockID = (String) InvRequestListManager.get(lnItem).getDetail(lnRow, "sStockIDx");
                         boolean lbHasExist = false;
-                        double lnExistQty = 0;
+                        int lnExistQty = 0;
                         int lnRowPR = -1;  // Initialize to an invalid row
 
                         // Check if stock already exists in product request
-                        for (int lnRowCheck = 0; lnRowCheck < loProductRequest.getItemCount(); lnRowCheck++) {
-                            String existingStockID = (String) loProductRequest.getDetail(lnRowCheck, "sStockIDx");
+                        for (int lnRowCheck = 1; lnRowCheck < loProductRequest.getItemCount() - 1; lnRowCheck++) {
+                            String existingStockID = (String) loProductRequest.getDetail(lnRowCheck , "sStockIDx");
                             if (lStockID.equalsIgnoreCase(existingStockID)) {
-                                lnExistQty = (Double) loProductRequest.getDetail(lnRowCheck, "nQuantity");
+                                lnExistQty = (Integer) loProductRequest.getDetail(lnRowCheck , "nQuantity");
                                 lbHasExist = true;
                                 lnRowPR = lnRowCheck;
                                 break;
@@ -489,19 +489,21 @@ public class InvRequestManager {
 
                         // If stock doesn't exist, add a new detail row
                         if (!lbHasExist) {
-                            loProductRequest.addNewDetail();
-                            lnRowPR = loProductRequest.getItemCount() - 1;
-                            loProductRequest.setDetail(lnRowPR, "sStockIDx", lStockID);
+                            lnRowPR = loProductRequest.getItemCount() ;
+                            loProductRequest.setDetail(lnRowPR , "sStockIDx", lStockID);
                             loProductRequest.setDetail(lnRowPR, "nQuantity", lnApprovedQty);
 
                             //set connection to product
-                            setDetail(lnItem, lnRow, "sBatchNox", loProductRequest.getMaster("sTranNox"));
+                            setDetail(lnItem, lnRow, "sBatchNox", loProductRequest.getMaster("sTransNox"));
+                            
+                            loProductRequest.addNewDetail();
                         } else {
                             // Update the quantity of existing stock
-                            loProductRequest.setDetail(lnRowPR, "nQuantity", lnExistQty + lnApprovedQty);
+                            loProductRequest.setDetail(lnRowPR , "nQuantity", lnExistQty + lnApprovedQty);
                         }
 
                         lbModified = true;
+
                     }
                 }
 
@@ -511,7 +513,7 @@ public class InvRequestManager {
                 }
             }
             //save each stock 
-            for (int lnModifiedrow : laModifiedRow) {
+            for (int lnModifiedrow = 0; lnModifiedrow < laModifiedRow.size()-1; lnModifiedrow++) {
                 lbUpdate = saveTransactionStock(laModifiedRow.get(lnModifiedrow));
                 if (!lbUpdate) {
                     poGRider.rollbackTrans();
@@ -684,17 +686,22 @@ public class InvRequestManager {
                 }
 
             case 3://FG Approval Form
-                for (lnCtr = 0; lnCtr <= lnItem - 1; lnCtr++) {
-                    lnQuantity = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nQuantity").toString());
-                    lnApproved = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nApproved").toString());
-                    lnCancelld = Double.valueOf(InvRequestListManager.get(fnIndex).getDetail(lnCtr, "nCancelld").toString());
-                    if (lnApproved > 0) {
-                        lnModified++;
+                for (int lnItemList = 0; lnItemList <= InvRequestListManager.size() - 1; lnItemList++) {
+                    lnItem = InvRequestListManager.get(lnItemList).ItemCount();
+                    for (lnCtr = 0; lnCtr <= lnItem - 1; lnCtr++) {
+                        lnQuantity = Double.valueOf(InvRequestListManager.get(lnItemList).getDetail(lnCtr, "nQuantity").toString());
+                        lnApproved = Double.valueOf(InvRequestListManager.get(lnItemList).getDetail(lnCtr, "nApproved").toString());
+                        lnCancelld = Double.valueOf(InvRequestListManager.get(lnItemList).getDetail(lnCtr, "nCancelld").toString());
+                        if (lnApproved > 0) {
+                            lnModified++;
+                        }
+                        if (lnApproved > lnQuantity) {
+                            lbReqApproval = true;
+                        }
                     }
-                    if (lnApproved > lnQuantity) {
-                        lbReqApproval = true;
-                        break;
-                    }
+                }
+                if (lbReqApproval) {
+                    return getSysApproval();
                 }
                 break;
             default:
@@ -705,22 +712,31 @@ public class InvRequestManager {
             psWarnMsg = "Unable to save. No items have been modified in the transaction record.";
             return false;
         }
-        if (lbReqApproval) {
-            if (poGRider.getUserLevel() < UserRight.SUPERVISOR) {
-                JSONObject loJSON = showFXDialog.getApproval(poGRider);
+        if (lbReqApproval) {//single record
+            getSysApproval();
+        }
+        return true;
+    }
 
-                if (loJSON != null) {
-                    if ((int) loJSON.get("nUserLevl") < UserRight.SUPERVISOR) {
-                        psWarnMsg = "Only managerial accounts can approved transactions.(Authentication failed!!!)";
-                        return false;
-                    }
+    private boolean getSysApproval() {
+        // Check if the user's level is below the Supervisor level
+        if (poGRider.getUserLevel() < UserRight.SUPERVISOR) {
+            // Show the approval dialog to get the user level for approval
+            JSONObject loJSON = showFXDialog.getApproval(poGRider);
+
+            if (loJSON != null) {
+                if ((int) loJSON.get("nUserLevl") < UserRight.SUPERVISOR) {
+                    psWarnMsg = "Only managerial accounts can approve transactions. (Authentication failed!!!)";
                     return false;
                 }
+                return false;
             }
+            return false;
         }
         return true;
     }
 }
+
 //
 //        private boolean showPurchaseOrder(int fnIndex) {
 //
