@@ -360,9 +360,7 @@ public class ProductionRequest {
 
         if (fbByCode) {
             lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox LIKE " + SQLUtil.toSQL(fsValue + "%"));
-        } else {
-            lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox LIKE " + SQLUtil.toSQL(fsValue + "%"));
-        }
+        } 
 
         System.out.println(lsSQL);
         if (p_bWithUI) {
@@ -404,7 +402,7 @@ public class ProductionRequest {
         return OpenRecord(lsSQL);
     }
 
-    public boolean OpenRecord(String fsValue) throws SQLException {
+        public boolean OpenRecord(String fsValue) throws SQLException {
         p_nEditMode = EditMode.UNKNOWN;
 
         if (p_oApp == null) {
@@ -915,7 +913,7 @@ public class ProductionRequest {
         }
 
         p_sMessage = "";
-
+        p_oMaster.first();
         if (((String) getMaster("cTranStat")).equals("2")) {
             p_sMessage = "Transaction was already posted..";
             return false;
@@ -1047,9 +1045,9 @@ public class ProductionRequest {
 
         lsSQL = MiscUtil.addCondition(lsSQL, lsCondition);
 
-        if (!"PK01;PR01;P0W2".contains(p_sBranchCd)) {
-            lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox LIKE " + SQLUtil.toSQL(p_sBranchCd + "%"));
-        }
+//        if (!"PK01;PR01;P0W2".contains(p_sBranchCd)) {
+//            lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox LIKE " + SQLUtil.toSQL(p_sBranchCd + "%"));
+//        }
         return lsSQL;
     }
 

@@ -82,6 +82,7 @@ public class InvRequestManager {
     public String getMessage() {
         return psWarnMsg;
     }
+    
 
     public String getSQ_Master() {
         return MiscUtil.makeSelect(new UnitInvRequestMaster());
@@ -473,14 +474,14 @@ public class InvRequestManager {
                     if (lnApprovedQty > 0) {
                         String lStockID = (String) InvRequestListManager.get(lnItem).getDetail(lnRow, "sStockIDx");
                         boolean lbHasExist = false;
-                        int lnExistQty = 0;
+                        double lnExistQty = 0;
                         int lnRowPR = -1;  // Initialize to an invalid row
 
                         // Check if stock already exists in product request
-                        for (int lnRowCheck = 1; lnRowCheck < loProductRequest.getItemCount() - 1; lnRowCheck++) {
-                            String existingStockID = (String) loProductRequest.getDetail(lnRowCheck , "sStockIDx");
+                        for (int lnRowCheck = 1; lnRowCheck <= loProductRequest.getItemCount() - 1; lnRowCheck++) {
+                            String existingStockID = (String) loProductRequest.getDetail(lnRowCheck, "sStockIDx");
                             if (lStockID.equalsIgnoreCase(existingStockID)) {
-                                lnExistQty = (Integer) loProductRequest.getDetail(lnRowCheck , "nQuantity");
+                                lnExistQty = (Double) loProductRequest.getDetail(lnRowCheck, "nQuantity");
                                 lbHasExist = true;
                                 lnRowPR = lnRowCheck;
                                 break;
@@ -489,17 +490,17 @@ public class InvRequestManager {
 
                         // If stock doesn't exist, add a new detail row
                         if (!lbHasExist) {
-                            lnRowPR = loProductRequest.getItemCount() ;
-                            loProductRequest.setDetail(lnRowPR , "sStockIDx", lStockID);
+                            lnRowPR = loProductRequest.getItemCount();
+                            loProductRequest.setDetail(lnRowPR, "sStockIDx", lStockID);
                             loProductRequest.setDetail(lnRowPR, "nQuantity", lnApprovedQty);
 
                             //set connection to product
                             setDetail(lnItem, lnRow, "sBatchNox", loProductRequest.getMaster("sTransNox"));
-                            
+
                             loProductRequest.addNewDetail();
                         } else {
                             // Update the quantity of existing stock
-                            loProductRequest.setDetail(lnRowPR , "nQuantity", lnExistQty + lnApprovedQty);
+                            loProductRequest.setDetail(lnRowPR, "nQuantity", lnExistQty + lnApprovedQty);
                         }
 
                         lbModified = true;
@@ -513,8 +514,9 @@ public class InvRequestManager {
                 }
             }
             //save each stock 
-            for (int lnModifiedrow = 0; lnModifiedrow < laModifiedRow.size()-1; lnModifiedrow++) {
-                lbUpdate = saveTransactionStock(laModifiedRow.get(lnModifiedrow));
+            for (int lnModifiedrow = 0; lnModifiedrow <= laModifiedRow.size() - 1; lnModifiedrow++) {
+
+                lbUpdate = InvRequestListManager.get(lnModifiedrow).saveTransaction();
                 if (!lbUpdate) {
                     poGRider.rollbackTrans();
                     psWarnMsg = InvRequestListManager.get(lnModifiedrow).getMessage();
@@ -522,6 +524,7 @@ public class InvRequestManager {
                 }
             }
             lbUpdate = loProductRequest.SaveRecord();
+            
             if (!lbUpdate) {
                 poGRider.rollbackTrans();
                 psWarnMsg = loProductRequest.getMessage();
@@ -529,6 +532,7 @@ public class InvRequestManager {
             }
             if (!pbWithParent) {
                 poGRider.commitTrans();
+                loProductRequest.CloseRecord();
             }
 
             return lbUpdate;
