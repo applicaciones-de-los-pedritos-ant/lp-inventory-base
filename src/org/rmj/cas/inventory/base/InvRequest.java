@@ -915,8 +915,8 @@ public class InvRequest {
         File selectedFile = fileChooser.showOpenDialog(fsParentWindow);
 
         String fileName = selectedFile.getName();
-        if (fileName == null){
-        return false;
+        if (fileName == null) {
+            return false;
         }
         psFilePath = fileName;
         String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1, selectedFile.getName().length());
@@ -1462,6 +1462,7 @@ public class InvRequest {
         String lsColName = "";
         String lsColCrit = "";
         String lsSQL = "";
+        String lsCondition = "";
 
         JSONObject loJSON;
         ResultSet loRS;
@@ -1483,6 +1484,15 @@ public class InvRequest {
 //                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»a.sBarCodex»a.sStockIDx";
 //                lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
+                if (ItemCount() > 0) {
+                    for (int lnCtr = 0; lnCtr < ItemCount(); lnCtr++) {
+                        lsCondition += ", " + SQLUtil.toSQL(getDetail(lnCtr, "sStockIDx"));
+                    }
+                    lsCondition = "AND a.sStockIDx NOT IN (" + lsCondition.substring(2) + ") GROUP BY a.sStockIDx";
+                }
+                if (!lsCondition.isEmpty()) {
+                    lsSQL = lsSQL + lsCondition;
+                }
 
                 if (fbByCode) {
                     if (paDetailOthers.get(fnRow).getValue("sStockIDx").equals(fsValue)) {
@@ -1491,6 +1501,7 @@ public class InvRequest {
 
                     lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx = " + SQLUtil.toSQL(fsValue));
 
+                    System.out.println(lsSQL);
                     loRS = poGRider.executeQuery(lsSQL);
 
                     loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
@@ -1522,6 +1533,7 @@ public class InvRequest {
                 System.out.println(lsSQL);
 
                 if (loJSON != null) {
+
                     setDetail(fnRow, "sStockIDx", (String) loJSON.get("sStockIDx"));
                     setDetail(fnRow, "nQuantity", 0.00);
                     String ToBranchCd = poData.getBranchCd();
@@ -1587,11 +1599,21 @@ public class InvRequest {
                 lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»e.nQtyOnHnd»d.sDescript";
 
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
+                if (ItemCount() > 0) {
+                    for (int lnCtr = 0; lnCtr < ItemCount(); lnCtr++) {
+                        lsCondition += ", " + SQLUtil.toSQL(getDetail(lnCtr, "sStockIDx"));
+                    }
+                    lsCondition = "AND a.sStockIDx NOT IN (" + lsCondition.substring(2) + ") GROUP BY a.sStockIDx";
+                }
+                if (!lsCondition.isEmpty()) {
+                    lsSQL = lsSQL + lsCondition;
+                }
 
                 if (fbByCode) {
 //                    if (paDetail.get(fnRow).getStockID().equals(fsValue)) return true;
                     lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx = " + SQLUtil.toSQL(fsValue));
 
+                    System.out.println(lsSQL);
                     loRS = poGRider.executeQuery(lsSQL);
 
                     loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
