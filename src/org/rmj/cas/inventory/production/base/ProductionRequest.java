@@ -208,7 +208,7 @@ public class ProductionRequest {
 
     }
 
-    public Object getDetailI(int fnRow, String fsIndex) throws SQLException {
+    public Object getDetail(int fnRow, String fsIndex) throws SQLException {
         return getDetail(fnRow, getColumnIndex(p_oDetail, fsIndex));
     }
 
@@ -225,24 +225,25 @@ public class ProductionRequest {
         p_oDetail.absolute(fnRow);
 
         switch (fnIndex) {
-            case 6:
-            case 7:
-            case 8:
-                if (foValue instanceof Integer) {
-                    p_oDetail.updateInt(fnIndex, (int) foValue);
+            case 3://nQuantity
+            case 4://nEntryNox
+            case 5://nQtyOnHnd
+                if (foValue instanceof Number) {
+                    p_oDetail.updateObject(fnIndex,  foValue);
                     p_oDetail.updateRow();
                 }
 
                 if (p_oListener != null) {
-                    p_oListener.DetailRetreive(fnRow, fnIndex, p_oDetail.getString(fnIndex));
+                    p_oListener.DetailRetreive(fnRow, fnIndex, p_oDetail.getObject(fnIndex));
                 }
                 break;
             case 1: //sTransNox
-            case 2: //xBarCodex
-            case 3: //sBrandNme
-            case 4: //xModelNme
-            case 5: //xColorNme
-            case 9: //sReferNox
+            case 2: //sStockIDx
+            case 6: //sDescript
+            case 7: //xBrandNme
+            case 8: //xModelNme
+            case 9: //xInvTypNm
+            case 10: //sMeasurNm
                 p_oDetail.updateString(fnIndex, (String) foValue);
                 p_oDetail.updateRow();
                 if (p_oListener != null) {
@@ -359,9 +360,7 @@ public class ProductionRequest {
 
         if (fbByCode) {
             lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox LIKE " + SQLUtil.toSQL(fsValue + "%"));
-        } else {
-            lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox LIKE " + SQLUtil.toSQL(fsValue + "%"));
-        }
+        } 
 
         System.out.println(lsSQL);
         if (p_bWithUI) {
@@ -403,7 +402,7 @@ public class ProductionRequest {
         return OpenRecord(lsSQL);
     }
 
-    public boolean OpenRecord(String fsValue) throws SQLException {
+        public boolean OpenRecord(String fsValue) throws SQLException {
         p_nEditMode = EditMode.UNKNOWN;
 
         if (p_oApp == null) {
@@ -562,7 +561,7 @@ public class ProductionRequest {
             System.out.println(loRS.getString("sBrandNme"));
             p_oDetail.updateString("sStockIDx", loRS.getString("sStockIDx"));
             p_oDetail.updateString("sBarCodex", loRS.getString("sBarCodex"));
-            p_oDetail.updateString("nQtyOnHnd", loRS.getString("nQtyOnHnd"));
+            p_oDetail.updateObject("nQtyOnHnd", loRS.getObject("nQtyOnHnd"));
             p_oDetail.updateString("sDescript", loRS.getString("sDescript"));
             p_oDetail.updateString("xBrandNme", loRS.getString("xBrandNme"));
             p_oDetail.updateString("xModelNme", loRS.getString("xModelNme"));
@@ -667,12 +666,18 @@ public class ProductionRequest {
     }
 
     public boolean addNewDetail() throws SQLException {
-        int lnCtr = 1;
-        while (p_oDetail.next()) {
-            p_oDetail.absolute(p_oDetail.getRow());
-            lnCtr = p_oDetail.getInt("nEntryNox");
+        if (p_oDetail == null) {
+            p_sMessage = "Detail row set is not initialized.";
+            return false;
         }
-        p_oDetail.last();
+
+        if (p_oDetail.last()) {
+            String lastStockID = p_oDetail.getString("sStockIDx");
+            if (lastStockID == null || lastStockID.isEmpty()) {
+                p_sMessage = "The last row's Stock ID is invalid. Cannot add a new detail.";
+                return false;
+            }
+        }
         p_oDetail.moveToInsertRow();
 
         MiscUtil.initRowSet(p_oDetail);
@@ -680,11 +685,10 @@ public class ProductionRequest {
         p_oDetail.updateObject("sTransNox", MiscUtil.getNextCode(MASTER_TABLE, "sTransNox", true, p_oApp.getConnection(), p_sBranchCd));
         p_oDetail.updateObject("nQuantity", 0);
         p_oDetail.updateObject("nQtyOnHnd", 0);
-        p_oDetail.updateObject("sStockIDx", "");
-        p_oDetail.updateObject("nEntryNox", lnCtr);
-
+        p_oDetail.updateObject("sStockIDx", ""); // Set to empty string
         p_oDetail.insertRow();
         p_oDetail.moveToCurrentRow();
+
         return true;
     }
 
@@ -750,6 +754,7 @@ public class ProductionRequest {
                 p_oDetail.updateObject("sTransNox", lsTransNox);
                 p_oDetail.updateObject("nEntryNox", lnCtr);
                 p_oDetail.updateRow();
+                System.out.println(p_oDetail.getString("sStockIDx"));
                 if (!p_oDetail.getString("sStockIDx").isEmpty()) {
                     lsSQL = MiscUtil.rowset2SQL(p_oDetail, DETAIL_TABLE, "sBarCodex;sDescript;xBrandNme;xModelNme;xInvTypNm;sMeasurNm;nQtyOnHnd");
 
@@ -908,7 +913,7 @@ public class ProductionRequest {
         }
 
         p_sMessage = "";
-
+        p_oMaster.first();
         if (((String) getMaster("cTranStat")).equals("2")) {
             p_sMessage = "Transaction was already posted..";
             return false;
@@ -977,15 +982,16 @@ public class ProductionRequest {
             return false;
         }
 
-        if (((String) p_oMaster.getString("sIssuingx")).isEmpty()) {
-            p_sMessage = "Issuing entity is not set.";
-            return false;
-        }
+        p_oMaster.first();
+//        if (((String) p_oMaster.getString("sIssuingx")).isEmpty()) {
+//            p_sMessage = "Issuing entity is not set.";
+//            return false;
+//        }
 
         p_oDetail.beforeFirst();
         while (p_oDetail.next()) {
             if (!p_oDetail.getString("sStockIDx").isEmpty()) {
-                if (p_oDetail.getInt("nQuantity") <= 0) {
+                if ((Double) p_oDetail.getObject("nQuantity") <= 0) {
                     p_sMessage = "Quantity for " + p_oDetail.getString("sStockIDx") + " must not be empty.";
                     return false;
                 }
@@ -1031,7 +1037,7 @@ public class ProductionRequest {
                 + ",DATE_FORMAT(a.dTransact, '%m/%d/%Y') AS dTransact"
                 + ", a.sRemarksx"
                 + ", c.sClientNm"
-                + " FROM " + MASTER_TABLE+ " a"     
+                + " FROM " + MASTER_TABLE + " a"
                 + " LEFT JOIN Branch d ON a.sIssuingx = d.sBranchCd"
                 + ", Employee_Master001 b "
                 + " LEFT JOIN Client_Master c ON b.sEmployID = c.sClientID"
@@ -1039,9 +1045,9 @@ public class ProductionRequest {
 
         lsSQL = MiscUtil.addCondition(lsSQL, lsCondition);
 
-        if (!"PK01;PR01;P0W2".contains(p_sBranchCd)) {
-            lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox LIKE " + SQLUtil.toSQL(p_sBranchCd + "%"));
-        }
+//        if (!"PK01;PR01;P0W2".contains(p_sBranchCd)) {
+//            lsSQL = MiscUtil.addCondition(lsSQL, "a.sTransNox LIKE " + SQLUtil.toSQL(p_sBranchCd + "%"));
+//        }
         return lsSQL;
     }
 

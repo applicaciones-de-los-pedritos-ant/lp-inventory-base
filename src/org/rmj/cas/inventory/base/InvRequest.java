@@ -231,6 +231,7 @@ public class InvRequest {
             case "nApproved":
             case "nIssueQty":
             case "nOrderQty":
+            case "sInvTypCd":
                 return paDetailOthers.get(fnRow).getValue(fsCol);
             default:
                 return null;
@@ -256,9 +257,8 @@ public class InvRequest {
         poData = new UnitInvRequestMaster();
         poData.setTransNox(MiscUtil.getNextCode(poData.getTable(), "sTransNox", true, loConn, psBranchCd));
         poData.setDateTransact(poGRider.getServerDate());
-        
-        
-       if (!poGRider.getBranchCode().contains("P0W1")) {
+
+        if (!poGRider.getBranchCode().contains("P0W1")) {
             poData.setBranchCd(poGRider.getBranchCode());
         }
 
@@ -277,7 +277,7 @@ public class InvRequest {
             paDetail = loadTransactionDetail(fsTransNox);
 
             if (poData.getEntryNox() != paDetail.size()) {
-                setMessage("Transaction discrepancy detected... \n"
+                setMessage("Transaction discrepancy detected... \n" + fsTransNox + "entry nox" + poData.getEntryNox() + "size" + paDetail.size()
                         + "Detail count is not equal to the entry number...");
                 return false;
             }
@@ -331,6 +331,7 @@ public class InvRequest {
 
         String lsSQL = MiscUtil.addCondition(getSQ_Detail(), "sTransNox = " + SQLUtil.toSQL(fsTransNox));
         try {
+//            System.out.println(lsSQL);
             ResultSet loRS = poGRider.executeQuery(lsSQL);
 
             for (int lnCtr = 1; lnCtr <= MiscUtil.RecordCount(loRS); lnCtr++) {
@@ -356,6 +357,7 @@ public class InvRequest {
                 loOcc.setValue("nAllocQty", loRS.getDouble("nAllocQty"));
                 loOcc.setValue("nReceived", loRS.getDouble("nReceived"));
                 loOcc.setValue("sNotesxxx", loRS.getString("sNotesxxx"));
+                loOcc.setValue("sBatchNox", loRS.getString("sBatchNox"));
                 loOcc.setValue("dModified", loRS.getDate("dModified"));
                 loDetail.add(loOcc);
 
@@ -368,12 +370,13 @@ public class InvRequest {
                 loOth.setValue("xQtyOnHnd", loRS.getDouble("xQtyOnHnd"));
                 loOth.setValue("nResvOrdr", loRS.getDouble("nResvOrdr"));
                 loOth.setValue("nBackOrdr", loRS.getDouble("nBackOrdr"));
-                loOth.setValue("nApproved", loRS.getDouble("nApproved") - loRS.getDouble("nIssueQty")- loRS.getDouble("nOrderQty"));
-                loOth.setValue("nIssueQty", 0.0);
-                loOth.setValue("nOrderQty", 0.0);
+                loOth.setValue("nApproved", loRS.getDouble("nApproved") - loRS.getDouble("nIssueQty") - loRS.getDouble("nOrderQty"));
+                loOth.setValue("nIssueQty", 0);
+                loOth.setValue("nOrderQty", 0);
                 loOth.setValue("nReorderx", 0);
                 loOth.setValue("nLedgerNo", loRS.getInt("nLedgerNo"));
                 loOth.setValue("sBrandNme", loRS.getString("xBrandNme"));
+                loOth.setValue("sInvTypCd", loRS.getString("sInvTypCd"));
                 if (loRS.getString("sMeasurNm") != null) {
                     loOth.setValue("sMeasurNm", loRS.getString("sMeasurNm"));
                 } else {
@@ -912,6 +915,9 @@ public class InvRequest {
         File selectedFile = fileChooser.showOpenDialog(fsParentWindow);
 
         String fileName = selectedFile.getName();
+        if (fileName == null) {
+            return false;
+        }
         psFilePath = fileName;
         String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1, selectedFile.getName().length());
 
@@ -1456,6 +1462,7 @@ public class InvRequest {
         String lsColName = "";
         String lsColCrit = "";
         String lsSQL = "";
+        String lsCondition = "";
 
         JSONObject loJSON;
         ResultSet loRS;
@@ -1477,6 +1484,15 @@ public class InvRequest {
 //                lsColName = "xBrandNme»sDescript»sMeasurNm»xModelNme»nQtyOnHnd»xInvTypNm»a.sBarCodex»a.sStockIDx";
 //                lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
+                if (ItemCount() > 0) {
+                    for (int lnCtr = 0; lnCtr < ItemCount(); lnCtr++) {
+                        lsCondition += ", " + SQLUtil.toSQL(getDetail(lnCtr, "sStockIDx"));
+                    }
+                    lsCondition = "AND a.sStockIDx NOT IN (" + lsCondition.substring(2) + ") GROUP BY a.sStockIDx";
+                }
+                if (!lsCondition.isEmpty()) {
+                    lsSQL = lsSQL + lsCondition;
+                }
 
                 if (fbByCode) {
                     if (paDetailOthers.get(fnRow).getValue("sStockIDx").equals(fsValue)) {
@@ -1485,6 +1501,7 @@ public class InvRequest {
 
                     lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx = " + SQLUtil.toSQL(fsValue));
 
+                    System.out.println(lsSQL);
                     loRS = poGRider.executeQuery(lsSQL);
 
                     loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
@@ -1516,6 +1533,7 @@ public class InvRequest {
                 System.out.println(lsSQL);
 
                 if (loJSON != null) {
+
                     setDetail(fnRow, "sStockIDx", (String) loJSON.get("sStockIDx"));
                     setDetail(fnRow, "nQuantity", 0.00);
                     String ToBranchCd = poData.getBranchCd();
@@ -1539,6 +1557,7 @@ public class InvRequest {
                         setDetail(fnRow, "nResvOrdr", Double.valueOf((String) loJSON.get("nResvOrdr")));
                         setDetail(fnRow, "nBackOrdr", Double.valueOf((String) loJSON.get("nBackOrdr")));
                         setDetail(fnRow, "nFloatQty", Double.valueOf((String) loJSON.get("nFloatQty")));
+                        setDetail(fnRow, "sInvTypCd", (String) loJSON.get("sInvTypCd"));
                     }
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
                     paDetailOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
@@ -1580,11 +1599,21 @@ public class InvRequest {
                 lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»e.nQtyOnHnd»d.sDescript";
 
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
+                if (ItemCount() > 0) {
+                    for (int lnCtr = 0; lnCtr < ItemCount(); lnCtr++) {
+                        lsCondition += ", " + SQLUtil.toSQL(getDetail(lnCtr, "sStockIDx"));
+                    }
+                    lsCondition = "AND a.sStockIDx NOT IN (" + lsCondition.substring(2) + ") GROUP BY a.sStockIDx";
+                }
+                if (!lsCondition.isEmpty()) {
+                    lsSQL = lsSQL + lsCondition;
+                }
 
                 if (fbByCode) {
 //                    if (paDetail.get(fnRow).getStockID().equals(fsValue)) return true;
                     lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx = " + SQLUtil.toSQL(fsValue));
 
+                    System.out.println(lsSQL);
                     loRS = poGRider.executeQuery(lsSQL);
 
                     loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
@@ -1624,6 +1653,7 @@ public class InvRequest {
                         setDetail(fnRow, "nResvOrdr", Double.valueOf((String) loJSON.get("nResvOrdr")));
                         setDetail(fnRow, "nBackOrdr", Double.valueOf((String) loJSON.get("nBackOrdr")));
                         setDetail(fnRow, "nFloatQty", Double.valueOf((String) loJSON.get("nFloatQty")));
+                        setDetail(fnRow, "sInvTypCd", (String) loJSON.get("sInvTypCd"));
                     }
 
                     paDetailOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
@@ -1790,6 +1820,7 @@ public class InvRequest {
                 + ", a.nAllocQty"
                 + ", a.nReceived"
                 + ", a.sNotesxxx"
+                + ", a.sBatchNox"
                 + ", a.dModified"
                 + ", b.nQtyOnHnd"
                 + ", b.nQtyOnHnd + a.nQuantity xQtyOnHnd"
@@ -1801,6 +1832,7 @@ public class InvRequest {
                 + ", c.sDescript"
                 + ", d.sMeasurNm"
                 + ", IFNULL(e.sDescript, '') xBrandNme"
+                + ", c.sInvTypCd"
                 + " FROM Inv_Stock_Request_Detail a"
                 + ", Inv_Master b"
                 + " LEFT JOIN Inventory c"

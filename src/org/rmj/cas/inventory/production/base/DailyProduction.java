@@ -7,12 +7,23 @@
 package org.rmj.cas.inventory.production.base;
 
 import com.mysql.jdbc.Connection;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.view.JasperViewer;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.rmj.appdriver.constants.EditMode;
 import org.rmj.appdriver.constants.RecordStatus;
@@ -22,6 +33,7 @@ import org.rmj.appdriver.iface.GEntity;
 import org.rmj.appdriver.MiscUtil;
 import org.rmj.appdriver.SQLUtil;
 import org.rmj.appdriver.agentfx.CommonUtils;
+import org.rmj.appdriver.agentfx.ShowMessageFX;
 import org.rmj.appdriver.agentfx.ui.showFXDialog;
 import org.rmj.cas.inventory.base.InventoryTrans;
 import org.rmj.cas.inventory.others.pojo.UnitDailyProductionDetailOthers;
@@ -30,9 +42,12 @@ import org.rmj.cas.inventory.production.pojo.UnitDailyProductionMaster;
 import org.rmj.appdriver.agentfx.callback.IMasterDetail;
 import org.rmj.appdriver.constants.UserRight;
 import org.rmj.cas.inventory.base.InvExpiration;
+import org.rmj.cas.inventory.base.InvRequest;
 import org.rmj.cas.inventory.base.InvTransfer;
+import org.rmj.cas.inventory.base.Inventory;
 import org.rmj.cas.inventory.others.pojo.UnitDailyProductionInvOthers;
 import org.rmj.cas.inventory.production.pojo.UnitDailyProductionInv;
+import org.rmj.lp.parameter.agent.XMBranch;
 
 public class DailyProduction {
 
@@ -70,16 +85,64 @@ public class DailyProduction {
         }
     }
 
+    public boolean BrowseProductRequest() {
+
+        try {
+            ProductionRequest loProdRequest = new ProductionRequest(poGRider, poGRider.getBranchCode(), true);
+            loProdRequest.setTranStat(1);//fetch only printed / confirmed
+
+            if (!loProdRequest.SearchRecord("", true)) {
+                return false;
+            }
+            int lnCtr = loProdRequest.getItemCount();
+            setMaster("sSourceCd", "");
+            setMaster("sSourceNo", "");
+            if (lnCtr < 0) {
+                return false;
+            }
+
+            //copy the data to daily 
+            for (int lnRow = 0; lnRow <= lnCtr - 1; lnRow++) {
+                addDetail();
+                System.out.println(ItemCount());
+
+//                setDetail(lnRow, "nQuantity", loProdRequest.getDetail(lnRow, "nQuantity"));
+                setDetail(lnRow, "sStockIDx", loProdRequest.getDetail(lnRow + 1, "sStockIDx"));
+                setDetail(lnRow, "nGoalQtyx", loProdRequest.getDetail(lnRow + 1, "nQuantity"));
+                setDetail(lnRow, "nOrderQty", loProdRequest.getDetail(lnRow + 1, "nQuantity"));
+
+                paDetailOthers.get(lnRow).setValue("sBarCodex", loProdRequest.getDetail(lnRow + 1, "sBarCodex"));
+                paDetailOthers.get(lnRow).setValue("sDescript", loProdRequest.getDetail(lnRow + 1, "sDescript"));
+                paDetailOthers.get(lnRow).setValue("sMeasurNm", loProdRequest.getDetail(lnRow + 1, "sMeasurNm"));
+//                addDetail();
+
+            }
+
+//            deleteDetail(ItemCount() - 1);
+            setMaster("sSourceCd", "PReq");
+            setMaster("sSourceNo", loProdRequest.getMaster("sTransNox"));
+
+        } catch (SQLException ex) {
+            Logger.getLogger(DailyProduction.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return true;
+    }
+
     public boolean addDetail() {
+        if (!String.valueOf(getMaster("sSourceNo")).isEmpty()) {
+            return false;
+        }
         if (paDetail.isEmpty()) {
             paDetail.add(new UnitDailyProductionDetail());
             paDetail.get(ItemCount() - 1).setDateExpiryDt(poGRider.getServerDate());
 
             paDetailOthers.add(new UnitDailyProductionDetailOthers());
         } else {
+            System.out.println(paDetail.get(ItemCount() - 1).getStockIDx());
+            System.out.println(paDetail.get(ItemCount() - 1).getGoalQty());
             if (!paDetail.get(ItemCount() - 1).getStockIDx().equals("")
-                    && Double.valueOf(String.valueOf(paDetail.get(ItemCount() - 1).getQuantity())) != 0.00
-                    && Double.valueOf(String.valueOf(paDetail.get(ItemCount() - 1).getGoalQty())) != 0.00) {
+                    && Double.valueOf(String.valueOf(paDetail.get(ItemCount() - 1).getGoalQty())) > 0) {
+
                 paDetail.add(new UnitDailyProductionDetail());
                 paDetail.get(ItemCount() - 1).setDateExpiryDt(poGRider.getServerDate());
 
@@ -130,6 +193,12 @@ public class DailyProduction {
                     } else {
                         paDetail.get(fnRow).setValue(fnCol, null);
                     }
+                } else if (fnCol == poDetail.getColumn("nOrderQty")) {
+                    if (foData instanceof Number) {
+                        paDetail.get(fnRow).setValue(fnCol, foData);
+                    } else {
+                        paDetail.get(fnRow).setValue(fnCol, null);
+                    }
                 } else if (fnCol == poDetail.getColumn("dExpiryDt")) {
                     if (foData instanceof Date) {
                         paDetail.get(fnRow).setValue(fnCol, foData);
@@ -141,6 +210,7 @@ public class DailyProduction {
                 }
 
                 DetailRetreived(fnCol);
+//                addDetail();
             }
         }
     }
@@ -359,8 +429,9 @@ public class DailyProduction {
                 loOcc.setValue("sTransNox", loRS.getString("sTransNox"));
                 loOcc.setValue("nEntryNox", loRS.getInt("nEntryNox"));
                 loOcc.setValue("sStockIDx", loRS.getString("sStockIDx"));
-                loOcc.setValue("nQuantity", loRS.getDouble("nQuantity"));
                 loOcc.setValue("nGoalQtyx", loRS.getDouble("nGoalQtyx"));
+                loOcc.setValue("nOrderQty", loRS.getDouble("nOrderQty"));
+                loOcc.setValue("nQuantity", loRS.getDouble("nQuantity"));
                 loOcc.setValue("dExpiryDt", loRS.getDate("dExpiryDt"));
                 loOcc.setValue("dModified", loRS.getDate("dModified"));
                 loDetail.add(loOcc);
@@ -526,10 +597,6 @@ public class DailyProduction {
         setMessage("");
         if (paDetail.isEmpty()) {
             setMessage("Unable to save empty detail transaction.");
-            return false;
-        } else if (paDetail.get(0).getStockIDx().equals("")
-                || paDetail.get(0).getQuantity() == (Number) 0) {
-            setMessage("Detail might not have item or zero quantity.");
             return false;
         }
 
@@ -835,6 +902,15 @@ public class DailyProduction {
             return lbResult;
         }
 
+        //check if quantity is served
+        for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
+            if (Double.valueOf(paDetail.get(lnCtr).getQuantity().toString()) <= 0) {
+                setMessage("Detail contains an item with zero quantity.");
+                return false;
+            }
+
+        }
+
         String lsSQL = "UPDATE " + loObject.getTable()
                 + " SET  cTranStat = " + SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)
                 + ", sModified = " + SQLUtil.toSQL(psUserIDxx)
@@ -862,6 +938,21 @@ public class DailyProduction {
                 poGRider.rollbackTrans();
             }
         }
+
+        String lsSourceNo = (String) getMaster("sSourceNo");
+        if (!lsSourceNo.isEmpty() || lsSourceNo != null) {
+            try {
+                ProductionRequest loProductReq = new ProductionRequest(poGRider, poGRider.getBranchCode(), true);
+                loProductReq.setTranStat(12340);
+                loProductReq.OpenRecord(lsSourceNo);
+                loProductReq.PostRecord();
+
+                printTransfer();
+            } catch (SQLException ex) {
+                Logger.getLogger(DailyProduction.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
         return lbResult;
     }
 
@@ -1033,7 +1124,7 @@ public class DailyProduction {
         switch (fnCol) {
             case 3:
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE)
-                        + " AND a.sInvTypCd IN " + CommonUtils.getParameter(System.getProperty("store.inventory.type")));
+                        + " AND a.sInvTypCd IN " + CommonUtils.getParameter(System.getProperty("store.inventory.type.product")));
 
                 System.out.println(lsSQL);
                 if (fbByCode) {
@@ -1106,8 +1197,7 @@ public class DailyProduction {
 //        String lsHeader = "Barcode»Description»Inv. Type»Brand»Qty on Hand»Stock ID";
 //        String lsColName = "a.sBarCodex»sDescript»xInvTypNm»xBrandNme»e.nQtyOnHnd»sStockIDx";
 //        String lsColCrit = "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»e.nQtyOnHnd»a.sStockIDx";
-    
-    
+
 //05/13/2024 revision
         String lsHeader = "Barcode»Description»Brand»Unit»Qty on Hand»Stock ID»Inv. Type";
         String lsColName = "a.sBarCodex»a.sDescript»xBrandNme»f.sMeasurNm»e.nQtyOnHnd»sStockIDx»xInvTypNm";
@@ -1532,12 +1622,13 @@ public class DailyProduction {
                 + "  a.sTransNox"
                 + ", a.nEntryNox"
                 + ", a.sStockIDx"
+                + ", a.nGoalQtyx"
+                + ", a.nOrderQty"
                 + ", a.nQuantity"
                 + ", a.dExpiryDt"
                 + ", a.dModified"
                 + ", c.sBarCodex"
                 + ", c.sDescript"
-                + ", a.nGoalQtyx"
                 + ", d.sMeasurNm"
                 + ", IFNULL(e.sDescript, '') xBrandNme"
                 + " FROM Daily_Production_Detail a"
@@ -1609,7 +1700,7 @@ public class DailyProduction {
         String lsCondition = "";
         String lsSQL = "SELECT "
                 + "  a.sTransNox"
-  +  ",DATE_FORMAT(a.dTransact, '%m/%d/%Y') AS dTransact"
+                + ",DATE_FORMAT(a.dTransact, '%m/%d/%Y') AS dTransact"
                 + ", a.sRemarksx"
                 + " FROM Daily_Production_Master a"
                 + " WHERE a.sTransNox LIKE " + SQLUtil.toSQL(psBranchCd + "%");
@@ -1764,6 +1855,93 @@ public class DailyProduction {
         poCallBack.DetailRetreive(fnRow);
     }
 
+    public boolean printTransfer() {
+        if (poData == null) {
+            ShowMessageFX.Warning("Unable to print transaction.", "Warning", "No record loaded.");
+            return false;
+        }
+
+        // Create the parameters for the report
+        Map<String, Object> params = new HashMap<>();
+        params.put("sBranchNm", poGRider.getBranchName());
+        params.put("sAddressx", poGRider.getAddress() + ", " + poGRider.getTownName() + " " + poGRider.getProvince());
+        params.put("sTransNox", poData.getTransNox());
+        params.put("sSourceNo", poData.getSourceNo());
+        params.put("dTransact", SQLUtil.dateFormat(poData.getDateTransact(), SQLUtil.FORMAT_LONG_DATE));
+        params.put("sPrintdBy", poGRider.getClientName());
+        params.put("xRemarksx", poData.getRemarksx());
+
+        JSONObject loJSON;
+
+        JSONArray loArray = new JSONArray();
+        try {
+            String lsSQL = MiscUtil.addCondition("SELECT a.sTransNox, b.sBranchCd FROM Inv_Stock_Request_Detail a "
+                    +" LEFT JOIN Inv_Stock_Request_Master b "
+                    +" ON a.sTransNox = b.sTransNox "
+                    +" GROUP BY a.sTransNox", "a.sBatchNox = " + SQLUtil.toSQL(poData.getSourceNo()));
+            System.err.println(lsSQL);
+            ResultSet loRS = poGRider.executeQuery(lsSQL);
+
+            if (!loRS.isBeforeFirst()) { // This checks if there are no rows in the ResultSet
+                loRS.close(); // Always close your ResultSet
+
+                System.err.println("No Result");
+                return false; // Return false if no records found
+            }
+            System.err.println("Fetching Data");
+            while (loRS.next()) {
+                InvRequest instance = new InvRequest(poGRider, psBranchCd, !pbWithParent);
+                String lsBranchName = "";
+
+                System.err.println(loRS.getString("sTransNox"));
+                if (instance.openTransaction(loRS.getString("sTransNox"))) {
+                    XMBranch loBranch = instance.GetBranch(loRS.getString("sBranchCd"), true);
+                    if (loBranch != null) {
+                        lsBranchName = (String) loBranch.getMaster("sBranchNm");
+                    }
+                    // Open the transaction to get item details
+                    for (int lnItemRow = 0; lnItemRow <= instance.ItemCount() - 1; lnItemRow++) {
+                        String lsBarCodex = (String) instance.getDetailOthers(lnItemRow, "sBarCodex");
+                        String lsDescript = (String) instance.getDetailOthers(lnItemRow, "sDescript");
+                        String lsMeasurex = (String) instance.getDetailOthers(lnItemRow, "sMeasurNm");
+                        double lnQuantity = Double.valueOf(instance.getDetail(lnItemRow, "nQuantity").toString());
+
+                        // Create a JSON object for the current item
+                        loJSON = new JSONObject();
+                        loJSON.put("sField01", lsBranchName);
+                        loJSON.put("sField02", lsBarCodex);
+                        loJSON.put("sField03", lsDescript);
+                        loJSON.put("sField04", lsMeasurex);
+                        loJSON.put("nField01", lnQuantity);
+
+                        // Add the JSON object to the array
+                        loArray.add(loJSON);
+                    }
+                }
+            }
+
+            System.err.println("Finish Fetching Data");
+            loRS.close();
+
+            // Convert the JSON array to InputStream
+            InputStream stream = new ByteArrayInputStream(loArray.toJSONString().getBytes("UTF-8"));
+            JsonDataSource jrjson = new JsonDataSource(stream);
+
+            // Generate the report
+            JasperPrint jrprint = JasperFillManager.fillReport(
+                    poGRider.getReportPath() + "DailyProductionCollation.jasper", params, jrjson);
+
+            // Show the report in a viewer
+            JasperViewer jv = new JasperViewer(jrprint, false);
+            jv.setVisible(true);
+            jv.setAlwaysOnTop(true);
+        } catch (JRException | UnsupportedEncodingException | SQLException ex) {
+//            Logger.getLogger(DailyProduction.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+
+        return true;
+    }
     //Member Variables
     private GRider poGRider = null;
     private String psUserIDxx = "";
