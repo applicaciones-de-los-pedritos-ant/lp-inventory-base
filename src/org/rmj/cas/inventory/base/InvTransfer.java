@@ -1237,10 +1237,7 @@ public class InvTransfer {
         if (!pbWithParent) {
             poGRider.beginTrans();
         }
-        if (poData.getBranchCd().isEmpty()) {
-            poData.setBranchCd(psBranchCd);
 
-        }
         poData.setTranTotl(computeTotal());
 
         //delete empty detail
@@ -1256,7 +1253,10 @@ public class InvTransfer {
             String lsTransNox = MiscUtil.getNextCode(loNewEnt.getTable(), "sTransNox", true, loConn, psBranchCd);
 
             loNewEnt.setTransNox(lsTransNox);
-            loNewEnt.setBranchCd(poGRider.getBranchCode());
+            if (poData.getBranchCd().isEmpty()) {
+                poData.setBranchCd(psBranchCd);
+
+            }
             loNewEnt.setEntryNox(ItemCount());
             loNewEnt.setModified(psUserIDxx);
             loNewEnt.setDateModified(poGRider.getServerDate());
