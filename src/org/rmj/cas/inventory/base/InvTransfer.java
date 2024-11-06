@@ -257,7 +257,9 @@ public class InvTransfer {
         poData = new UnitInvTransferMaster();
         poData.setTransNox(MiscUtil.getNextCode(poData.getTable(), "sTransNox", true, loConn, psBranchCd));
         poData.setTransact(poGRider.getServerDate());
-
+        if (!poGRider.isWarehouse()) {
+            poData.setBranchCd(poGRider.getBranchCode());
+        }
         paDetail = new ArrayList<>();
         paDetailOthers = new ArrayList<>(); //detail other info storage
         paDetailExpiration = new ArrayList<>(); //detail other info storage
@@ -1251,7 +1253,10 @@ public class InvTransfer {
             String lsTransNox = MiscUtil.getNextCode(loNewEnt.getTable(), "sTransNox", true, loConn, psBranchCd);
 
             loNewEnt.setTransNox(lsTransNox);
-            loNewEnt.setBranchCd(poGRider.getBranchCode());
+            if (poData.getBranchCd().isEmpty()) {
+                poData.setBranchCd(psBranchCd);
+
+            }
             loNewEnt.setEntryNox(ItemCount());
             loNewEnt.setModified(psUserIDxx);
             loNewEnt.setDateModified(poGRider.getServerDate());
@@ -1282,14 +1287,25 @@ public class InvTransfer {
         }
 
         if (!lsSQL.equals("") && getErrMsg().isEmpty()) {
-            if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
-                if (!poGRider.getErrMsg().isEmpty()) {
-                    setErrMsg(poGRider.getErrMsg());
-                } else {
-                    setMessage("No record updated");
+            if (poData.getBranchCd().equalsIgnoreCase(poGRider.getBranchCode())) {
+                if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
+                    if (!poGRider.getErrMsg().isEmpty()) {
+                        setErrMsg(poGRider.getErrMsg());
+                    } else {
+                        setMessage("No record updated");
+                    }
                 }
+                //lbUpdate = saveInvTrans(); //save inventory legder
+            } else {
+                if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), psBranchCd, poData.getBranchCd()) == 0) {
+                    if (!poGRider.getErrMsg().isEmpty()) {
+                        setErrMsg(poGRider.getErrMsg());
+                    } else {
+                        setMessage("No record updated");
+                    }
+                }
+
             }
-            //lbUpdate = saveInvTrans(); //save inventory legder
         }
 
         if (!pbWithParent) {
@@ -1348,11 +1364,24 @@ public class InvTransfer {
                     lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt);
 
                     if (!lsSQL.equals("")) {
-                        if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
-                            if (!poGRider.getErrMsg().isEmpty()) {
-                                setErrMsg(poGRider.getErrMsg());
-                                return false;
+                        if (poData.getBranchCd().equalsIgnoreCase(poGRider.getBranchCode())) {
+                            if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
+                                if (!poGRider.getErrMsg().isEmpty()) {
+                                    setErrMsg(poGRider.getErrMsg());
+                                } else {
+                                    setMessage("No record updated");
+                                }
                             }
+                            //lbUpdate = saveInvTrans(); //save inventory legder
+                        } else {
+                            if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), psBranchCd, poData.getBranchCd()) == 0) {
+                                if (!poGRider.getErrMsg().isEmpty()) {
+                                    setErrMsg(poGRider.getErrMsg());
+                                } else {
+                                    setMessage("No record updated");
+                                }
+                            }
+
                         }
                     }
                 }
@@ -1386,11 +1415,24 @@ public class InvTransfer {
                     }
 
                     if (!lsSQL.equals("")) {
-                        if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
-                            if (!poGRider.getErrMsg().isEmpty()) {
-                                setErrMsg(poGRider.getErrMsg());
-                                return false;
+                        if (poData.getBranchCd().equalsIgnoreCase(poGRider.getBranchCode())) {
+                            if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
+                                if (!poGRider.getErrMsg().isEmpty()) {
+                                    setErrMsg(poGRider.getErrMsg());
+                                } else {
+                                    setMessage("No record updated");
+                                }
                             }
+                            //lbUpdate = saveInvTrans(); //save inventory legder
+                        } else {
+                            if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), psBranchCd, poData.getBranchCd()) == 0) {
+                                if (!poGRider.getErrMsg().isEmpty()) {
+                                    setErrMsg(poGRider.getErrMsg());
+                                } else {
+                                    setMessage("No record updated");
+                                }
+                            }
+
                         }
                     }
                 } else {
@@ -1400,11 +1442,24 @@ public class InvTransfer {
                                 + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox());
 
                         if (!lsSQL.equals("")) {
-                            if (poGRider.executeQuery(lsSQL, poDetail.getTable(), "", "") == 0) {
-                                if (!poGRider.getErrMsg().isEmpty()) {
-                                    setErrMsg(poGRider.getErrMsg());
-                                    return false;
+                            if (poData.getBranchCd().equalsIgnoreCase(poGRider.getBranchCode())) {
+                                if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
+                                    if (!poGRider.getErrMsg().isEmpty()) {
+                                        setErrMsg(poGRider.getErrMsg());
+                                    } else {
+                                        setMessage("No record updated");
+                                    }
                                 }
+                                //lbUpdate = saveInvTrans(); //save inventory legder
+                            } else {
+                                if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), psBranchCd, poData.getBranchCd()) == 0) {
+                                    if (!poGRider.getErrMsg().isEmpty()) {
+                                        setErrMsg(poGRider.getErrMsg());
+                                    } else {
+                                        setMessage("No record updated");
+                                    }
+                                }
+
                             }
                         }
                     }
@@ -1417,11 +1472,24 @@ public class InvTransfer {
                         + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox());
 
                 if (!lsSQL.equals("")) {
-                    if (poGRider.executeQuery(lsSQL, poDetail.getTable(), "", "") == 0) {
-                        if (!poGRider.getErrMsg().isEmpty()) {
-                            setErrMsg(poGRider.getErrMsg());
-                            return false;
+                    if (poData.getBranchCd().equalsIgnoreCase(poGRider.getBranchCode())) {
+                        if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
+                            if (!poGRider.getErrMsg().isEmpty()) {
+                                setErrMsg(poGRider.getErrMsg());
+                            } else {
+                                setMessage("No record updated");
+                            }
                         }
+                        //lbUpdate = saveInvTrans(); //save inventory legder
+                    } else {
+                        if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), psBranchCd, poData.getBranchCd()) == 0) {
+                            if (!poGRider.getErrMsg().isEmpty()) {
+                                setErrMsg(poGRider.getErrMsg());
+                            } else {
+                                setMessage("No record updated");
+                            }
+                        }
+
                     }
                 }
             }
@@ -1490,8 +1558,8 @@ public class InvTransfer {
             return lbResult;
         }
         for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
-            if (paDetail.get(lnCtr).getQuantity().doubleValue() < (Double)paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
-                setMessage("Not enough quantity on hand. Please check your inventory." 
+            if (paDetail.get(lnCtr).getQuantity().doubleValue() < (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
+                setMessage("Not enough quantity on hand. Please check your inventory."
                         + paDetailOthers.get(lnCtr).getValue("sBarCodex"));
                 return false;
             }
@@ -2262,12 +2330,19 @@ public class InvTransfer {
 
         JSONObject loJSON;
         ResultSet loRS;
-
+        XMBranch loBranch;
         setErrMsg("");
         setMessage("");
         switch (fnCol) {
+            case 2: //Origin
+                loBranch = new XMBranch(poGRider, psBranchCd, true);
+                if (loBranch.browseRecord(fsValue, fbByCode)) {
+                    setMaster(fnCol, (String) loBranch.getMaster("sBranchCd"));
+                    MasterRetreived(fnCol);
+                    return true;
+                }
             case 4: //sDestinat
-                XMBranch loBranch = new XMBranch(poGRider, psBranchCd, true);
+                loBranch = new XMBranch(poGRider, psBranchCd, true);
                 if (loBranch.browseRecord(fsValue, fbByCode)) {
                     setMaster(fnCol, (String) loBranch.getMaster("sBranchCd"));
                     MasterRetreived(fnCol);
