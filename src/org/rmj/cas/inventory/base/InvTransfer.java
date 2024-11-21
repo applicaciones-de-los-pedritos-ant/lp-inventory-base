@@ -1249,8 +1249,13 @@ public class InvTransfer {
         if (pnEditMode == EditMode.ADDNEW) {
             Connection loConn = null;
             loConn = setConnection();
+            String lsTransNox;
 
-            String lsTransNox = MiscUtil.getNextCode(loNewEnt.getTable(), "sTransNox", true, loConn, psBranchCd);
+            if (poData.getBranchCd().equals(psBranchCd)) {
+                lsTransNox = MiscUtil.getNextCode(loNewEnt.getTable(), "sTransNox", true, loConn, psBranchCd);
+            } else {
+                lsTransNox = MiscUtil.getNextCode(loNewEnt.getTable(), "sTransNox", true, loConn, poData.getBranchCd());
+            }
 
             loNewEnt.setTransNox(lsTransNox);
             if (poData.getBranchCd().isEmpty()) {
@@ -2323,6 +2328,8 @@ public class InvTransfer {
     }
 
     public boolean SearchMaster(int fnCol, String fsValue, boolean fbByCode) {
+        Connection loConn = null;
+        loConn = setConnection();
         String lsHeader = "";
         String lsColName = "";
         String lsColCrit = "";
@@ -2336,9 +2343,14 @@ public class InvTransfer {
         switch (fnCol) {
             case 2: //Origin
                 loBranch = new XMBranch(poGRider, psBranchCd, true);
-                if (loBranch.browseRecord(fsValue, fbByCode)) {
+                loJSON = searchBranchOrigin(fsValue, false);
+
+                if (loBranch.openRecord((String) loJSON.get("sBranchCd"))) {
                     setMaster(fnCol, (String) loBranch.getMaster("sBranchCd"));
                     MasterRetreived(fnCol);
+                    String lsTransNox = MiscUtil.getNextCode(poData.getTable(), "sTransNox", true, loConn, poData.getBranchCd());
+                    poData.setTransNox(lsTransNox);
+                    MasterRetreived(1);
                     return true;
                 }
             case 4: //sDestinat
@@ -2414,6 +2426,31 @@ public class InvTransfer {
 
         }
         return false;
+    }
+
+    public JSONObject searchBranchOrigin(String fsValue, boolean fbByCode) {
+        String lsHeader = "Branch Code»Description»Company ID»Company";
+        String lsColName = "sBranchCd»sBranchNm»sCompnyID»sCompnyNm";
+        String lsColCrit = "a.sBranchCd»a.sBranchNm»a.sCompnyID»b.sCompnyNm";
+        String lsSQL = "SELECT "
+                + "  a.sBranchCd"
+                + ", a.sBranchNm"
+                + ", a.sCompnyID"
+                + ", b.sCompnyNm"
+                + " FROM Branch a"
+                + " LEFT JOIN Company b"
+                + " ON a.sCompnyID = b.sCompnyID"
+                + "WHERE cAutomate = '1' ";
+
+        JSONObject loJSON = showFXDialog.jsonSearch(poGRider,
+                lsSQL,
+                fsValue,
+                lsHeader,
+                lsColName,
+                lsColCrit,
+                fbByCode ? 0 : 1);
+
+        return loJSON;
     }
 
     public boolean SearchMaster(String fsCol, String fsValue, boolean fbByCode) {
