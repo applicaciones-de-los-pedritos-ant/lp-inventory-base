@@ -106,6 +106,30 @@ public class InvTransfer {
         }
     }
 
+    public boolean BrowseRecordReturn(String fsValue, boolean fbByCode) {
+        String lsHeader = "Transfer No»Origin Branch»Date";
+        String lsColName = "sTransNox»sBranchNm»dTransact";
+        String lsColCrit = "a.sTransNox»c.sBranchNm»a.dTransact";
+        String lsSQL = MiscUtil.addCondition(getSQ_InvTransfer(),
+                " LEFT(a.sTransNox,4) <> " + SQLUtil.toSQL(poGRider.getBranchCode())
+                + " AND c.cAutomate = '0'");
+
+        System.out.println(lsSQL);
+        JSONObject loJSON = showFXDialog.jsonSearch(poGRider,
+                lsSQL,
+                fsValue,
+                lsHeader,
+                lsColName,
+                lsColCrit,
+                fbByCode ? 0 : 1);
+
+        if (loJSON == null) {
+            return false;
+        } else {
+            return openTransaction((String) loJSON.get("sTransNox"));
+        }
+    }
+
     public boolean addDetail() {
         if (paDetail.isEmpty()) {
             paDetail.add(new UnitInvTransferDetail());
