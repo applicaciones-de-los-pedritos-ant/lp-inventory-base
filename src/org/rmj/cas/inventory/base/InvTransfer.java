@@ -1275,7 +1275,7 @@ public class InvTransfer {
             loConn = setConnection();
             String lsTransNox;
 
-            if (poData.getBranchCd().equals(psBranchCd)) {
+            if ((poData.getBranchCd() != null && poData.getBranchCd().equals(psBranchCd)) || poData.getBranchCd() == null || poData.getBranchCd().isEmpty()) {
                 lsTransNox = MiscUtil.getNextCode(loNewEnt.getTable(), "sTransNox", true, loConn, psBranchCd);
             } else {
                 lsTransNox = MiscUtil.getNextCode(loNewEnt.getTable(), "sTransNox", true, loConn, poData.getBranchCd());
