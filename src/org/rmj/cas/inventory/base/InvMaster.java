@@ -826,7 +826,48 @@ public class InvMaster {
         return true;
     }
 
-    public boolean recalculate(String fsStockIDx) throws SQLException {
+    //mac 2024.11.27
+    /**
+     * recalculate(String fsStockIDx, String fsDateFrom, String fsDateThru)
+     * 
+     * @param fsStockIDx
+     * @return true or false
+     * @throws SQLException 
+     */
+    private boolean recalculate(String fsStockIDx) throws SQLException{
+        String lsSQL;
+        
+        double lnQOH = 0.00;
+        Date ldBegInv = poGRider.getServerDate();
+        
+        //find inventory
+        lsSQL = "SELECT a.sStockIDx, a.dBegInvxx, a.nBegQtyxx" +
+                " FROM Inv_Master a" +
+                    ", Inventory b" +
+                " WHERE a.sStockIDx = b.sStockIDx" +
+                    " AND a.sStockIDx = " + SQLUtil.toSQL(fsStockIDx) +
+                    " AND a.sBranchCd = " + SQLUtil.toSQL(psBranchCd);
+    
+        ResultSet loRS = poGRider.executeQuery(lsSQL);
+        
+        if (MiscUtil.RecordCount(loRS) <= 0) return false;
+        
+        //get beginning inventory date and quantity
+        if (loRS.next()){
+            ldBegInv = loRS.getDate("dBegInvxx");
+            lnQOH = loRS.getDouble("nBegQtyxx");
+        }
+        
+        //get the ledger starting from 1 day after the beginning inventory date
+        ldBegInv = CommonUtils.dateAdd(ldBegInv, 1);
+        
+        lsSQL = "";
+        
+        
+        return false;
+    }
+    
+    public boolean recalculatex(String fsStockIDx) throws SQLException {
         if (fsStockIDx == null) {
             String lsSQL = "SELECT a.sStockIDx"
                     + " FROM Inv_Master a"
