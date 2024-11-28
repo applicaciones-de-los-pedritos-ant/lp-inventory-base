@@ -170,7 +170,11 @@ public class InvTransfer {
                 if (fnCol == poDetail.getColumn("nQuantity")) {
                     if (foData instanceof Number) {
                         if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
-                            confirmSelectParent(fnRow);
+                            //validate if has parent or will uses a parent if no uses child or not a subitem with negative qty
+                            if(!confirmSelectParent(fnRow)){
+                                 paDetail.get(fnRow).setValue(fnCol, foData);
+                                 return;
+                            }
 
                             if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
                                 ShowMessageFX.Error("This item has no inventory available.",
@@ -1859,7 +1863,7 @@ public class InvTransfer {
         return lbResult;
     }
 
-    private void confirmSelectParent(int fnRow) {
+    private boolean confirmSelectParent(int fnRow) {
         ResultSet loRSParent;
         String[] laResult;
 
@@ -1891,10 +1895,12 @@ public class InvTransfer {
                         setDetail(fnRow, "nQuantity", 1);
                     }
                 }
+                return true;
             } else {
-
+                return false;
             }
         } else {
+            return false;
 //            setDetail(fnRow, "nQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
         }
     }
@@ -2464,7 +2470,7 @@ public class InvTransfer {
                 + " FROM Branch a"
                 + " LEFT JOIN Company b"
                 + " ON a.sCompnyID = b.sCompnyID"
-                + " WHERE a.cAutomate = '1' ";
+                + " WHERE a.cAutomate = '0' ";
 
         JSONObject loJSON = showFXDialog.jsonSearch(poGRider,
                 lsSQL,
