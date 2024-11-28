@@ -2470,7 +2470,7 @@ public class InvTransfer {
                 + " FROM Branch a"
                 + " LEFT JOIN Company b"
                 + " ON a.sCompnyID = b.sCompnyID"
-                + " WHERE a.cAutomate = '1' ";
+                + " WHERE a.cAutomate = '0' ";
 
         JSONObject loJSON = showFXDialog.jsonSearch(poGRider,
                 lsSQL,
