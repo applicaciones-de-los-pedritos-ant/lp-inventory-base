@@ -171,9 +171,13 @@ public class InvTransfer {
                     if (foData instanceof Number) {
                         if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
                             //validate if has parent or will uses a parent if no uses child or not a subitem with negative qty
-                            if(!confirmSelectParent(fnRow)){
-                                 paDetail.get(fnRow).setValue(fnCol, foData);
-                                 return;
+                            if (!confirmSelectParent(fnRow)) {
+                                if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
+                                    ShowMessageFX.Error("This item has no inventory available.",
+                                            pxeModuleName, "Please confirm!!!");
+                                    paDetail.get(fnRow).setValue(fnCol, 0);
+                                    return;
+                                }
                             }
 
                             if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
