@@ -1590,13 +1590,13 @@ public class InvTransfer {
             setMessage("No record found...");
             return lbResult;
         }
-//        for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
-//            if (paDetail.get(lnCtr).getQuantity().doubleValue() < (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
-//                setMessage("Not enough quantity on hand. Please check your inventory."
-//                        + paDetailOthers.get(lnCtr).getValue("sBarCodex"));
-//                return false;
-//            }
-//        }
+        for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
+            if (paDetail.get(lnCtr).getQuantity().doubleValue() < (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
+                setMessage("Not enough quantity on hand. Please check your inventory."
+                        + paDetailOthers.get(lnCtr).getValue("sBarCodex"));
+                return false;
+            }
+        }
         //if it is already closed, just return true
         if (loObject.getTranStat().equalsIgnoreCase(TransactionStatus.STATE_CLOSED)) {
             return true;
