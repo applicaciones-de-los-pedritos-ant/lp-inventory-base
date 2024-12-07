@@ -12,7 +12,6 @@ import org.rmj.appdriver.constants.RecordStatus;
 import org.rmj.appdriver.GRider;
 import org.rmj.appdriver.MiscUtil;
 import org.rmj.appdriver.SQLUtil;
-import org.rmj.appdriver.agentfx.ShowMessageFX;
 import org.rmj.cas.inventory.constants.basefx.InvConstants;
 import org.rmj.cas.inventory.pojo.UnitInventoryTrans;
 
@@ -665,7 +664,8 @@ public class InventoryTrans {
                     return false;
                 }
                 
-                //TODO: re align on hand
+                InvMaster loInv = new InvMaster(poGRider, psBranchCd, true);
+                loInv.reAlignOnHand(poRSDetail.getString("sStockIDx"), pdTransact);
             }
         } catch (SQLException ex) {
             setMessage("Please inform MIS Deparment.");
@@ -803,7 +803,7 @@ public class InventoryTrans {
                             ", sModified = " + SQLUtil.toSQL(poGRider.getUserID()) + 
                             ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate());
             
-            if (psSourceCd == InvConstants.PURCHASE_RECEIVING){
+            if (psSourceCd == null ? InvConstants.PURCHASE_RECEIVING == null : psSourceCd.equals(InvConstants.PURCHASE_RECEIVING)){
                 lsLgrSQL = lsLgrSQL +
                             ", dExpiryxx = " + SQLUtil.toSQL(poRSMaster.get(lnCtr).getDateExpire()) +
                             ", nPurPrice = " + poRSMaster.get(lnCtr).getPurchase();
@@ -819,8 +819,12 @@ public class InventoryTrans {
                 return false;
             }
 
-            //TODO:
-            //realign on hand   
+            try {
+                InvMaster loInv = new InvMaster(poGRider, psBranchCd, true);
+                loInv.reAlignOnHand(poRSProcessd.get(lnCtr).getStockIDx(), pdTransact); 
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
         }
 
         return true;
