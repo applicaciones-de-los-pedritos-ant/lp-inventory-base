@@ -1596,13 +1596,14 @@ public class InvTransfer {
             if (paDetail.get(lnCtr).getQuantity().doubleValue() < (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
                 if (confirmSelectParent(lnCtr)) {
                     if (paDetail.get(lnCtr).getQuantity().doubleValue() == 0.00) {
-                        ShowMessageFX.Error("This item has no inventory available." 
+                        ShowMessageFX.Error("This item has no inventory available."
                                 + paDetailOthers.get(lnCtr).getValue("sBarCodex"),
                                 pxeModuleName, "Please confirm!!!");
                         paDetail.get(lnCtr).setValue(lnCtr, 0);
+                        return false;
                     } else {
                         paDetail.get(lnCtr).setValue(lnCtr, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
-
+                       
                     }
                 } else {
                     setMessage("Not enough quantity on hand. Please check your inventory."
