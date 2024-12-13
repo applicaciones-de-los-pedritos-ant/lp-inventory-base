@@ -172,10 +172,12 @@ public class InvTransfer {
                         if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
                             //validate if has parent or will uses a parent if no uses child or not a subitem with negative qty
                             if (!confirmSelectParent(fnRow)) {
-                                ShowMessageFX.Error("This item has no inventory available.",
-                                        pxeModuleName, "Please confirm!!!");
-                                paDetail.get(fnRow).setValue(fnCol, 0);
-                                return;
+                                if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
+                                    ShowMessageFX.Error("This item has no inventory available.",
+                                            pxeModuleName, "Please confirm!!!");
+                                    paDetail.get(fnRow).setValue(fnCol, 0);
+                                    return;
+                                }
                             }
 
                             if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
@@ -185,6 +187,11 @@ public class InvTransfer {
 //                                 paDetail.get(fnRow).setValue(fnCol, foData);
 //                                setDetail(fnRow, "nQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
                             } else {
+                                
+                                if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {   
+                                    ShowMessageFX.Error("Not enough quantity on hand. Quantity is set automatically based on the quantity on hand."+"\n Barcode : " + paDetailOthers.get(fnRow).getValue("sBarCodex") + " ,   Quantity on Hand : "+ paDetailOthers.get(fnRow).getValue("nQtyOnHnd") ,
+                                            pxeModuleName, "Please confirm!!!");
+                                }
                                 paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
 //                                setDetail(fnRow, "nQuantity", Double.valueOf(foData.toString()));
                             }
@@ -686,7 +693,7 @@ public class InvTransfer {
         }
 
         /*---------------------------------------------------------------------------------
-         *   Save inventory trans of the items
+         *   Save inventory trans of the items                                             *
          *---------------------------------------------------------------------------------*/
         loInvTrans.InitTransaction();
         for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
@@ -1593,21 +1600,12 @@ public class InvTransfer {
             return lbResult;
         }
         for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
-            if (paDetail.get(lnCtr).getQuantity().doubleValue() < (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
-                if (confirmSelectParent(lnCtr)) {
-                    if (paDetail.get(lnCtr).getQuantity().doubleValue() == 0.00) {
-                        ShowMessageFX.Error("This item has no inventory available."
-                                + paDetailOthers.get(lnCtr).getValue("sBarCodex"),
-                                pxeModuleName, "Please confirm!!!");
-                        paDetail.get(lnCtr).setValue(lnCtr, 0);
-                        return false;
-                    } else {
-                        paDetail.get(lnCtr).setValue(lnCtr, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
-                       
-                    }
-                } else {
+            System.out.println("paDetail = " + paDetail.get(lnCtr).getQuantity());
+            System.out.println("paDetailOthers = " + paDetailOthers.get(lnCtr).getValue("nQtyOnHnd"));
+            if (paDetail.get(lnCtr).getQuantity().doubleValue() > (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
+                if(paDetail.get(lnCtr).getParnQty().doubleValue() <= 0){
                     setMessage("Not enough quantity on hand. Please check your inventory."
-                            + paDetailOthers.get(lnCtr).getValue("sBarCodex"));
+                            +"\n Barcode : " + paDetailOthers.get(lnCtr).getValue("sBarCodex") + " ,   Quantity on Hand : "+ paDetailOthers.get(lnCtr).getValue("nQtyOnHnd"));
                     return false;
                 }
             }
@@ -1881,7 +1879,7 @@ public class InvTransfer {
     private boolean confirmSelectParent(int fnRow) {
         ResultSet loRSParent;
         String[] laResult;
-//        System.out.println (getSQ_Parent(paDetail.get(fnRow).getStockIDx()));
+
         loRSParent = poGRider.executeQuery(getSQ_Parent(paDetail.get(fnRow).getStockIDx()));
         if (MiscUtil.RecordCount(loRSParent) > 0) {
             if (ShowMessageFX.YesNo("Item has no inventory but has parent unit.\n\n"
