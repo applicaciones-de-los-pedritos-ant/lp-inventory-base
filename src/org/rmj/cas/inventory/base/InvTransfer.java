@@ -2463,6 +2463,7 @@ public class InvTransfer {
                     MasterRetreived(fnCol);
                     String lsTransNox = MiscUtil.getNextCode(poData.getTable(), "sTransNox", true, loConn, poData.getBranchCd());
                     poData.setTransNox(lsTransNox);
+                    psBranchCd = (String) loBranch.getMaster("sBranchCd");
                     MasterRetreived(1);
                     return true;
                 }
