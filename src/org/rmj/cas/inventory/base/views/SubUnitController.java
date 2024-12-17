@@ -157,6 +157,17 @@ public class SubUnitController implements Initializable {
         }
     }
     
+    public void processData (){
+    try {
+            poRS.absolute(pnRow + 1);
+            
+            psValue = poRS.getString("sStockIDx") + "»" + poRS.getString("nQuantity");
+        } catch (SQLException e) {
+            ShowMessageFX.Error(getStage(), e.getMessage(), pxeModuleName, "Please inform MIS Department.");
+            System.exit(1);
+        }
+    }
+    
     private void table_Clicked(MouseEvent event) {
         pnRow = table.getSelectionModel().getSelectedIndex();
         table_Clicked();

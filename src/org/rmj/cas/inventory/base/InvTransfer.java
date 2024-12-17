@@ -180,7 +180,7 @@ public class InvTransfer {
 
                             if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
                                 ShowMessageFX.Error("This item has no inventory available.",
-                                        pxeModuleName, "Please confirm!!!");
+                                        pxeModuleName, "Please check your Inventory!!!");
                                 paDetail.get(fnRow).setValue(fnCol, 0);
 //                                 paDetail.get(fnRow).setValue(fnCol, foData);
 //                                setDetail(fnRow, "nQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
@@ -469,7 +469,6 @@ public class InvTransfer {
 
             for (int lnCtr = 1; lnCtr <= MiscUtil.RecordCount(loRS); lnCtr++) {
                 loRS.absolute(lnCtr);
-
                 //load detail
                 loOcc = new UnitInvTransferDetail();
                 loOcc.setValue("sTransNox", loRS.getString("sTransNox"));
@@ -509,6 +508,8 @@ public class InvTransfer {
                     loOth.setValue("sMeasurNm", "");
                 }
                 paDetailOthers.add(loOth);
+                //confirm parent qty
+                confirmParent(lnCtr -1);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -1362,11 +1363,13 @@ public class InvTransfer {
             if (paDetail.isEmpty()) {
                 setMessage("Unable to save empty detail transaction.");
                 return false;
-            } else if (paDetail.get(0).getStockIDx().equals("")) {
-                setMessage("Detail might not have zero quantity.");
+            } else if (paDetail.get(lnCtr).getStockIDx().equals("")) {
+                setMessage("Detail might not have set.");
                 return false;
-            } else if (paDetail.get(0).getQuantity().doubleValue() == 0.00) {
-                setMessage("Detail might not have zero quantity.");
+            } else if (paDetail.get(lnCtr).getQuantity().doubleValue() == 0.00) {
+                setMessage("Detail might not have zero quantity. "
+                        + paDetailOthers.get(lnCtr).getValue("sBarCodex").toString() + ", "
+                        + paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString());
                 return false;
             }
         }
@@ -1593,6 +1596,9 @@ public class InvTransfer {
             return lbResult;
         }
         for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
+            System.out.print(paDetail.get(lnCtr).getQuantity().doubleValue()
+                    + ", Parent Qty = "
+                    + paDetailOthers.get(lnCtr).getValue("nQtyOnHnd"));
             if (paDetail.get(lnCtr).getQuantity().doubleValue() < (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
                 if (confirmSelectParent(lnCtr)) {
                     if (paDetail.get(lnCtr).getQuantity().doubleValue() == 0.00) {
@@ -1603,11 +1609,12 @@ public class InvTransfer {
                         return false;
                     } else {
                         paDetail.get(lnCtr).setValue(lnCtr, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
-                       
+
                     }
                 } else {
                     setMessage("Not enough quantity on hand. Please check your inventory."
-                            + paDetailOthers.get(lnCtr).getValue("sBarCodex"));
+                            + paDetailOthers.get(lnCtr).getValue("sBarCodex")
+                            + "! Qty on Hand is " + paDetailOthers.get(lnCtr).getValue("nQtyOnHnd"));
                     return false;
                 }
             }
@@ -1915,7 +1922,7 @@ public class InvTransfer {
                 return false;
             }
         } else {
-            return false;
+            return true;
 //            setDetail(fnRow, "nQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
         }
     }
@@ -2016,6 +2023,65 @@ public class InvTransfer {
         } catch (IOException ex) {
             ShowMessageFX.Error(ex.getMessage(), pxeModuleName, "Please inform MIS department.");
             System.exit(1);
+        }
+
+        return "";
+    }
+
+    private boolean confirmParent(int fnRow) {
+        ResultSet loRSParent;
+        String[] laResult;
+        loRSParent = poGRider.executeQuery(getSQ_Parent(paDetail.get(fnRow).getStockIDx()));
+        if (MiscUtil.RecordCount(loRSParent) > 0) {
+            String lsValue = confirmSubParent(loRSParent,
+                    (String) paDetailOthers.get(fnRow).getValue("sBarCodex"),
+                    (String) paDetailOthers.get(fnRow).getValue("sDescript"),
+                    (String) paDetailOthers.get(fnRow).getValue("sMeasurNm"),
+                    (String) paDetailOthers.get(fnRow).getValue("sInvTypNm"));
+
+            if (!lsValue.equals("")) {
+                String[] lasValue = lsValue.split("»");
+
+                setDetail(fnRow, "sParentID", lasValue[0]);
+                setDetail(fnRow, "nParntQty", 1);
+                setDetail(fnRow, "nSbItmQty", Double.valueOf(lasValue[1]));
+
+                paDetailOthers.get(fnRow).setValue("sParentID", lasValue[0]);
+                paDetailOthers.get(fnRow).setValue("xParntQty", Double.valueOf(paDetailOthers.get(fnRow).getValue("xParntQty").toString()) + 1);
+                paDetailOthers.get(fnRow).setValue("xQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("xQuantity").toString()) + Double.valueOf(lasValue[1]));
+                paDetailOthers.get(fnRow).setValue("nQtyOnHnd", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()) + Double.valueOf(lasValue[1]));
+
+                if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
+                    setDetail(fnRow, "nQuantity", 1);
+                }
+            } else {
+                return false;
+            }
+            return true;
+
+        } else {
+            return true;
+//            setDetail(fnRow, "nQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
+        }
+    }
+
+    private String confirmSubParent(ResultSet foRS,
+            String fsBarCodex,
+            String fsDescript,
+            String fsMeasurNm,
+            String fsInvTypNm) {
+        SubUnitController loSubUnit = new SubUnitController();
+        loSubUnit.setParentUnits(foRS);
+
+        loSubUnit.setBarCodex(fsBarCodex);
+        loSubUnit.setDescript(fsDescript);
+        loSubUnit.setMeasurNm(fsMeasurNm);
+        loSubUnit.setInvTypNm(fsInvTypNm);
+        //without ui 
+        loSubUnit.processData();
+
+        if (!loSubUnit.isCancelled()) {
+            return loSubUnit.getValue();
         }
 
         return "";
