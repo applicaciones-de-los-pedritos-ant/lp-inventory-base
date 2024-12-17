@@ -180,7 +180,9 @@ public class InvTransfer {
 
                             if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
                                 ShowMessageFX.Error("This item has no inventory available.",
-                                        pxeModuleName, "Please check your Inventory!!!");
+                                        pxeModuleName, "Please check your Inventory!!!"
+                                        + paDetailOthers.get(fnCol).getValue("sBarCodex").toString()
+                                        + ", Qty On Hand " + paDetailOthers.get(fnCol).getValue("nQtyOnHnd"));
                                 paDetail.get(fnRow).setValue(fnCol, 0);
 //                                 paDetail.get(fnRow).setValue(fnCol, foData);
 //                                setDetail(fnRow, "nQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
@@ -509,7 +511,7 @@ public class InvTransfer {
                 }
                 paDetailOthers.add(loOth);
                 //confirm parent qty
-                confirmParent(lnCtr -1);
+                confirmParent(lnCtr - 1);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
