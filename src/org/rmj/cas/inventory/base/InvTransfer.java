@@ -187,6 +187,10 @@ public class InvTransfer {
 //                                 paDetail.get(fnRow).setValue(fnCol, foData);
 //                                setDetail(fnRow, "nQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
                             } else {
+                                ShowMessageFX.Error("This item has no other available units. Please check your inventory.",
+                                        pxeModuleName, "Please check your Inventory!!!"
+                                        + paDetailOthers.get(fnCol).getValue("sBarCodex").toString()
+                                        + ", Qty On Hand available is only " + paDetailOthers.get(fnCol).getValue("nQtyOnHnd"));
                                 paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
 //                                setDetail(fnRow, "nQuantity", Double.valueOf(foData.toString()));
                             }
