@@ -2441,7 +2441,7 @@ public class InvTransferReturn {
                 + " LEFT JOIN Measure e"
                 + " ON c.sMeasurID = e.sMeasurID"
                 + " WHERE a.sStockIDx = b.sStockIDx"
-                + " AND b.sBranchCD = " + SQLUtil.toSQL(psBranchCd)
+//                + " AND b.sBranchCD = " + SQLUtil.toSQL(psBranchCd)
                 + " ORDER BY a.nEntryNox";
     }
 
@@ -2548,7 +2548,7 @@ public class InvTransferReturn {
                 + " LEFT JOIN Branch c"
                 + " ON a.sBranchCd = c.sBranchCd"
                 + " WHERE a.cTranStat = '1'"
-                + " AND a.sBranchCd = " + SQLUtil.toSQL(poGRider.getBranchCode());
+                + " AND a.sBranchCd = " + SQLUtil.toSQL(psBranchCd);
     }
 
     private String getSQ_Parent(String fsStockIDx) {
@@ -2697,7 +2697,7 @@ public class InvTransferReturn {
                 + " ON a.sMeasurID = f.sMeasurID"
                 + ", Inv_Master e"
                 + " WHERE a.sStockIDx = e.sStockIDx"
-                + " GROUP BY e.sBranchCd ";
+                + " GROUP BY e.sStockIDx ";
 
 //                               " AND e.nQtyOnHnd > 0" +
         //validate result based on the assigned inventory type.
