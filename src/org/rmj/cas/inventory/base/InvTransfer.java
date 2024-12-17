@@ -384,6 +384,13 @@ public class InvTransfer {
                         + "Detail count is not equal to the entry number...");
                 return false;
             }
+
+            psBranchCd = poData.getBranchCd();
+            
+            for (int lnCtr = 0 ; lnCtr <= paDetail.size()- 1;lnCtr++){
+                //confirm parent qty
+                confirmParent(lnCtr);
+            }
         } else {
             setMessage("Unable to load transaction.");
             return false;
@@ -510,8 +517,6 @@ public class InvTransfer {
                     loOth.setValue("sMeasurNm", "");
                 }
                 paDetailOthers.add(loOth);
-                //confirm parent qty
-                confirmParent(lnCtr - 1);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -564,7 +569,7 @@ public class InvTransfer {
         ResultSet loRS = null;
         int lnCtr;
         Date ldParentExp = null;
-        InventoryTrans loInvTrans = new InventoryTrans(poGRider, poGRider.getBranchCode());
+        InventoryTrans loInvTrans = new InventoryTrans(poGRider, psBranchCd);
 
         /*---------------------------------------------------------------------------------
          *   Credit from mother unit
@@ -578,7 +583,7 @@ public class InvTransfer {
             }
 
             if (!paDetail.get(lnCtr).getParentID().equals("")) {
-                InventoryTrans loInvDMTrans = new InventoryTrans(poGRider, poGRider.getBranchCode());
+                InventoryTrans loInvDMTrans = new InventoryTrans(poGRider, psBranchCd);
                 loInvDMTrans.InitTransaction();
 
                 lsSQL = "SELECT"
@@ -645,7 +650,7 @@ public class InvTransfer {
          *---------------------------------------------------------------------------------*/
         for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
             if (!paDetail.get(lnCtr).getParentID().equals("")) {
-                InventoryTrans loInvCMTrans = new InventoryTrans(poGRider, poGRider.getBranchCode());
+                InventoryTrans loInvCMTrans = new InventoryTrans(poGRider, psBranchCd);
                 loInvCMTrans.InitTransaction();
                 lsSQL = "SELECT"
                         + "  nQtyOnHnd"
@@ -2033,7 +2038,7 @@ public class InvTransfer {
     private boolean confirmParent(int fnRow) {
         ResultSet loRSParent;
         String[] laResult;
-        loRSParent = poGRider.executeQuery(getSQ_Parent(paDetail.get(fnRow).getStockIDx()));
+        loRSParent = poGRider.executeQuery(getSQ_Parent(paDetailOthers.get(fnRow).getValue("sStockIDx").toString()));
         if (MiscUtil.RecordCount(loRSParent) > 0) {
             String lsValue = confirmSubParent(loRSParent,
                     (String) paDetailOthers.get(fnRow).getValue("sBarCodex"),
