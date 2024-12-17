@@ -108,7 +108,7 @@ public class InvTransfer {
 
     public boolean BrowseRecordReturn(String fsValue, boolean fbByCode) {
         String lsHeader = "Transfer No»Origin Branch»Date";
-        String lsColName = "sTransNox»sBranchNm»dTransact";
+        String lsColName = "sTransNox»xBranchNm»dTransact";
         String lsColCrit = "a.sTransNox»c.sBranchNm»a.dTransact";
         String lsSQL = MiscUtil.addCondition(getSQ_InvTransfer(),
                 " LEFT(a.sTransNox,4) <> " + SQLUtil.toSQL(poGRider.getBranchCode())
@@ -2757,9 +2757,9 @@ public class InvTransfer {
         String lsCondition = "";
         String lsSQL = "SELECT "
                 + "  a.sTransNox"
-                + ", b.sBranchNm"
+                + ", b.sBranchNm sBranchNm"
                 + ", DATE_FORMAT(a.dTransact, '%m/%d/%Y') AS dTransact"
-                + ", c.sBranchNm"
+                + ", c.sBranchNm xBranchNm"
                 + " FROM Inv_Transfer_Master a"
                 + " LEFT JOIN Branch b"
                 + " ON a.sDestinat = b.sBranchCd"
