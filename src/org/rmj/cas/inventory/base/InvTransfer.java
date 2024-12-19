@@ -187,14 +187,21 @@ public class InvTransfer {
 //                                 paDetail.get(fnRow).setValue(fnCol, foData);
 //                                setDetail(fnRow, "nQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
                             } else {
-                                ShowMessageFX.Error("This item is available in limited quantities.",
-                                        pxeModuleName,
-                                        "Your quantity on hand (QOH) is insufficient "
-                                        + "for the quantity you are try to Transfer. \n "
-                                        + paDetailOthers.get(fnRow).getValue("sBarCodex").toString()
-                                        + ", Available quantity is only " + paDetailOthers.get(fnRow).getValue("nQtyOnHnd"));
-                                paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
+                                if (Double.valueOf(foData.toString())
+                                        > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
+
+                                    ShowMessageFX.Error("This item is available in limited quantities.",
+                                            pxeModuleName,
+                                            "Your quantity on hand (QOH) is insufficient "
+                                            + "for the quantity you are try to Transfer. \n "
+                                            + paDetailOthers.get(fnRow).getValue("sBarCodex").toString()
+                                            + ", Available quantity is only " + paDetailOthers.get(fnRow).getValue("nQtyOnHnd"));
+                                    paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
+
+                                } else {
+                                    paDetail.get(fnRow).setValue(fnCol, foData);
 //                                setDetail(fnRow, "nQuantity", Double.valueOf(foData.toString()));
+                                }
                             }
 //                            paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
                         } else {
