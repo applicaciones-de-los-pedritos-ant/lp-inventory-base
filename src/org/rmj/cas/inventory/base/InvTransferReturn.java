@@ -2442,7 +2442,7 @@ public class InvTransferReturn {
                 + " ON c.sMeasurID = e.sMeasurID"
                 + " WHERE a.sStockIDx = b.sStockIDx"
 //                + " AND b.sBranchCD = " + SQLUtil.toSQL(psBranchCd)
-                + " ORDER BY a.nEntryNox";
+                + " GROUP BY  a.nEntryNox ORDER BY a.nEntryNox";
     }
 
     private String getSQ_DetailExpiration() {
