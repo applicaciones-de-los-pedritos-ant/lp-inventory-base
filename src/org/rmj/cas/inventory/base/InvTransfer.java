@@ -84,7 +84,7 @@ public class InvTransfer {
 
     public boolean BrowseAcceptance(String fsValue, boolean fbByCode) {
         String lsHeader = "Transfer No»Source»Date»Destination";
-        String lsColName = "a.sTransNox»c.sBranchNm»dTransact»b.sBranchNm";
+        String lsColName = "a.sTransNox»xBranchNm»dTransact»b.sBranchNm";
         String lsColCrit = "a.sTransNox»c.sBranchNm»a.dTransact»b.sBranchNm";
         String lsSQL = MiscUtil.addCondition(getSQ_InvTransfer(),
                 "a.sDestinat = " + SQLUtil.toSQL(poGRider.getBranchCode())
@@ -1625,10 +1625,10 @@ public class InvTransfer {
                         ShowMessageFX.Error("This item has no inventory available."
                                 + paDetailOthers.get(lnCtr).getValue("sBarCodex"),
                                 pxeModuleName, "Please confirm!!!");
-                        paDetail.get(lnCtr).setValue(lnCtr, 0);
+                        paDetail.get(lnCtr).setValue(6, 0);
                         return false;
                     } else {
-                        paDetail.get(lnCtr).setValue(lnCtr, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
+                        paDetail.get(lnCtr).setValue(6, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
 
                     }
                 } else {
