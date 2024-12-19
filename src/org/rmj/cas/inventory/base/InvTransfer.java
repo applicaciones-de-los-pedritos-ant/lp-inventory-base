@@ -181,18 +181,18 @@ public class InvTransfer {
                             if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
                                 ShowMessageFX.Error("This item has no inventory available.",
                                         pxeModuleName, "Please check your Inventory!!!"
-                                        + paDetailOthers.get(fnCol).getValue("sBarCodex").toString()
-                                        + ", Qty On Hand " + paDetailOthers.get(fnCol).getValue("nQtyOnHnd"));
+                                        + paDetailOthers.get(fnRow).getValue("sBarCodex").toString()
+                                        + ", quantity on hand = " + paDetailOthers.get(fnRow).getValue("nQtyOnHnd"));
                                 paDetail.get(fnRow).setValue(fnCol, 0);
 //                                 paDetail.get(fnRow).setValue(fnCol, foData);
 //                                setDetail(fnRow, "nQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
                             } else {
-                                ShowMessageFX.Error("This item has no inventory available.",
+                                ShowMessageFX.Error("This item is available in limited quantities.",
                                         pxeModuleName,
-                                        "Your quantity on Hand (QOH) is insufficient "
-                                        + "for the quantity you are try to Transfer. ,"
-                                        + paDetailOthers.get(fnCol).getValue("sBarCodex").toString()
-                                        + ", Available quantity is only " + paDetailOthers.get(fnCol).getValue("nQtyOnHnd"));
+                                        "Your quantity on hand (QOH) is insufficient "
+                                        + "for the quantity you are try to Transfer. \n "
+                                        + paDetailOthers.get(fnRow).getValue("sBarCodex").toString()
+                                        + ", Available quantity is only " + paDetailOthers.get(fnRow).getValue("nQtyOnHnd"));
                                 paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
 //                                setDetail(fnRow, "nQuantity", Double.valueOf(foData.toString()));
                             }
