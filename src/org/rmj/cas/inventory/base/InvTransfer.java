@@ -169,6 +169,9 @@ public class InvTransfer {
 
                 if (fnCol == poDetail.getColumn("nQuantity")) {
                     if (foData instanceof Number) {
+                        if (Double.valueOf(foData.toString()) <= 0.0) {
+                            return;
+                        }
                         if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
                             //validate if has parent or will uses a parent if no uses child or not a subitem with negative qty
                             if (!confirmSelectParent(fnRow)) {
@@ -1616,10 +1619,7 @@ public class InvTransfer {
             return lbResult;
         }
         for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
-            System.out.print(paDetail.get(lnCtr).getQuantity().doubleValue()
-                    + ", Parent Qty = "
-                    + paDetailOthers.get(lnCtr).getValue("nQtyOnHnd"));
-            if (paDetail.get(lnCtr).getQuantity().doubleValue() < (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
+            if (paDetail.get(lnCtr).getQuantity().doubleValue() > (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
                 if (confirmSelectParent(lnCtr)) {
                     if (paDetail.get(lnCtr).getQuantity().doubleValue() == 0.00) {
                         ShowMessageFX.Error("This item has no inventory available."
@@ -1628,7 +1628,10 @@ public class InvTransfer {
                         paDetail.get(lnCtr).setValue(6, 0);
                         return false;
                     } else {
-                        paDetail.get(lnCtr).setValue(6, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
+                        if ((Double) paDetail.get(lnCtr).getQuantity() > (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
+                            paDetail.get(lnCtr).setValue(6, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
+
+                        }
 
                     }
                 } else {
