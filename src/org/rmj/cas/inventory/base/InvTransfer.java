@@ -1880,23 +1880,23 @@ public class InvTransfer {
          * of transaction/ error even if saving is success. add new function to
          * succeed when success
          */
-//        if (poGRider.executeQuery(lsSQL, loObject.getTable(), "", "") == 0){
-//            if (!poGRider.getErrMsg().isEmpty()){
-//                setErrMsg(poGRider.getErrMsg());
-//            } else setErrMsg("No record deleted.");  
-//        } else {
-//            if (loObject.getTranStat().equalsIgnoreCase(TransactionStatus.STATE_CLOSED))
-//                lbResult = unsaveInvTrans();
-//        }
-        if (poGRider.executeQuery(lsSQL, loObject.getTable(), "", "") == 0) {
-            if (!poGRider.getErrMsg().isEmpty()) {
+        if (poGRider.executeQuery(lsSQL, loObject.getTable(), "", "") == 0){
+            if (!poGRider.getErrMsg().isEmpty()){
                 setErrMsg(poGRider.getErrMsg());
-            } else {
-                setErrMsg("No record deleted.");
-            }
+            } else setErrMsg("No record deleted.");  
         } else {
-            lbResult = true;
+            if (loObject.getTranStat().equalsIgnoreCase(TransactionStatus.STATE_CLOSED))
+                lbResult = unsaveInvTrans();
         }
+//        if (poGRider.executeQuery(lsSQL, loObject.getTable(), "", "") == 0) {
+//            if (!poGRider.getErrMsg().isEmpty()) {
+//                setErrMsg(poGRider.getErrMsg());
+//            } else {
+//                setErrMsg("No record deleted.");
+//            }
+//        } else {
+//            lbResult = true;
+//        }
 
         if (!pbWithParent) {
             if (getErrMsg().isEmpty()) {
