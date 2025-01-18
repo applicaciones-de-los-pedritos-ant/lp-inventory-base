@@ -1880,13 +1880,16 @@ public class InvTransfer {
          * of transaction/ error even if saving is success. add new function to
          * succeed when success
          */
-        if (poGRider.executeQuery(lsSQL, loObject.getTable(), "", "") == 0){
-            if (!poGRider.getErrMsg().isEmpty()){
+        if (poGRider.executeQuery(lsSQL, loObject.getTable(), "", "") == 0) {
+            if (!poGRider.getErrMsg().isEmpty()) {
                 setErrMsg(poGRider.getErrMsg());
-            } else setErrMsg("No record deleted.");  
+            } else {
+                setErrMsg("No record deleted.");
+            }
         } else {
-            if (loObject.getTranStat().equalsIgnoreCase(TransactionStatus.STATE_CLOSED))
+            if (loObject.getTranStat().equalsIgnoreCase(TransactionStatus.STATE_CLOSED)) {
                 lbResult = unsaveInvTrans();
+            }
         }
 //        if (poGRider.executeQuery(lsSQL, loObject.getTable(), "", "") == 0) {
 //            if (!poGRider.getErrMsg().isEmpty()) {
@@ -2228,6 +2231,71 @@ public class InvTransfer {
             default:
                 return false;
         }
+    }
+
+    public boolean setUtilityDetail(int fnRow, String fsValue, boolean fbByCode) throws SQLException {
+
+        String lsCondition = "";
+        String lsSQL = "";
+        ResultSet loRS;
+
+        lsSQL = MiscUtil.addCondition(getSQ_Stocks(), " e.nQtyOnHnd > 0");
+
+        if (fbByCode) {
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
+        } else {
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sDescript = " + SQLUtil.toSQL(fsValue));
+        }
+        System.out.println(lsSQL);
+        loRS = poGRider.executeQuery(lsSQL);
+
+        if (loRS != null) {
+            if (MiscUtil.RecordCount(loRS) > 0) {
+                loRS.absolute(1);
+                setDetail(fnRow, "sStockIDx", loRS.getString("sStockIDx"));
+//            setDetail(fnRow, "nInvCostx", Double.valueOf((String) loJSON.get("nSelprice")));
+
+                double nInvCostx = loRS.getObject("nUnitPrce") != null ? loRS.getDouble("nUnitPrce") : 0.0;
+                // Set the detail value
+                setDetail(fnRow, "nInvCostx", nInvCostx);
+
+                paDetailOthers.get(fnRow).setValue("sStockIDx", loRS.getString("sStockIDx"));
+                paDetailOthers.get(fnRow).setValue("sBarCodex", loRS.getString("sBarCodex"));
+                paDetailOthers.get(fnRow).setValue("sDescript", loRS.getString("sDescript"));
+                paDetailOthers.get(fnRow).setValue("nQtyOnHnd", loRS.getDouble("nQtyOnHnd"));
+                paDetailOthers.get(fnRow).setValue("nResvOrdr", loRS.getDouble("nResvOrdr"));
+                paDetailOthers.get(fnRow).setValue("nBackOrdr", loRS.getDouble("nBackOrdr"));
+                paDetailOthers.get(fnRow).setValue("nFloatQty", loRS.getDouble("nFloatQty"));
+                paDetailOthers.get(fnRow).setValue("nLedgerNo", loRS.getInt("nLedgerNo"));
+                paDetailOthers.get(fnRow).setValue("sInvTypNm", loRS.getString("xInvTypNm"));
+                paDetailOthers.get(fnRow).setValue("sMeasurNm", loRS.getString("sMeasurNm"));
+                paDetailOthers.get(fnRow).setValue("sBrandNme", loRS.getString("xBrandNme"));
+
+//          
+                return true;
+            } else {
+                setDetail(fnRow, "sStockIDx", "");
+                setDetail(fnRow, "nInvCostx", 0.00);
+                setDetail(fnRow, "nQuantity", 0);
+
+                paDetailOthers.get(fnRow).setValue("sStockIDx", "");
+                paDetailOthers.get(fnRow).setValue("sBarCodex", "");
+                paDetailOthers.get(fnRow).setValue("sDescript", "");
+                paDetailOthers.get(fnRow).setValue("sStockIDx", "");
+                paDetailOthers.get(fnRow).setValue("sParentID", "");
+                paDetailOthers.get(fnRow).setValue("nQtyOnHnd", 0);
+                paDetailOthers.get(fnRow).setValue("nResvOrdr", 0);
+                paDetailOthers.get(fnRow).setValue("nBackOrdr", 0);
+                paDetailOthers.get(fnRow).setValue("nFloatQty", 0);
+                paDetailOthers.get(fnRow).setValue("nLedgerNo", 0);
+                paDetailOthers.get(fnRow).setValue("xQuantity", 0);
+                paDetailOthers.get(fnRow).setValue("sMeasurNm", "");
+                paDetailOthers.get(fnRow).setValue("sBrandNme", "");
+
+            }
+            return false;
+        }
+        return true;
     }
 
     private boolean searhItemDetail(int fnRow, int fnCol, String fsValue, boolean fbSearch, boolean fbByCode) {

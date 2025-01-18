@@ -858,7 +858,7 @@ public class InvAdjustment{
                                                             lsHeader, 
                                                             lsColName, 
                                                             lsColCrit, 
-                                                            6);
+                                                            0);
                     } else{
                         if (paDetailOthers.get(fnRow).getValue("sDescript").equals(fsValue)) return true;
                         
@@ -956,7 +956,57 @@ public class InvAdjustment{
                 return false;
         }
     }
-    
+   
+    public boolean setUtilityDetail(int fnRow, String fsValue, boolean fbByCode) throws SQLException {
+        String lsSQL = "";
+        ResultSet loRS;
+
+        setErrMsg("");
+        setMessage("");
+
+        lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
+
+        if (fbByCode) {
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
+        } else {
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sDescript = " + SQLUtil.toSQL(fsValue));
+        }
+
+        loRS = poGRider.executeQuery(lsSQL);
+
+        if (loRS != null) {
+            if (MiscUtil.RecordCount(loRS) > 0) {
+                loRS.absolute(1);
+                setDetail(fnRow, "sStockIDx", loRS.getString("sStockIDx"));
+                setDetail(fnRow, 6, loRS.getDouble("nUnitPrce"));
+                setDetail(fnRow, "sBrandNme", loRS.getString("xBrandNme"));
+                paDetailOthers.get(fnRow).setValue("sStockIDx", loRS.getString("sStockIDx"));
+                paDetailOthers.get(fnRow).setValue("sBarCodex", loRS.getString("sBarCodex"));
+                paDetailOthers.get(fnRow).setValue("sDescript", loRS.getString("sDescript"));
+                paDetailOthers.get(fnRow).setValue("nQtyOnHnd", loRS.getDouble("nQtyOnHnd"));
+                paDetailOthers.get(fnRow).setValue("nLedgerNo", loRS.getInt("nLedgerNo"));
+                paDetailOthers.get(fnRow).setValue("sInvTypNm", loRS.getString("xInvTypNm"));
+                paDetailOthers.get(fnRow).setValue("sMeasurNm", loRS.getString("sMeasurNm"));
+
+            return true;
+            }
+        }
+        setDetail(fnRow, "sStockIDx", "");
+        setDetail(fnRow, "nCredtQty", 0);
+        setDetail(fnRow, "nDebitQty", 0);
+        setDetail(fnRow, "sBrandNme", "");
+
+        paDetailOthers.get(fnRow).setValue("sStockIDx", "");
+        paDetailOthers.get(fnRow).setValue("sBarCodex", "");
+        paDetailOthers.get(fnRow).setValue("sDescript", "");
+        paDetailOthers.get(fnRow).setValue("nQtyOnHnd", 0);
+        paDetailOthers.get(fnRow).setValue("nLedgerNo", 0);
+        paDetailOthers.get(fnRow).setValue("xQuantity", 0);
+        paDetailOthers.get(fnRow).setValue("sMeasurNm", 0);
+        return false;
+
+    }
+
     public boolean SearchDetail(int fnRow, String fsCol, String fsValue, boolean fbSearch, boolean fbByCode){
         return SearchDetail(fnRow, poDetail.getColumn(fsCol), fsValue, fbSearch, fbByCode);
     }
@@ -1057,7 +1107,10 @@ public class InvAdjustment{
                 " ORDER BY a.nEntryNox";
     }
     
-    public int ItemCount(){
+    public int ItemCount() {
+        if (paDetail == null) {
+            return 0;
+        }
         return paDetail.size();
     }
     
@@ -1112,6 +1165,7 @@ public class InvAdjustment{
         lsSQL = MiscUtil.addCondition(lsSQL, lsCondition);
         return lsSQL;
     }
+    
     
     private String getSQ_Stocks(){
         String lsSQL = "SELECT " +
