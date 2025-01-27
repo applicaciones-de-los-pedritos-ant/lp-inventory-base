@@ -1626,7 +1626,9 @@ public class InvTransfer {
                 //confirm parent qty
                 if (requiredParentQty != 0) {
                     for (int lnQty = 1; lnQty <= requiredParentQty; lnQty++) {
-                        confirmParent(lnCtr);
+                        if (!confirmParent(lnCtr)) {
+                            break;
+                        }
                         // if qty is enough break the loop
                         if (paDetail.get(lnCtr).getQuantity().doubleValue() <= (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
                             break;
@@ -2092,6 +2094,14 @@ public class InvTransfer {
                     (String) paDetailOthers.get(fnRow).getValue("sMeasurNm"),
                     (String) paDetailOthers.get(fnRow).getValue("sInvTypNm"));
 
+            try {
+                if ((Double) paDetail.get(fnRow).getParnQty() > Double.valueOf(loRSParent.getString("nQtyOnHnd").toString())) {
+                    return false;
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
+            }
             if (!lsValue.equals("")) {
                 String[] lasValue = lsValue.split("»");
 
