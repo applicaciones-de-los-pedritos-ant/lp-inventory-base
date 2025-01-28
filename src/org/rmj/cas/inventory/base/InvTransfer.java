@@ -403,10 +403,6 @@ public class InvTransfer {
 
             psBranchCd = poData.getBranchCd();
 
-            for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
-                //confirm parent qty
-                confirmParent(lnCtr);
-            }
         } else {
             setMessage("Unable to load transaction.");
             return false;
@@ -1618,7 +1614,29 @@ public class InvTransfer {
             setMessage("No record found...");
             return lbResult;
         }
+
         for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
+            // recheck borrowed item during entry
+            if (!paDetail.get(lnCtr).getParentID().isEmpty()) {
+                double requiredParentQty = paDetail.get(lnCtr).getParnQty().doubleValue();
+                //reset to zero 
+                setDetail(lnCtr, "sParentID", "");
+                setDetail(lnCtr, "nParntQty", 0);
+                setDetail(lnCtr, "nSbItmQty", 0);
+                //confirm parent qty
+                if (requiredParentQty != 0) {
+                    for (int lnQty = 1; lnQty <= requiredParentQty; lnQty++) {
+                        if (!confirmParent(lnCtr)) {
+                            break;
+                        }
+                        // if qty is enough break the loop
+                        if (paDetail.get(lnCtr).getQuantity().doubleValue() <= (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
+                            break;
+                        }
+
+                    }
+                }
+            }
             if (paDetail.get(lnCtr).getQuantity().doubleValue() > (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
                 if (confirmSelectParent(lnCtr)) {
                     if (paDetail.get(lnCtr).getQuantity().doubleValue() == 0.00) {
@@ -1921,6 +1939,17 @@ public class InvTransfer {
                     + "Do you want to use parent unit?",
                     pxeModuleName, "Please confirm!!!")) {
 
+                if (pnEditMode != EditMode.ADDNEW) {
+                    //check required parent on confirmation 
+                    try {
+                        if ((Double) paDetail.get(fnRow).getParnQty() > Double.valueOf(loRSParent.getString("nQtyOnHnd").toString())) {
+                            return false;
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
+                        return false;
+                    }
+                }
                 String lsValue = showSelectParent(loRSParent,
                         (String) paDetailOthers.get(fnRow).getValue("sBarCodex"),
                         (String) paDetailOthers.get(fnRow).getValue("sDescript"),
@@ -1931,8 +1960,8 @@ public class InvTransfer {
                     String[] lasValue = lsValue.split("»");
 
                     setDetail(fnRow, "sParentID", lasValue[0]);
-                    setDetail(fnRow, "nParntQty", 1);
-                    setDetail(fnRow, "nSbItmQty", Double.valueOf(lasValue[1]));
+                    setDetail(fnRow, "nParntQty", (int) paDetail.get(fnRow).getParnQty() + 1);
+                    setDetail(fnRow, "nSbItmQty", (int) paDetail.get(fnRow).getSbItmQty() + Double.valueOf(lasValue[1]));
 
                     paDetailOthers.get(fnRow).setValue("sParentID", lasValue[0]);
                     paDetailOthers.get(fnRow).setValue("xParntQty", Double.valueOf(paDetailOthers.get(fnRow).getValue("xParntQty").toString()) + 1);
@@ -2065,12 +2094,20 @@ public class InvTransfer {
                     (String) paDetailOthers.get(fnRow).getValue("sMeasurNm"),
                     (String) paDetailOthers.get(fnRow).getValue("sInvTypNm"));
 
+            try {
+                if ((Double) paDetail.get(fnRow).getParnQty() > Double.valueOf(loRSParent.getString("nQtyOnHnd").toString())) {
+                    return false;
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
+            }
             if (!lsValue.equals("")) {
                 String[] lasValue = lsValue.split("»");
 
                 setDetail(fnRow, "sParentID", lasValue[0]);
-                setDetail(fnRow, "nParntQty", 1);
-                setDetail(fnRow, "nSbItmQty", Double.valueOf(lasValue[1]));
+                setDetail(fnRow, "nParntQty", (int) paDetail.get(fnRow).getParnQty() + 1);
+                setDetail(fnRow, "nSbItmQty", (int) paDetail.get(fnRow).getSbItmQty() + Double.valueOf(lasValue[1]));
 
                 paDetailOthers.get(fnRow).setValue("sParentID", lasValue[0]);
                 paDetailOthers.get(fnRow).setValue("xParntQty", Double.valueOf(paDetailOthers.get(fnRow).getValue("xParntQty").toString()) + 1);
