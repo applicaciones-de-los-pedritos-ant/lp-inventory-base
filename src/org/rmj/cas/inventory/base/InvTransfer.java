@@ -182,23 +182,16 @@ public class InvTransfer {
                             }
 
                             if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
-                                ShowMessageFX.Error("This item has no inventory available.",
-                                        pxeModuleName, "Please check your Inventory!!!"
-                                        + paDetailOthers.get(fnRow).getValue("sBarCodex").toString()
-                                        + ", quantity on hand = " + paDetailOthers.get(fnRow).getValue("nQtyOnHnd"));
+                                ShowMessageFX.Error("This item has no inventory available.","Warning", null);
                                 paDetail.get(fnRow).setValue(fnCol, 0);
-//                                 paDetail.get(fnRow).setValue(fnCol, foData);
-//                                setDetail(fnRow, "nQuantity", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
                             } else {
                                 if (Double.valueOf(foData.toString())
                                         > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
 
-                                    ShowMessageFX.Error("This item is available in limited quantities.",
-                                            pxeModuleName,
-                                            "Your quantity on hand (QOH) is insufficient "
-                                            + "for the quantity you are try to Transfer. \n "
-                                            + paDetailOthers.get(fnRow).getValue("sBarCodex").toString()
-                                            + ", Available quantity is only " + paDetailOthers.get(fnRow).getValue("nQtyOnHnd"));
+                                    ShowMessageFX.Error("This item is available in limited quantities.\n\n" +
+                                                                    "Quantity to issue will be the available quantity only.",
+                                                        pxeModuleName,
+                                                        null);
                                     paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
 
                                 } else {
@@ -1930,14 +1923,24 @@ public class InvTransfer {
     }
 
     private boolean confirmSelectParent(int fnRow) {
+        String lsSQL;
         ResultSet loRSParent;
-        String[] laResult;
-//        System.out.println (getSQ_Parent(paDetail.get(fnRow).getStockIDx()));
-        loRSParent = poGRider.executeQuery(getSQ_Parent(paDetail.get(fnRow).getStockIDx()));
+        
+        lsSQL = getSQ_Parent(paDetail.get(fnRow).getStockIDx());
+        loRSParent = poGRider.executeQuery(lsSQL);
         if (MiscUtil.RecordCount(loRSParent) > 0) {
-            if (ShowMessageFX.YesNo("Item has no inventory but has parent unit.\n\n"
-                    + "Do you want to use parent unit?",
-                    pxeModuleName, "Please confirm!!!")) {
+            if (ShowMessageFX.YesNo("Item has no quantity on hand.\n\n"
+                                        + "Do you want to use parent unit?",
+                                pxeModuleName, 
+                                "Please confirm!!!")) {
+                
+                lsSQL = MiscUtil.addCondition(lsSQL, "b.nQtyOnHnd > 0");
+                loRSParent = poGRider.executeQuery(lsSQL);
+                if (MiscUtil.RecordCount(loRSParent) <= 0){
+                    ShowMessageFX.Warning("No parent inventory can be splitted.\nAll have no quantity on hand."
+                                            , "Notice", null);
+                    return true;
+                }
 
                 if (pnEditMode != EditMode.ADDNEW) {
                     //check required parent on confirmation 
@@ -2919,23 +2922,22 @@ public class InvTransfer {
 
     private String getSQ_Parent(String fsStockIDx) {
         return "SELECT"
-                + "  a.sStockIDx"
-                + ", a.sItmSubID"
-                + ", a.nQuantity"
-                + ", c.sBarCodex"
-                + ", c.sDescript"
-                + ", b.nQtyOnHnd"
-                + ", d.sMeasurNm"
+                    + "  a.sStockIDx"
+                    + ", a.sItmSubID"
+                    + ", a.nQuantity"
+                    + ", c.sBarCodex"
+                    + ", c.sDescript"
+                    + ", b.nQtyOnHnd"
+                    + ", d.sMeasurNm"
                 + " FROM Inventory_Sub_Unit a"
-                + ", Inv_Master b"
-                + " LEFT JOIN Inventory c"
-                + " ON b.sStockIDx = c.sStockIDx"
-                + " LEFT JOIN Measure d"
-                + " ON c.sMeasurID = d.sMeasurID"
+                    + ", Inv_Master b"
+                        + " LEFT JOIN Inventory c"
+                            + " ON b.sStockIDx = c.sStockIDx"
+                        + " LEFT JOIN Measure d"
+                            + " ON c.sMeasurID = d.sMeasurID"
                 + " WHERE a.sStockIDx = b.sStockIDx"
-                + " AND b.sBranchCd = " + SQLUtil.toSQL(psBranchCd)
-                + " AND a.sItmSubID = " + SQLUtil.toSQL(fsStockIDx)
-                + " AND b.nQtyOnHnd > 0";
+                    + " AND b.sBranchCd = " + SQLUtil.toSQL(psBranchCd)
+                    + " AND a.sItmSubID = " + SQLUtil.toSQL(fsStockIDx);
     }
 
     private String getSQ_SubItem(String fsStockIDx) {
