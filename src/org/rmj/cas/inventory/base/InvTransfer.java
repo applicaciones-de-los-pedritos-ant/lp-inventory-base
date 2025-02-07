@@ -1963,8 +1963,8 @@ public class InvTransfer {
                     String[] lasValue = lsValue.split("»");
 
                     setDetail(fnRow, "sParentID", lasValue[0]);
-                    setDetail(fnRow, "nParntQty", (int) paDetail.get(fnRow).getParnQty() + 1);
-                    setDetail(fnRow, "nSbItmQty", (int) paDetail.get(fnRow).getSbItmQty() + Double.valueOf(lasValue[1]));
+                    setDetail(fnRow, "nParntQty", (double) paDetail.get(fnRow).getParnQty() + 1);
+                    setDetail(fnRow, "nSbItmQty", (double) paDetail.get(fnRow).getSbItmQty() + Double.valueOf(lasValue[1]));
 
                     paDetailOthers.get(fnRow).setValue("sParentID", lasValue[0]);
                     paDetailOthers.get(fnRow).setValue("xParntQty", Double.valueOf(paDetailOthers.get(fnRow).getValue("xParntQty").toString()) + 1);
