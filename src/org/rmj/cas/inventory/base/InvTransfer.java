@@ -820,7 +820,7 @@ public class InvTransfer {
                                             + " ORDER BY b.dExpiryDt";
                         loRSSub = poGRider.executeQuery(lsSQLSub);
 
-                        double lnQtyOut = Double.valueOf(paDetail.get(lnCtr).getQuantity().toString());
+                        double lnQtyOut = Double.parseDouble(paDetail.get(lnCtr).getQuantity().toString());
                         double lnQuantity = 0;
                         while (loRSSub.next()) {
                             if (lnQtyOut >= loRSSub.getDouble("nQtyOnHnd")) {
