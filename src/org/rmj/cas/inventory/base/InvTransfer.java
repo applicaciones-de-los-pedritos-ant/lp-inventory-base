@@ -807,17 +807,17 @@ public class InvTransfer {
                     if (!paDetailOthers.get(lnCtr).getValue("sParentID").toString().isEmpty()) {
                         ResultSet loRSSub = null;
                         String lsSQLSub = "SELECT"
-                                + "  a.sStockIDx"
-                                + ", b.nQuantity"
-                                + ", b.nQtyOnHnd"
-                                + ", b.dExpiryDt"
-                                + " FROM Inventory_Sub_Unit a"
-                                + ", Inv_Master_Expiration b"
-                                + " WHERE a.sStockIDx = b.sStockIDx"
-                                + " AND a.sItmSubID = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx())
-                                + " AND b.sBranchCd = " + SQLUtil.toSQL(psBranchCd)
-                                + " AND b.nQtyOnHnd > 0"
-                                + " ORDER BY b.dExpiryDt";
+                                            + "  a.sStockIDx"
+                                            + ", a.nQuantity"
+                                            + ", b.nQtyOnHnd"
+                                            + ", b.dExpiryDt"
+                                            + " FROM Inventory_Sub_Unit a"
+                                                + ", Inv_Master_Expiration b"
+                                            + " WHERE a.sStockIDx = b.sStockIDx"
+                                                + " AND a.sItmSubID = " + SQLUtil.toSQL(paDetail.get(lnCtr).getStockIDx())
+                                                + " AND b.sBranchCd = " + SQLUtil.toSQL(psBranchCd)
+                                                + " AND b.nQtyOnHnd > 0"
+                                            + " ORDER BY b.dExpiryDt";
                         loRSSub = poGRider.executeQuery(lsSQLSub);
 
                         double lnQtyOut = Double.valueOf(paDetail.get(lnCtr).getQuantity().toString());
@@ -2098,7 +2098,7 @@ public class InvTransfer {
                     (String) paDetailOthers.get(fnRow).getValue("sInvTypNm"));
 
             try {
-                if ((Double) paDetail.get(fnRow).getParnQty() > Double.valueOf(loRSParent.getString("nQtyOnHnd").toString())) {
+                if (Double.valueOf(paDetail.get(fnRow).getParnQty().toString()) > Double.valueOf(loRSParent.getString("nQtyOnHnd").toString())) {
                     return false;
                 }
             } catch (SQLException ex) {
