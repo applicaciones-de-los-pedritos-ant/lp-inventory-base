@@ -1641,9 +1641,7 @@ public class InvTransfer {
                     } else {
                         if ((Double) paDetail.get(lnCtr).getQuantity() > (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
                             paDetail.get(lnCtr).setValue(6, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
-
                         }
-
                     }
                 } else {
                     setMessage("Not enough quantity on hand. Please check your inventory."
@@ -1939,7 +1937,7 @@ public class InvTransfer {
                 if (MiscUtil.RecordCount(loRSParent) <= 0){
                     ShowMessageFX.Warning("No parent inventory can be splitted.\nAll have no quantity on hand."
                                             , "Notice", null);
-                    return true;
+                    return false;
                 }
 
                 if (pnEditMode != EditMode.ADDNEW) {
