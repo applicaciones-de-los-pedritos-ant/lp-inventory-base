@@ -1611,22 +1611,28 @@ public class InvTransfer {
         for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
             // recheck borrowed item during entry
             if (!paDetail.get(lnCtr).getParentID().isEmpty()) {
-                double requiredParentQty = paDetail.get(lnCtr).getParnQty().doubleValue();
-                //reset to zero 
-                setDetail(lnCtr, "sParentID", "");
-                setDetail(lnCtr, "nParntQty", 0);
-                setDetail(lnCtr, "nSbItmQty", 0);
-                //confirm parent qty
-                if (requiredParentQty != 0) {
-                    for (int lnQty = 1; lnQty <= requiredParentQty; lnQty++) {
-                        if (!confirmParent(lnCtr)) {
-                            break;
-                        }
-                        // if qty is enough break the loop
-                        if (paDetail.get(lnCtr).getQuantity().doubleValue() <= (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
-                            break;
-                        }
+                //if already have qty
+                if (paDetail.get(lnCtr).getQuantity().doubleValue() <= (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
+                    //clear parent
+                    setDetail(lnCtr, "sParentID", "");
+                    setDetail(lnCtr, "nParntQty", 0);
+                    setDetail(lnCtr, "nSbItmQty", 0);
 
+                } else {
+                    double requiredParentQty = paDetail.get(lnCtr).getParnQty().doubleValue();
+
+                    //reset to zero 
+                    setDetail(lnCtr, "sParentID", "");
+                    setDetail(lnCtr, "nParntQty", 0);
+                    setDetail(lnCtr, "nSbItmQty", 0);
+                    //confirm parent qty
+                    if (requiredParentQty != 0) {
+                        for (int lnQty = 1; lnQty <= requiredParentQty; lnQty++) {
+                            if (!confirmParent(lnCtr)) {
+                                break; //break the loop 
+                            }
+
+                        }
                     }
                 }
             }
@@ -1650,14 +1656,19 @@ public class InvTransfer {
                     return false;
                 }
             }
-            saveTransaction();
+
         }
+        //save the auto update validation
+        saveTransaction();
         //if it is already closed, just return true
-        if (loObject.getTranStat().equalsIgnoreCase(TransactionStatus.STATE_CLOSED)) {
+
+        if (loObject.getTranStat()
+                .equalsIgnoreCase(TransactionStatus.STATE_CLOSED)) {
             return true;
         }
 
-        if (!loObject.getTranStat().equalsIgnoreCase(TransactionStatus.STATE_OPEN)) {
+        if (!loObject.getTranStat()
+                .equalsIgnoreCase(TransactionStatus.STATE_OPEN)) {
             setMessage("Unable to close closed/cancelled/posted/voided transaction.");
             return lbResult;
         }
@@ -1947,9 +1958,11 @@ public class InvTransfer {
                         loRSParent.absolute(1);
                         if ((Double) paDetail.get(fnRow).getParnQty() >= Double.valueOf(loRSParent.getString("nQtyOnHnd").toString())) {
                             return false;
+
                         }
                     } catch (SQLException ex) {
-                        Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(InvTransfer.class
+                                .getName()).log(Level.SEVERE, null, ex);
                         return false;
                     }
                 }
@@ -2096,9 +2109,11 @@ public class InvTransfer {
                 loRSParent.absolute(1);
                 if (Double.valueOf(paDetail.get(fnRow).getParnQty().toString()) >= Double.valueOf(loRSParent.getString("nQtyOnHnd").toString())) {
                     return false;
+
                 }
             } catch (SQLException ex) {
-                Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(InvTransfer.class
+                        .getName()).log(Level.SEVERE, null, ex);
                 return false;
             }
             String lsValue = confirmSubParent(loRSParent,
