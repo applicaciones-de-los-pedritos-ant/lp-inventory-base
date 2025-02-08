@@ -1630,7 +1630,7 @@ public class InvTransfer {
                     }
                 }
             }
-            if (paDetail.get(lnCtr).getQuantity().doubleValue() < (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
+            if (paDetail.get(lnCtr).getQuantity().doubleValue() > (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
                 if (confirmSelectParent(lnCtr)) {
                     if (paDetail.get(lnCtr).getQuantity().doubleValue() == 0.00) {
                         ShowMessageFX.Error("This item has no inventory available."
@@ -1650,6 +1650,7 @@ public class InvTransfer {
                     return false;
                 }
             }
+            saveTransaction();
         }
         //if it is already closed, just return true
         if (loObject.getTranStat().equalsIgnoreCase(TransactionStatus.STATE_CLOSED)) {
@@ -1936,20 +1937,21 @@ public class InvTransfer {
                 loRSParent = poGRider.executeQuery(lsSQL);
                 if (MiscUtil.RecordCount(loRSParent) <= 0) {
                     ShowMessageFX.Warning("No parent inventory can be splitted.\nAll have no quantity on hand.",
-                             "Notice", null);
+                            "Notice", null);
                     return false;
                 }
 
                 if (pnEditMode != EditMode.ADDNEW) {
-                //check required parent on confirmation 
-                try {
-                    if ((Double) paDetail.get(fnRow).getParnQty() >= Double.valueOf(loRSParent.getString("nQtyOnHnd").toString())) {
+                    //check required parent on confirmation 
+                    try {
+                        loRSParent.absolute(1);
+                        if ((Double) paDetail.get(fnRow).getParnQty() >= Double.valueOf(loRSParent.getString("nQtyOnHnd").toString())) {
+                            return false;
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
                         return false;
                     }
-                } catch (SQLException ex) {
-                    Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
-                    return false;
-                }
                 }
                 String lsValue = showSelectParent(loRSParent,
                         (String) paDetailOthers.get(fnRow).getValue("sBarCodex"),
@@ -2089,13 +2091,9 @@ public class InvTransfer {
         String[] laResult;
         loRSParent = poGRider.executeQuery(getSQ_Parent(paDetailOthers.get(fnRow).getValue("sStockIDx").toString()));
         if (MiscUtil.RecordCount(loRSParent) > 0) {
-            String lsValue = confirmSubParent(loRSParent,
-                    (String) paDetailOthers.get(fnRow).getValue("sBarCodex"),
-                    (String) paDetailOthers.get(fnRow).getValue("sDescript"),
-                    (String) paDetailOthers.get(fnRow).getValue("sMeasurNm"),
-                    (String) paDetailOthers.get(fnRow).getValue("sInvTypNm"));
 
             try {
+                loRSParent.absolute(1);
                 if (Double.valueOf(paDetail.get(fnRow).getParnQty().toString()) >= Double.valueOf(loRSParent.getString("nQtyOnHnd").toString())) {
                     return false;
                 }
@@ -2103,12 +2101,18 @@ public class InvTransfer {
                 Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
             }
+            String lsValue = confirmSubParent(loRSParent,
+                    (String) paDetailOthers.get(fnRow).getValue("sBarCodex"),
+                    (String) paDetailOthers.get(fnRow).getValue("sDescript"),
+                    (String) paDetailOthers.get(fnRow).getValue("sMeasurNm"),
+                    (String) paDetailOthers.get(fnRow).getValue("sInvTypNm"));
+
             if (!lsValue.equals("")) {
                 String[] lasValue = lsValue.split("»");
 
                 setDetail(fnRow, "sParentID", lasValue[0]);
-                setDetail(fnRow, "nParntQty", (int) paDetail.get(fnRow).getParnQty() + 1);
-                setDetail(fnRow, "nSbItmQty", (int) paDetail.get(fnRow).getSbItmQty() + Double.valueOf(lasValue[1]));
+                setDetail(fnRow, "nParntQty", Double.parseDouble(paDetail.get(fnRow).getParnQty().toString()) + 1);
+                setDetail(fnRow, "nSbItmQty", Double.parseDouble(paDetail.get(fnRow).getSbItmQty().toString()) + Double.valueOf(lasValue[1]));
 
                 paDetailOthers.get(fnRow).setValue("sParentID", lasValue[0]);
                 paDetailOthers.get(fnRow).setValue("xParntQty", Double.valueOf(paDetailOthers.get(fnRow).getValue("xParntQty").toString()) + 1);
@@ -2116,7 +2120,7 @@ public class InvTransfer {
                 paDetailOthers.get(fnRow).setValue("nQtyOnHnd", Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()) + Double.valueOf(lasValue[1]));
 
                 if (paDetail.get(fnRow).getQuantity().doubleValue() == 0.00) {
-                    setDetail(fnRow, "nQuantity", 1);
+//                    setDetail(fnRow, "nQuantity", 1);
                 }
             } else {
                 return false;
