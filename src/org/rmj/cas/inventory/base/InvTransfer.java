@@ -1645,10 +1645,11 @@ public class InvTransfer {
                         paDetail.get(lnCtr).setValue(6, 0);
                         return false;
                     } else {
+                        paDetail.get(lnCtr).setValue(6, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
+
                         if ((Double) paDetail.get(lnCtr).getQuantity() > (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
-                            paDetail.get(lnCtr).setValue(6, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
                             ShowMessageFX.Error("Not enough quantity on hand. Please check your inventory. "
-                                    + paDetailOthers.get(lnCtr).getValue("sBarCodex") 
+                                    + paDetailOthers.get(lnCtr).getValue("sBarCodex")
                                     + "! Qty on Hand is " + paDetailOthers.get(lnCtr).getValue("nQtyOnHnd"),
                                     pxeModuleName, "Please confirm!!!");
                             return false;
