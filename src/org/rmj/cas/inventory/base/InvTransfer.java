@@ -1645,7 +1645,7 @@ public class InvTransfer {
                         paDetail.get(lnCtr).setValue(6, 0);
                         return false;
                     } else {
-                        paDetail.get(lnCtr).setValue(6, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
+//                        paDetail.get(lnCtr).setValue(6, Double.valueOf(paDetailOthers.get(lnCtr).getValue("nQtyOnHnd").toString()));
 
                         if ((Double) paDetail.get(lnCtr).getQuantity() > (Double) paDetailOthers.get(lnCtr).getValue("nQtyOnHnd")) {
                             ShowMessageFX.Error("Not enough quantity on hand. Please check your inventory. "
