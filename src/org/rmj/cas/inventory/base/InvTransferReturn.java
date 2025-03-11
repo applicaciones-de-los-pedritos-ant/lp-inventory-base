@@ -171,8 +171,7 @@ public class InvTransferReturn {
                     if (foData instanceof Number) {
                         paDetail.get(fnRow).setValue(fnCol, foData);
 
-                    } 
-                    else {
+                    } else {
                         paDetail.get(fnRow).setValue(fnCol, 0);
                     }
                 } else if (fnCol == poDetail.getColumn("nInvCostx")) {
@@ -1441,7 +1440,8 @@ public class InvTransferReturn {
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,
                                 (GEntity) laSubUnit.get(lnCtr),
                                 " nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2))
-                                + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)),
+                                + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1))
+                                + " AND sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(3)),
                                 "sBrandNme");
 
                     } else {
@@ -1476,7 +1476,8 @@ public class InvTransferReturn {
                     for (int lnCtr2 = lnCtr; lnCtr2 <= laSubUnit.size() - 1; lnCtr2++) {
                         lsSQL = "DELETE FROM " + poDetail.getTable()
                                 + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getStockIDx())
-                                + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox());
+                                + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox())
+                                + " AND sTransNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getTransNox());
 
                         if (!lsSQL.equals("")) {
                             if (poData.getBranchCd().equalsIgnoreCase(poGRider.getBranchCode())) {
@@ -1506,7 +1507,8 @@ public class InvTransferReturn {
             if (lnCtr == laSubUnit.size() - 1) {
                 lsSQL = "DELETE FROM " + poDetail.getTable()
                         + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getStockIDx())
-                        + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox());
+                        + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox())
+                        + " AND sTransNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getTransNox());
 
                 if (!lsSQL.equals("")) {
                     if (poData.getBranchCd().equalsIgnoreCase(poGRider.getBranchCode())) {
@@ -2066,7 +2068,6 @@ public class InvTransferReturn {
             paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
             paDetailOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
 
-           
             return true;
         } else {
             setDetail(fnRow, fnCol, "");
@@ -2172,7 +2173,6 @@ public class InvTransferReturn {
             paDetailOthers.get(fnRow).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
             paDetailOthers.get(fnRow).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
 
-            
             return true;
         } else {
             setDetail(fnRow, fnCol, "");
@@ -2441,7 +2441,7 @@ public class InvTransferReturn {
                 + " LEFT JOIN Measure e"
                 + " ON c.sMeasurID = e.sMeasurID"
                 + " WHERE a.sStockIDx = b.sStockIDx"
-//                + " AND b.sBranchCD = " + SQLUtil.toSQL(psBranchCd)
+                //                + " AND b.sBranchCD = " + SQLUtil.toSQL(psBranchCd)
                 + " GROUP BY  a.nEntryNox ORDER BY a.nEntryNox";
     }
 
