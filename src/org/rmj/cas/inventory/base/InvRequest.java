@@ -560,7 +560,8 @@ public class InvRequest {
                             lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,
                                     (GEntity) laSubUnit.get(lnCtr),
                                     " nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2))
-                                    + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)),
+                                    + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1))
+                                    + " AND sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(3)),
                                     "sBrandNme");
 
                         } else {
@@ -582,7 +583,8 @@ public class InvRequest {
                         for (int lnCtr2 = lnCtr; lnCtr2 <= laSubUnit.size() - 1; lnCtr2++) {
                             lsSQL = "DELETE FROM " + poDetail.getTable()
                                     + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getStockID())
-                                    + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox());
+                                    + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox())
+                                    + " AND sTransNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getTransNox());
 
                             if (!lsSQL.equals("")) {
                                 if (poGRider.executeQuery(lsSQL, poDetail.getTable(), "", "") == 0) {
@@ -599,7 +601,8 @@ public class InvRequest {
                 if (lnCtr == laSubUnit.size() - 1) {
                     lsSQL = "DELETE FROM " + poDetail.getTable()
                             + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getStockID())
-                            + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox());
+                            + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox())
+                            + " AND sTransNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getTransNox());
 
                     if (!lsSQL.equals("")) {
                         if (poGRider.executeQuery(lsSQL, poDetail.getTable(), "", "") == 0) {
@@ -626,7 +629,8 @@ public class InvRequest {
                             lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,
                                     (GEntity) laSubUnit.get(lnCtr),
                                     " nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2))
-                                    + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)),
+                                    + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1))
+                                    + " AND sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(3)),
                                     "sBrandNme");
 
                         } else {
