@@ -430,8 +430,7 @@ public class InvWaste {
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,
                                 (GEntity) laSubUnit.get(lnCtr),
                                 " nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2))
-                                + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1))
-                                + " AND sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(3)),
+                                + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)),
                                 "sBrandNme");
 
                     } else {
@@ -452,8 +451,7 @@ public class InvWaste {
                 } else {
                     for (int lnCtr2 = lnCtr; lnCtr2 <= laSubUnit.size() - 1; lnCtr2++) {
                         lsSQL = "DELETE FROM " + poDetail.getTable()
-                                + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getStockIDx())
-                                + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox())
+                                + " WHERE nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox())
                                 + " AND sTransNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getTransNox());
 
                         if (!lsSQL.equals("")) {
@@ -470,8 +468,7 @@ public class InvWaste {
             }
             if (lnCtr == laSubUnit.size() - 1) {
                 lsSQL = "DELETE FROM " + poDetail.getTable()
-                        + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getStockIDx())
-                        + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox())
+                        + " WHERE nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox())
                         + " AND sTransNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getTransNox());
 
                 if (!lsSQL.equals("")) {
