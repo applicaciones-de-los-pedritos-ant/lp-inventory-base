@@ -1440,8 +1440,7 @@ public class InvTransferReturn {
                         lsSQL = MiscUtil.makeSQL((GEntity) loNewEnt,
                                 (GEntity) laSubUnit.get(lnCtr),
                                 " nEntryNox = " + SQLUtil.toSQL(loNewEnt.getValue(2))
-                                + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1))
-                                + " AND sStockIDx = " + SQLUtil.toSQL(loNewEnt.getValue(3)),
+                                + " AND sTransNox = " + SQLUtil.toSQL(loNewEnt.getValue(1)),
                                 "sBrandNme");
 
                     } else {
