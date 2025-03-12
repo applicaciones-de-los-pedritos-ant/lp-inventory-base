@@ -1474,8 +1474,7 @@ public class InvTransferReturn {
                 } else {
                     for (int lnCtr2 = lnCtr; lnCtr2 <= laSubUnit.size() - 1; lnCtr2++) {
                         lsSQL = "DELETE FROM " + poDetail.getTable()
-                                + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getStockIDx())
-                                + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox())
+                                + " WHERE nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getEntryNox())
                                 + " AND sTransNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr2).getTransNox());
 
                         if (!lsSQL.equals("")) {
@@ -1505,8 +1504,7 @@ public class InvTransferReturn {
             }
             if (lnCtr == laSubUnit.size() - 1) {
                 lsSQL = "DELETE FROM " + poDetail.getTable()
-                        + " WHERE sStockIDx = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getStockIDx())
-                        + " AND nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox())
+                        + " WHERE nEntryNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getEntryNox())
                         + " AND sTransNox = " + SQLUtil.toSQL(laSubUnit.get(lnCtr).getTransNox());
 
                 if (!lsSQL.equals("")) {
