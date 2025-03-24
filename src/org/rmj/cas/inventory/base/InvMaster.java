@@ -854,7 +854,7 @@ public class InvMaster {
         poGRider.beginTrans();
 
         while (loRS.next()) {
-            if (!recalculate(psStockIDx, true)) {
+            if (!recalculate(loRS.getString("sStockIDx"), true)) {
                 poGRider.rollbackTrans();
                 return false;
             }
