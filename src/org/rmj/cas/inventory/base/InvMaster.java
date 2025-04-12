@@ -1011,18 +1011,47 @@ public class InvMaster {
             setMessage("No inventory found for this branch.");
             return false;
         }
-
+        
         //get beginning inventory date and quantity
         if (loRS.next()) {
             ldBegInv = loRS.getDate("dBegInvxx");
             lnQOH = loRS.getDouble("nBegQtyxx");
+            
+            if (ldBegInv == null){
+                lsSQL = "SELECT * FROM Inv_Ledger" +
+                        " WHERE sStockIDx = " + SQLUtil.toSQL(fsStockIDx) +
+                            " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd) +
+                            " AND nQtyInxxx > 0" +
+                        " ORDER BY dTransact, nLedgerNo LIMIT 1";
+                
+                loRS = poGRider.executeQuery(lsSQL);
+                
+                if (loRS.next()){
+                    ldBegInv = loRS.getDate("dTransact");
+                    lnQOH = loRS.getDouble("nQtyInxxx");
+                    
+                    lsSQL = "UPDATE Inv_Master SET" +
+                                "  dBegInvxx = " + SQLUtil.toSQL(ldBegInv) +
+                                ", nBegQtyxx = " + lnQOH +
+                            " WHERE sStockIDx = " + SQLUtil.toSQL(fsStockIDx) +
+                            " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd);
+                    
+                    if (poGRider.executeQuery(lsSQL, "Inv_Master", psBranchCd, "") != 1) {
+                        setMessage("Unable to execute ledger update.");
+                        if (!fbWtParent) {
+                            poGRider.rollbackTrans();
+                        }
+                        return false;
+                    }
+                }
+            }
         }
 
         //load the ledger after the beginning inventory date
         lsSQL = "SELECT * FROM Inv_Ledger"
                 + " WHERE sStockIDx = " + SQLUtil.toSQL(fsStockIDx)
-                + " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd)
-                + " AND dTransact > " + SQLUtil.toSQL(SQLUtil.dateFormat(ldBegInv, SQLUtil.FORMAT_SHORT_DATE))
+                    + " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd)
+                    + " AND dTransact > " + SQLUtil.toSQL(SQLUtil.dateFormat(ldBegInv, SQLUtil.FORMAT_SHORT_DATE))
                 + " ORDER BY dTransact, nLedgerNo";
 
         loRS = poGRider.executeQuery(lsSQL);
@@ -1043,16 +1072,16 @@ public class InvMaster {
             lnQOH += (loRS.getDouble("nQtyInxxx") - loRS.getDouble("nQtyOutxx"));
 
             lsSQL = "UPDATE Inv_Ledger SET"
-                    + "  nLedgerNo = " + lnLedgerNo
-                    + ", nQtyOnHnd = " + lnQOH
-                    + ", sModified = " + SQLUtil.toSQL(poGRider.getUserID())
-                    + ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate())
+                        + "  nLedgerNo = " + lnLedgerNo
+                        + ", nQtyOnHnd = " + lnQOH
+                        + ", sModified = " + SQLUtil.toSQL(poGRider.getUserID())
+                        + ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate())
                     + " WHERE sStockIDx = " + SQLUtil.toSQL(fsStockIDx)
-                    + " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd)
-                    + " AND nLedgerNo = " + loRS.getInt("nLedgerNo")
-                    + " AND sSourceCd = " + SQLUtil.toSQL(loRS.getString("sSourceCd"))
-                    + " AND sSourceNo = " + SQLUtil.toSQL(loRS.getString("sSourceNo"));
-            ;
+                        + " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd)
+                        + " AND nLedgerNo = " + loRS.getInt("nLedgerNo")
+                        + " AND sSourceCd = " + SQLUtil.toSQL(loRS.getString("sSourceCd"))
+                        + " AND sSourceNo = " + SQLUtil.toSQL(loRS.getString("sSourceNo"));
+            
             if (poGRider.executeQuery(lsSQL, "Inv_Ledger", psBranchCd, "") != 1) {
                 setMessage("Unable to execute ledger update.");
                 if (!fbWtParent) {
