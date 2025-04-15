@@ -44,7 +44,6 @@ import org.rmj.appdriver.constants.UserRight;
 import org.rmj.cas.inventory.base.InvExpiration;
 import org.rmj.cas.inventory.base.InvRequest;
 import org.rmj.cas.inventory.base.InvTransfer;
-import org.rmj.cas.inventory.base.Inventory;
 import org.rmj.cas.inventory.others.pojo.UnitDailyProductionInvOthers;
 import org.rmj.cas.inventory.production.pojo.UnitDailyProductionInv;
 import org.rmj.lp.parameter.agent.XMBranch;
