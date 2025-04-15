@@ -357,7 +357,7 @@ public class InvRequest {
                 loOcc.setValue("nAllocQty", loRS.getDouble("nAllocQty"));
                 loOcc.setValue("nReceived", loRS.getDouble("nReceived"));
                 loOcc.setValue("sNotesxxx", loRS.getString("sNotesxxx"));
-                loOcc.setValue("sBatchNox", loRS.getString("sBatchNox"));
+//                loOcc.setValue("sBatchNox", loRS.getString("sBatchNox"));
                 loOcc.setValue("dModified", loRS.getDate("dModified"));
                 loDetail.add(loOcc);
 
@@ -1820,7 +1820,7 @@ public class InvRequest {
                 + ", a.nAllocQty"
                 + ", a.nReceived"
                 + ", a.sNotesxxx"
-                + ", a.sBatchNox"
+//                + ", a.sBatchNox"
                 + ", a.dModified"
                 + ", b.nQtyOnHnd"
                 + ", b.nQtyOnHnd + a.nQuantity xQtyOnHnd"

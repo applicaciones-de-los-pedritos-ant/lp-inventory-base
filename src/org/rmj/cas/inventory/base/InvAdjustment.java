@@ -1030,7 +1030,7 @@ public class InvAdjustment {
         setErrMsg("");
         setMessage("");
 
-        lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
+        lsSQL = getSQ_Stocks();
 
         if (fbByCode) {
             lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
