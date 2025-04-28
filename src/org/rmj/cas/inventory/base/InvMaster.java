@@ -999,10 +999,10 @@ public class InvMaster {
         //find inventory
         lsSQL = "SELECT a.sStockIDx, a.dBegInvxx, a.dAcquired, a.nBegQtyxx"
                 + " FROM Inv_Master a"
-                + ", Inventory b"
+                    + ", Inventory b"
                 + " WHERE a.sStockIDx = b.sStockIDx"
-                + " AND a.sStockIDx = " + SQLUtil.toSQL(fsStockIDx)
-                + " AND a.sBranchCd = " + SQLUtil.toSQL(psBranchCd);
+                    + " AND a.sStockIDx = " + SQLUtil.toSQL(fsStockIDx)
+                    + " AND a.sBranchCd = " + SQLUtil.toSQL(psBranchCd);
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
