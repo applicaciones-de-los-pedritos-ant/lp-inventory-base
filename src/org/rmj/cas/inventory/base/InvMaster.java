@@ -1026,13 +1026,8 @@ public class InvMaster {
                 loRS = poGRider.executeQuery(lsSQL);
                 
                 if (loRS.next()){                   
-                    ldBegInv = loRS.getDate("dTransact");
-                    lnQOH = loRS.getDouble("nQtyInxxx");
-                    
-                    if (ldBegInv.after(ldAcquired)){
-                        ldBegInv = ldAcquired;
-                        lnQOH = 0;
-                    }
+                    ldBegInv = CommonUtils.dateAdd(loRS.getDate("dTransact"), -1) ;
+                    lnQOH = 0;
                     
                     lsSQL = "UPDATE Inv_Master SET" +
                                 "  dBegInvxx = " + SQLUtil.toSQL(ldBegInv) +
