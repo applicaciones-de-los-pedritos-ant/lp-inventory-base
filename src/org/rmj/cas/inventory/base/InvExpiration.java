@@ -613,10 +613,12 @@ public class InvExpiration {
                 
                 if (poRSProcessd.get(lnCtr).getDateExpiry()==null) {
                     lsMasSQL = "INSERT INTO Inv_Master_Expiration SET" +
-                                "  sStockIDx = " + SQLUtil.toSQL(poRSProcessd.get(lnCtr).getStockID()) +
-                                ", sBranchCd = " + SQLUtil.toSQL(psBranchCd) +
-                                ", dExpiryDt = " + SQLUtil.toSQL(pdTransact) +
-                                ", nQtyOnHnd = " + poRSProcessd.get(lnCtr).getQuantity();
+                                    "  sStockIDx = " + SQLUtil.toSQL(poRSProcessd.get(lnCtr).getStockID()) +
+                                    ", sBranchCd = " + SQLUtil.toSQL(psBranchCd) +
+                                    ", dExpiryDt = " + SQLUtil.toSQL(pdTransact) +
+                                    ", nQtyOnHnd = " + poRSProcessd.get(lnCtr).getQuantity() +
+                                " ON DUPLICATE KEY UPDATE " +
+                                    "  nQtyOnHnd = nQtyOnHnd + " +poRSProcessd.get(lnCtr).getQuantity();
                 }else{
                      String lsSQL = "SELECT nQtyOnHnd" + 
                                     " FROM Inv_Master_Expiration" + 
@@ -628,10 +630,12 @@ public class InvExpiration {
                     
                     if (MiscUtil.RecordCount(loRS) == 0){
                         lsMasSQL = "INSERT INTO Inv_Master_Expiration SET" +
-                                "  sStockIDx = " + SQLUtil.toSQL(poRSProcessd.get(lnCtr).getStockID()) +
-                                ", sBranchCd = " + SQLUtil.toSQL(psBranchCd) +
-                                ", dExpiryDt = " + SQLUtil.toSQL(poRSProcessd.get(lnCtr).getDateExpiry()) +
-                                ", nQtyOnHnd = " + poRSProcessd.get(lnCtr).getQuantity();
+                                        "  sStockIDx = " + SQLUtil.toSQL(poRSProcessd.get(lnCtr).getStockID()) +
+                                        ", sBranchCd = " + SQLUtil.toSQL(psBranchCd) +
+                                        ", dExpiryDt = " + SQLUtil.toSQL(poRSProcessd.get(lnCtr).getDateExpiry()) +
+                                        ", nQtyOnHnd = " + poRSProcessd.get(lnCtr).getQuantity() +
+                                    " ON DUPLICATE KEY UPDATE " +
+                                        "  nQtyOnHnd = nQtyOnHnd + " +poRSProcessd.get(lnCtr).getQuantity();
                     }else{
                         lnQtyOnHnd = poRSProcessd.get(lnCtr).getQtyOnHnd().doubleValue() + poRSProcessd.get(lnCtr).getQtyInxxx().doubleValue() - poRSProcessd.get(lnCtr).getQtyOutxx().doubleValue(); 
                         lsMasSQL = "UPDATE Inv_Master_Expiration SET" + 
@@ -649,6 +653,7 @@ public class InvExpiration {
                             " WHERE sStockIDx = " + SQLUtil.toSQL(poRSProcessd.get(lnCtr).getStockID()) + 
                                 " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd) +
                                 " AND dExpiryDt = " + SQLUtil.toSQL(CommonUtils.xsDateShort(poRSProcessd.get(lnCtr).getDateExpiry()));
+                
             }    
                 
             if (poGRider.executeQuery(lsMasSQL, "Inv_Master_Expiration", psBranchCd, "") <= 0){
