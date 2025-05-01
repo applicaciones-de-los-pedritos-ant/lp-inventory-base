@@ -930,16 +930,8 @@ public class DailyProduction {
             lbResult = true;
         }
 
-        if (!pbWithParent) {
-            if (getErrMsg().isEmpty()) {
-                poGRider.commitTrans();
-            } else {
-                poGRider.rollbackTrans();
-            }
-        }
-
         String lsSourceNo = (String) getMaster("sSourceNo");
-        if (!lsSourceNo.isEmpty() || lsSourceNo != null) {
+        if (lsSourceNo != null && !lsSourceNo.isEmpty()) {
             try {
                 ProductionRequest loProductReq = new ProductionRequest(poGRider, poGRider.getBranchCode(), true);
                 loProductReq.setTranStat(12340);
@@ -949,6 +941,20 @@ public class DailyProduction {
                 printTransfer();
             } catch (SQLException ex) {
                 Logger.getLogger(DailyProduction.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            /* for saving of detail */
+            lbResult = saveInvTrans();
+            /* for saving of raw detail */
+            if (lbResult) {
+                lbResult = saveInvTransSub();
+            }
+        }
+        if (!pbWithParent) {
+            if (getErrMsg().isEmpty()) {
+                poGRider.commitTrans();
+            } else {
+                poGRider.rollbackTrans();
             }
         }
 
@@ -987,15 +993,7 @@ public class DailyProduction {
             } else {
                 setErrMsg("No record deleted.");
             }
-        } else {
-            /* for saving of detail */
-            lbResult = saveInvTrans();
-            /* for saving of raw detail */
-            if (lbResult) {
-                lbResult = saveInvTransSub();
-            }
         }
-
         if (!pbWithParent) {
             if (getErrMsg().isEmpty()) {
                 poGRider.commitTrans();
@@ -1323,14 +1321,13 @@ public class DailyProduction {
                     return false;
                 }
             }
-        }
 
-        if (!loInvTrans.DailyProduction_IN(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
-            setMessage(loInvTrans.getMessage());
-            setErrMsg(loInvTrans.getErrMsg());
-            return false;
+            if (!loInvTrans.DailyProduction_IN(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
+                setMessage(loInvTrans.getMessage());
+                setErrMsg(loInvTrans.getErrMsg());
+                return false;
+            }
         }
-
         //TODO
         //update branch order info
         return saveInvExpiration(poData.getDateTransact(), true);
@@ -1402,12 +1399,12 @@ public class DailyProduction {
                     return false;
                 }
             }
-        }
 
-        if (!loInvTrans.DailyProduction_OUT(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
-            setMessage(loInvTrans.getMessage());
-            setErrMsg(loInvTrans.getErrMsg());
-            return false;
+            if (!loInvTrans.DailyProduction_OUT(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
+                setMessage(loInvTrans.getMessage());
+                setErrMsg(loInvTrans.getErrMsg());
+                return false;
+            }
         }
 
         //TODO
@@ -1875,9 +1872,9 @@ public class DailyProduction {
         JSONArray loArray = new JSONArray();
         try {
             String lsSQL = MiscUtil.addCondition("SELECT a.sTransNox, b.sBranchCd FROM Inv_Stock_Request_Detail a "
-                    +" LEFT JOIN Inv_Stock_Request_Master b "
-                    +" ON a.sTransNox = b.sTransNox "
-                    +" GROUP BY a.sTransNox", "a.sBatchNox = " + SQLUtil.toSQL(poData.getSourceNo()));
+                    + " LEFT JOIN Inv_Stock_Request_Master b "
+                    + " ON a.sTransNox = b.sTransNox "
+                    + " GROUP BY a.sTransNox", "a.sBatchNox = " + SQLUtil.toSQL(poData.getSourceNo()));
             System.err.println(lsSQL);
             ResultSet loRS = poGRider.executeQuery(lsSQL);
 
