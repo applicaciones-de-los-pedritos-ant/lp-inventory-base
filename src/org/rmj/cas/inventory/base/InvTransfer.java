@@ -1738,10 +1738,10 @@ public class InvTransfer {
         }
 
         String lsSQL = "UPDATE " + loObject.getTable()
-                + " SET  cTranStat = " + SQLUtil.toSQL(TransactionStatus.STATE_POSTED)
-                + ", sReceived = " + SQLUtil.toSQL(psUserIDxx)
-                + ", dReceived = " + SQLUtil.toSQL(received)
-                + " WHERE sTransNox = " + SQLUtil.toSQL(loObject.getTransNox());
+                        + " SET  cTranStat = " + SQLUtil.toSQL(TransactionStatus.STATE_POSTED)
+                            + ", sReceived = " + SQLUtil.toSQL(psUserIDxx)
+                            + ", dReceived = " + SQLUtil.toSQL(received)
+                        + " WHERE sTransNox = " + SQLUtil.toSQL(loObject.getTransNox());
 
         if (!pbWithParent) {
             poGRider.beginTrans();
