@@ -1321,13 +1321,14 @@ public class DailyProduction {
                     return false;
                 }
             }
-
-            if (!loInvTrans.DailyProduction_IN(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
-                setMessage(loInvTrans.getMessage());
-                setErrMsg(loInvTrans.getErrMsg());
-                return false;
-            }
         }
+
+        if (!loInvTrans.DailyProduction_IN(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
+            setMessage(loInvTrans.getMessage());
+            setErrMsg(loInvTrans.getErrMsg());
+            return false;
+        }
+
         //TODO
         //update branch order info
         return saveInvExpiration(poData.getDateTransact(), true);
@@ -1400,11 +1401,11 @@ public class DailyProduction {
                 }
             }
 
-            if (!loInvTrans.DailyProduction_OUT(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
-                setMessage(loInvTrans.getMessage());
-                setErrMsg(loInvTrans.getErrMsg());
-                return false;
-            }
+        }
+        if (!loInvTrans.DailyProduction_OUT(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
+            setMessage(loInvTrans.getMessage());
+            setErrMsg(loInvTrans.getErrMsg());
+            return false;
         }
 
         //TODO
@@ -1435,46 +1436,46 @@ public class DailyProduction {
     }
 
     private boolean saveInvExpiration(Date fdTransact, Boolean fbInvIn) {
-        InvExpiration loInvTrans = new InvExpiration(poGRider, poGRider.getBranchCode());
-        loInvTrans.InitTransaction();
-
-        boolean lbProcess = false;
-
-        if (fbInvIn == false) {
-            for (int lnCtr = 0; lnCtr <= paInv.size() - 1; lnCtr++) {
-                if (paInv.get(lnCtr).getStockIDx().equals("")) {
-                    break;
-                }
-                loInvTrans.setDetail(lnCtr, "sStockIDx", paInv.get(lnCtr).getStockIDx());
-                loInvTrans.setDetail(lnCtr, "dExpiryDt", paInv.get(lnCtr).getDateExpiryDt());
-                loInvTrans.setDetail(lnCtr, "nQtyOutxx", paInv.get(lnCtr).getQtyUsed());
-
-                lbProcess = true;
-            }
-        } else {
-            for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
-                if (paDetail.get(lnCtr).getStockIDx().equals("")) {
-                    break;
-                }
-                loInvTrans.setDetail(lnCtr, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
-                loInvTrans.setDetail(lnCtr, "dExpiryDt", paDetail.get(lnCtr).getDateExpiryDt());
-                loInvTrans.setDetail(lnCtr, "nQtyInxxx", paDetail.get(lnCtr).getQuantity());
-
-                lbProcess = true;
-            }
-        }
-
-        if (fbInvIn == true) {
-            if (lbProcess) {
-                if (!loInvTrans.DailyProduction_IN(fdTransact, EditMode.ADDNEW)) {
-                    setMessage(loInvTrans.getMessage());
-                    setErrMsg(loInvTrans.getErrMsg());
-                    return false;
-                }
-            }
-        } else {
-            return saveInvExpirationSub(fdTransact);
-        }
+//        InvExpiration loInvTrans = new InvExpiration(poGRider, poGRider.getBranchCode());
+//        loInvTrans.InitTransaction();
+//
+//        boolean lbProcess = false;
+//
+//        if (fbInvIn == false) {
+//            for (int lnCtr = 0; lnCtr <= paInv.size() - 1; lnCtr++) {
+//                if (paInv.get(lnCtr).getStockIDx().equals("")) {
+//                    break;
+//                }
+//                loInvTrans.setDetail(lnCtr, "sStockIDx", paInv.get(lnCtr).getStockIDx());
+//                loInvTrans.setDetail(lnCtr, "dExpiryDt", paInv.get(lnCtr).getDateExpiryDt());
+//                loInvTrans.setDetail(lnCtr, "nQtyOutxx", paInv.get(lnCtr).getQtyUsed());
+//
+//                lbProcess = true;
+//            }
+//        } else {
+//            for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
+//                if (paDetail.get(lnCtr).getStockIDx().equals("")) {
+//                    break;
+//                }
+//                loInvTrans.setDetail(lnCtr, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
+//                loInvTrans.setDetail(lnCtr, "dExpiryDt", paDetail.get(lnCtr).getDateExpiryDt());
+//                loInvTrans.setDetail(lnCtr, "nQtyInxxx", paDetail.get(lnCtr).getQuantity());
+//
+//                lbProcess = true;
+//            }
+//        }
+//
+//        if (fbInvIn == true) {
+//            if (lbProcess) {
+//                if (!loInvTrans.DailyProduction_IN(fdTransact, EditMode.ADDNEW)) {
+//                    setMessage(loInvTrans.getMessage());
+//                    setErrMsg(loInvTrans.getErrMsg());
+//                    return false;
+//                }
+//            }
+//        } else {
+//            return saveInvExpirationSub(fdTransact);
+//        }
 
         return true;
     }

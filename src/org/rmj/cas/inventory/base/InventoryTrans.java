@@ -715,6 +715,9 @@ public class InventoryTrans {
         ResultSet loRS;
 
         for (int lnCtr = 0; lnCtr <= poRSProcessd.size() - 1; lnCtr++) {
+            if (poRSProcessd.get(lnCtr).getStockIDx().isEmpty()){
+                continue;
+                }
             if (psSourceCd.equals(InvConstants.ACCEPT_DELIVERY)
                     || psSourceCd.equals(InvConstants.ACCEPT_DELIVERY_DISCREPANCY)
                     || psSourceCd.equals(InvConstants.ACCEPT_WARRANTY_TRANSFER)
