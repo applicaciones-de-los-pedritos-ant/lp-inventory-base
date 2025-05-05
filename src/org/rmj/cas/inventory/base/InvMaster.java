@@ -1056,6 +1056,20 @@ public class InvMaster {
         loRS = poGRider.executeQuery(lsSQL);
 
         if (MiscUtil.RecordCount(loRS) <= 0) {
+            lsSQL = "UPDATE Inv_Master SET"
+                    + "  nQtyOnHnd = " + lnQOH
+                    + ", nLedgerNo = 0"
+                    + ", dLastTran = " + SQLUtil.toSQL(SQLUtil.dateFormat(ldBegInv, SQLUtil.FORMAT_SHORT_DATE))
+                    + ", sModified = " + SQLUtil.toSQL(poGRider.getUserID())
+                    + ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate())
+                    + " WHERE sStockIDx = " + SQLUtil.toSQL(fsStockIDx)
+                    + " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd);
+            
+            if (poGRider.executeQuery(lsSQL, "Inv_Master", psBranchCd, "") != 1) {
+                setMessage("Unable to execute ledger update.");
+                return false;
+            }
+            
             return true;
         }
 
