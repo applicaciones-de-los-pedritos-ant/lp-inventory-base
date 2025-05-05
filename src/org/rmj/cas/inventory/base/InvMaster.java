@@ -886,10 +886,13 @@ public class InvMaster {
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
-        if (MiscUtil.RecordCount(loRS) <= 0) {
+        if (!loRS.next()) {
             setMessage("No inventory found for this branch.");
             return false;
         }
+        
+        lnLedgerNo = 0;
+        lnQOH = loRS.getInt("nBegQtyxx");
 
         //get the starting on hand from the ledger of the transaction date
         lsSQL = "SELECT * FROM Inv_Ledger"
@@ -902,10 +905,7 @@ public class InvMaster {
         loRS = poGRider.executeQuery(lsSQL);
 
         //beginning quantity and ledger no
-        if (!loRS.next()) {
-            lnQOH = 0;
-            lnLedgerNo = 0;
-        } else {
+        if (loRS.next()) {
             lnQOH = loRS.getDouble("nQtyOnHnd");
             lnLedgerNo = loRS.getInt("nLedgerNo");
         }
