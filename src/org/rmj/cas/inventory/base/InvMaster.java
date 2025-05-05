@@ -297,7 +297,7 @@ public class InvMaster {
                     lsHeader,
                     lsColName,
                     lsColCrit,
-                    fbSearch ? 1 : 5);
+                    fbSearch ? 1 : 0);
         }
 
         if (loJSON != null) {
