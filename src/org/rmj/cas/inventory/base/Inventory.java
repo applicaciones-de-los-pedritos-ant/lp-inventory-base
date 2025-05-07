@@ -333,11 +333,11 @@ public class Inventory {
     }
 
     public boolean SaveRecord() {
-        setErrMsg("");
         String lsSQL = "";
         UnitInventory loOldEnt = null;
         UnitInventory loNewEnt = null;
         boolean lbUpdate = false;
+        setErrMsg("");
 
         // Typecast the Entity to this object
         loNewEnt = (UnitInventory) poData;
@@ -387,7 +387,7 @@ public class Inventory {
             }
         }
 
-        if (!lsSQL.equals("") && getErrMsg().isEmpty()) {
+        if (!lsSQL.equals("")) {
             if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
                 if (!poGRider.getErrMsg().isEmpty()) {
                     setErrMsg(poGRider.getErrMsg());
@@ -415,7 +415,7 @@ public class Inventory {
                 if (!loInvMaster.SaveRecord()) {
                     setErrMsg(loInvMaster.getErrMsg().isEmpty() ? loInvMaster.getMessage() : loInvMaster.getErrMsg());
                     poGRider.rollbackTrans();
-                    System.exit(1);
+                    return false;
                 }
             }
 
@@ -425,6 +425,7 @@ public class Inventory {
         if (!pbWithParent) {
             if (!getErrMsg().isEmpty()) {
                 poGRider.rollbackTrans();
+                return false;
             } else {
                 poGRider.commitTrans();
             }
