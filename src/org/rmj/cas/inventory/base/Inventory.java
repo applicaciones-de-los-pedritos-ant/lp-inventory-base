@@ -333,6 +333,7 @@ public class Inventory {
     }
 
     public boolean SaveRecord() {
+        setErrMsg("");
         String lsSQL = "";
         UnitInventory loOldEnt = null;
         UnitInventory loNewEnt = null;
@@ -390,8 +391,12 @@ public class Inventory {
             if (poGRider.executeQuery(lsSQL, loNewEnt.getTable(), "", "") == 0) {
                 if (!poGRider.getErrMsg().isEmpty()) {
                     setErrMsg(poGRider.getErrMsg());
+                    poGRider.rollbackTrans();
+                    return false;
                 } else {
                     setMessage("No record updated");
+                    poGRider.rollbackTrans();
+                    return false;
                 }
             }
             lbUpdate = true;
