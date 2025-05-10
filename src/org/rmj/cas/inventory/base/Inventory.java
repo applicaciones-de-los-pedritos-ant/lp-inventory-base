@@ -74,7 +74,7 @@ public class Inventory {
                 + ", b.sDescript "
                 + " FROM Inventory_Sub_Unit a"
                 + " LEFT JOIN Inventory b"
-                + " ON a.sStockIDx = b.sStockIDx"
+                + " ON a.sItmSubID = b.sStockIDx"
                 + " ORDER BY a.nEntryNox ";
         lsSQL = MiscUtil.addCondition(lsSQL, "a.sStockIDx = " + SQLUtil.toSQL(fsValue));
 
