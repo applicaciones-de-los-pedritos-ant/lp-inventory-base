@@ -588,8 +588,8 @@ public class InvTransfer {
             }
 
             if (!paDetail.get(lnCtr).getParentID().equals("")) {
-                InventoryTrans loInvDMTrans = new InventoryTrans(poGRider, psBranchCd);
-                loInvDMTrans.InitTransaction();
+                InventoryTrans loInvCMTrans = new InventoryTrans(poGRider, psBranchCd);
+                loInvCMTrans.InitTransaction();
 
                 lsSQL = "SELECT"
                         + "  a.nQtyOnHnd"
@@ -609,27 +609,27 @@ public class InvTransfer {
 
                 loRS = poGRider.executeQuery(lsSQL);
 
-                loInvDMTrans.setDetail(0, "sStockIDx", paDetail.get(lnCtr).getParentID());
-                loInvDMTrans.setDetail(0, "nQuantity", paDetail.get(lnCtr).getParnQty());
+                loInvCMTrans.setDetail(0, "sStockIDx", paDetail.get(lnCtr).getParentID());
+                loInvCMTrans.setDetail(0, "nQuantity", paDetail.get(lnCtr).getParnQty());
 
                 if (MiscUtil.RecordCount(loRS) == 0) {
-                    loInvDMTrans.setDetail(0, "nQtyOnHnd", 0);
-                    loInvDMTrans.setDetail(0, "nResvOrdr", 0);
-                    loInvDMTrans.setDetail(0, "nBackOrdr", 0);
+                    loInvCMTrans.setDetail(0, "nQtyOnHnd", 0);
+                    loInvCMTrans.setDetail(0, "nResvOrdr", 0);
+                    loInvCMTrans.setDetail(0, "nBackOrdr", 0);
                 } else {
                     try {
                         loRS.first();
-                        loInvDMTrans.setDetail(0, "nQtyOnHnd", loRS.getDouble("nQtyOnHnd"));
-                        loInvDMTrans.setDetail(0, "nResvOrdr", loRS.getDouble("nResvOrdr"));
-                        loInvDMTrans.setDetail(0, "nBackOrdr", loRS.getDouble("nBackOrdr"));
-                        loInvDMTrans.setDetail(0, "nLedgerNo", loRS.getInt("nLedgerNo"));
+                        loInvCMTrans.setDetail(0, "nQtyOnHnd", loRS.getDouble("nQtyOnHnd"));
+                        loInvCMTrans.setDetail(0, "nResvOrdr", loRS.getDouble("nResvOrdr"));
+                        loInvCMTrans.setDetail(0, "nBackOrdr", loRS.getDouble("nBackOrdr"));
+                        loInvCMTrans.setDetail(0, "nLedgerNo", loRS.getInt("nLedgerNo"));
 
                         if (loRS.getDate("dExpiryDt") == null) {
                             ldParentExp = poGRider.getSysDate();
                         } else {
                             ldParentExp = loRS.getDate("dExpiryDt");
                         }
-                        loInvDMTrans.setDetail(0, "dExpiryDt", ldParentExp);
+                        loInvCMTrans.setDetail(0, "dExpiryDt", ldParentExp);
                     } catch (SQLException e) {
                         setMessage("Please inform MIS Department.");
                         setErrMsg(e.getMessage());
@@ -637,9 +637,9 @@ public class InvTransfer {
                     }
                 }
 
-                if (!loInvDMTrans.DebitMemo(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
-                    setMessage(loInvDMTrans.getMessage());
-                    setErrMsg(loInvDMTrans.getErrMsg());
+                if (!loInvCMTrans.CreditMemo(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
+                    setMessage(loInvCMTrans.getMessage());
+                    setErrMsg(loInvCMTrans.getErrMsg());
                     return false;
                 }
 //                if (!loInvTrans.Delivery(poData.getTransNox(), poData.getTransact(), EditMode.ADDNEW)){
@@ -655,8 +655,8 @@ public class InvTransfer {
          *---------------------------------------------------------------------------------*/
         for (lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
             if (!paDetail.get(lnCtr).getParentID().equals("")) {
-                InventoryTrans loInvCMTrans = new InventoryTrans(poGRider, psBranchCd);
-                loInvCMTrans.InitTransaction();
+                InventoryTrans loInvDMTrans = new InventoryTrans(poGRider, psBranchCd);
+                loInvDMTrans.InitTransaction();
                 lsSQL = "SELECT"
                         + "  nQtyOnHnd"
                         + ", nResvOrdr"
@@ -668,21 +668,21 @@ public class InvTransfer {
 
                 loRS = poGRider.executeQuery(lsSQL);
 
-                loInvCMTrans.setDetail(0, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
-                loInvCMTrans.setDetail(0, "dExpiryDt", ldParentExp);
-                loInvCMTrans.setDetail(0, "nQuantity", paDetail.get(lnCtr).getSbItmQty());
+                loInvDMTrans.setDetail(0, "sStockIDx", paDetail.get(lnCtr).getStockIDx());
+                loInvDMTrans.setDetail(0, "dExpiryDt", ldParentExp);
+                loInvDMTrans.setDetail(0, "nQuantity", paDetail.get(lnCtr).getSbItmQty());
 
                 if (MiscUtil.RecordCount(loRS) == 0) {
-                    loInvCMTrans.setDetail(0, "nQtyOnHnd", 0);
-                    loInvCMTrans.setDetail(0, "nResvOrdr", 0);
-                    loInvCMTrans.setDetail(0, "nBackOrdr", 0);
+                    loInvDMTrans.setDetail(0, "nQtyOnHnd", 0);
+                    loInvDMTrans.setDetail(0, "nResvOrdr", 0);
+                    loInvDMTrans.setDetail(0, "nBackOrdr", 0);
                 } else {
                     try {
                         loRS.first();
-                        loInvCMTrans.setDetail(0, "nQtyOnHnd", loRS.getDouble("nQtyOnHnd"));
-                        loInvCMTrans.setDetail(0, "nResvOrdr", loRS.getDouble("nResvOrdr"));
-                        loInvCMTrans.setDetail(0, "nBackOrdr", loRS.getDouble("nBackOrdr"));
-                        loInvCMTrans.setDetail(0, "nLedgerNo", loRS.getInt("nLedgerNo"));
+                        loInvDMTrans.setDetail(0, "nQtyOnHnd", loRS.getDouble("nQtyOnHnd"));
+                        loInvDMTrans.setDetail(0, "nResvOrdr", loRS.getDouble("nResvOrdr"));
+                        loInvDMTrans.setDetail(0, "nBackOrdr", loRS.getDouble("nBackOrdr"));
+                        loInvDMTrans.setDetail(0, "nLedgerNo", loRS.getInt("nLedgerNo"));
                     } catch (SQLException e) {
                         setMessage("Please inform MIS Department.");
                         setErrMsg(e.getMessage());
@@ -690,9 +690,9 @@ public class InvTransfer {
                     }
                 }
 
-                if (!loInvCMTrans.CreditMemo(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
-                    setMessage(loInvCMTrans.getMessage());
-                    setErrMsg(loInvCMTrans.getErrMsg());
+                if (!loInvDMTrans.DebitMemo(poData.getTransNox(), poGRider.getServerDate(), EditMode.ADDNEW)) {
+                    setMessage(loInvDMTrans.getMessage());
+                    setErrMsg(loInvDMTrans.getErrMsg());
                     return false;
                 }
             }

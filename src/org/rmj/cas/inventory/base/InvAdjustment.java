@@ -99,11 +99,15 @@ public class InvAdjustment {
 
                 if (fnCol == poDetail.getColumn("nDebitQty")) {
                     if (foData instanceof Number) {
-                        if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
-                            paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
-                        } else {
-                            paDetail.get(fnRow).setValue(fnCol, foData);
-                        }
+//                        if (!pbWithParent) {
+//                            if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
+//                                paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
+//                            } else {
+//                                paDetail.get(fnRow).setValue(fnCol, foData);
+//                            }
+//                        } else {
+                        paDetail.get(fnRow).setValue(fnCol, foData);
+//                        }
 
                         addDetail();
                     } else {
@@ -111,10 +115,15 @@ public class InvAdjustment {
                     }
                 } else if (fnCol == poDetail.getColumn("nCredtQty")) {
                     if (foData instanceof Number) {
-//                        if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()))
-//                            paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
-//                        else
-                        paDetail.get(fnRow).setValue(fnCol, foData);
+                        if (!pbWithParent) {
+                            if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
+                                paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
+                            } else {
+                                paDetail.get(fnRow).setValue(fnCol, foData);
+                            }
+                        } else {
+                            paDetail.get(fnRow).setValue(fnCol, foData);
+                        }
 
                         addDetail();
                     } else {
@@ -365,8 +374,8 @@ public class InvAdjustment {
 
         lsSQL = "SELECT"
                 + "  a.sStockIDx"
-                + ", (SUM(a.nCredtQty) - SUM(a.nDebitQty)) xValuexxx"
-                + ", ABS((SUM(a.nCredtQty) - SUM(a.nDebitQty))) xActualxx"
+                + ", (SUM(a.nDebitQty) - SUM(a.nCredtQty)) xValuexxx"
+                + ", ABS((SUM(a.nDebitQty) - SUM(a.nCredtQty))) xActualxx"
                 + ", a.nEntryNox"
                 + ", a.dExpiryDt"
                 + " FROM Inv_Adjustment_Detail a"
@@ -436,7 +445,8 @@ public class InvAdjustment {
 //                lnCtr=lnCtr+1;
             }
         } catch (SQLException ex) {
-            Logger.getLogger(InvAdjustment.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(InvAdjustment.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
 
         return true;
