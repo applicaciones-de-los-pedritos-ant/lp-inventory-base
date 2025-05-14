@@ -500,7 +500,6 @@ public class InventoryTrans {
                 case InvConstants.WARRANTY_RELEASE:
                 case InvConstants.DEBIT_MEMO:
                     poRSProcessd.get(lnRow).setQtyInxxx(poRSMaster.get(lnCtr).getQuantity().doubleValue());
-                    poRSProcessd.get(lnRow).setQtyOutxx(poRSMaster.get(lnCtr).getQuantity().doubleValue());
 //                    poRSProcessd.get(lnRow).setDateExpire(pdTransact);
                     break;
                 case InvConstants.WASTE_INV:
