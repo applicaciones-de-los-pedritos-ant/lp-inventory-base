@@ -499,7 +499,7 @@ public class InventoryTrans {
                 case InvConstants.SALES_GIVE_AWAY:
                 case InvConstants.WARRANTY_RELEASE:
                 case InvConstants.DEBIT_MEMO:
-                    poRSProcessd.get(lnRow).setQtyOutxx(poRSMaster.get(lnCtr).getQuantity().doubleValue());
+                    poRSProcessd.get(lnRow).setQtyInxxx(poRSMaster.get(lnCtr).getQuantity().doubleValue());
 //                    poRSProcessd.get(lnRow).setDateExpire(pdTransact);
                     break;
                 case InvConstants.WASTE_INV:
@@ -507,7 +507,7 @@ public class InventoryTrans {
                             + poRSMaster.get(lnCtr).getQuantity().doubleValue());
                     break;
                 case InvConstants.CREDIT_MEMO:
-                    poRSProcessd.get(lnRow).setQtyInxxx(poRSMaster.get(lnCtr).getQuantity().doubleValue());
+                    poRSProcessd.get(lnRow).setQtyOutxx(poRSMaster.get(lnCtr).getQuantity().doubleValue());
 //                    poRSProcessd.get(lnRow).setDateExpire(pdTransact);
                     break;
                 case InvConstants.DAILY_PRODUCTION_IN:
@@ -732,7 +732,8 @@ public class InventoryTrans {
                     || psSourceCd.equals(InvConstants.DAILY_PRODUCTION_OUT)
                     || psSourceCd.equals(InvConstants.DELIVERY)
                     || psSourceCd.equals(InvConstants.DELIVERY_DISCREPANCY)
-                    || psSourceCd.equals(InvConstants.DEBIT_MEMO)) {
+                    || psSourceCd.equals(InvConstants.DEBIT_MEMO)
+                    || psSourceCd.equals(InvConstants.SALES)) {
 
                 lbNewInvxx = poRSProcessd.get(lnCtr).IsNewParts().equals("1");
                 lbActivate = poRSProcessd.get(lnCtr).getRecdStat().equals(RecordStatus.INACTIVE);

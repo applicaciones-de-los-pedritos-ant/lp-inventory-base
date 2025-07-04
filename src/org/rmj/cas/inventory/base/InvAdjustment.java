@@ -99,11 +99,15 @@ public class InvAdjustment {
 
                 if (fnCol == poDetail.getColumn("nDebitQty")) {
                     if (foData instanceof Number) {
-                        if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
-                            paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
-                        } else {
-                            paDetail.get(fnRow).setValue(fnCol, foData);
-                        }
+//                        if (!pbWithParent) {
+//                            if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
+//                                paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
+//                            } else {
+//                                paDetail.get(fnRow).setValue(fnCol, foData);
+//                            }
+//                        } else {
+                        paDetail.get(fnRow).setValue(fnCol, foData);
+//                        }
 
                         addDetail();
                     } else {
@@ -111,10 +115,15 @@ public class InvAdjustment {
                     }
                 } else if (fnCol == poDetail.getColumn("nCredtQty")) {
                     if (foData instanceof Number) {
-//                        if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()))
-//                            paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
-//                        else
-                        paDetail.get(fnRow).setValue(fnCol, foData);
+                        if (!pbWithParent) {
+                            if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
+                                paDetail.get(fnRow).setValue(fnCol, Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString()));
+                            } else {
+                                paDetail.get(fnRow).setValue(fnCol, foData);
+                            }
+                        } else {
+                            paDetail.get(fnRow).setValue(fnCol, foData);
+                        }
 
                         addDetail();
                     } else {
@@ -365,8 +374,8 @@ public class InvAdjustment {
 
         lsSQL = "SELECT"
                 + "  a.sStockIDx"
-                + ", (SUM(a.nCredtQty) - SUM(a.nDebitQty)) xValuexxx"
-                + ", ABS((SUM(a.nCredtQty) - SUM(a.nDebitQty))) xActualxx"
+                + ", (SUM(a.nDebitQty) - SUM(a.nCredtQty)) xValuexxx"
+                + ", ABS((SUM(a.nDebitQty) - SUM(a.nCredtQty))) xActualxx"
                 + ", a.nEntryNox"
                 + ", a.dExpiryDt"
                 + " FROM Inv_Adjustment_Detail a"
@@ -412,19 +421,21 @@ public class InvAdjustment {
                     lnCreditQty = 0.00;
                     lnDebitQtyx = 0.00;
                     if (loRS.getDouble("xValuexxx") > 0) {
-                        if (!loInvTrans.CreditMemo(poData.getTransNox(), poData.getTransact(), EditMode.ADDNEW)) {
-                            setMessage(loInvTrans.getMessage());
-                            setErrMsg(loInvTrans.getErrMsg());
-                            return false;
-                        }
-                        lnCreditQty = loRS.getDouble("xActualxx");
-                    } else {
                         if (!loInvTrans.DebitMemo(poData.getTransNox(), poData.getTransact(), EditMode.ADDNEW)) {
                             setMessage(loInvTrans.getMessage());
                             setErrMsg(loInvTrans.getErrMsg());
                             return false;
                         }
                         lnDebitQtyx = loRS.getDouble("xActualxx");
+
+                    } else {
+                        if (!loInvTrans.CreditMemo(poData.getTransNox(), poData.getTransact(), EditMode.ADDNEW)) {
+                            setMessage(loInvTrans.getMessage());
+                            setErrMsg(loInvTrans.getErrMsg());
+                            return false;
+                        }
+                        lnCreditQty = loRS.getDouble("xActualxx");
+
                     }
 
                     saveInvExpiration(poData.getTransact(),
@@ -436,7 +447,8 @@ public class InvAdjustment {
 //                lnCtr=lnCtr+1;
             }
         } catch (SQLException ex) {
-            Logger.getLogger(InvAdjustment.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(InvAdjustment.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
 
         return true;
@@ -1240,6 +1252,63 @@ public class InvAdjustment {
     }
 
     private String getSQ_Stocks() {
+        String lsSQL = "SELECT "
+                + "  a.sStockIDx"
+                + ", a.sBarCodex"
+                + ", a.sDescript"
+                + ", a.sBriefDsc"
+                + ", a.sAltBarCd"
+                + ", a.sCategCd1"
+                + ", a.sCategCd2"
+                + ", a.sCategCd3"
+                + ", a.sCategCd4"
+                + ", a.sBrandCde"
+                + ", a.sModelCde"
+                + ", a.sColorCde"
+                + ", a.sInvTypCd"
+                + ", a.nUnitPrce"
+                + ", a.nSelPrice"
+                + ", a.nDiscLev1"
+                + ", a.nDiscLev2"
+                + ", a.nDiscLev3"
+                + ", a.nDealrDsc"
+                + ", a.cComboInv"
+                + ", a.cWthPromo"
+                + ", a.cSerialze"
+                + ", a.cUnitType"
+                + ", a.cInvStatx"
+                + ", a.sSupersed"
+                + ", a.cRecdStat"
+                + ", b.sDescript xBrandNme"
+                + ", c.sDescript xModelNme"
+                + ", d.sDescript xInvTypNm"
+                + ", IFNULL(e.nQtyOnHnd, 0) nQtyOnHnd"
+                + ", IFNULL(e.nResvOrdr, 0) nResvOrdr"
+                + ", IFNULL(e.nBackOrdr, 0) nBackOrdr"
+                + ", IFNULL(e.nFloatQty, 0) nFloatQty"
+                + ", IFNULL(e.nLedgerNo, 0) nLedgerNo"
+                + ", f.sMeasurNm"
+                + " FROM Inventory a"
+                + " LEFT JOIN Brand b"
+                + " ON a.sBrandCde = b.sBrandCde"
+                + " LEFT JOIN Model c"
+                + " ON a.sModelCde = c.sModelCde"
+                + " LEFT JOIN Inv_Type d"
+                + " ON a.sInvTypCd = d.sInvTypCd"
+                + " LEFT JOIN Measure f"
+                + " ON a.sMeasurID = f.sMeasurID"
+                + " LEFT JOIN Inv_Master e "
+                + " ON a.sStockIDx = e.sStockIDx";
+
+        //validate result based on the assigned inventory type.
+        if (!System.getProperty("store.inventory.type").isEmpty()) {
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sInvTypCd IN " + CommonUtils.getParameter(System.getProperty("store.inventory.type")));
+        }
+
+        return lsSQL;
+    }
+
+    private String getSQ_StocksUtility() {
         String lsSQL = "SELECT "
                 + "  a.sStockIDx"
                 + ", a.sBarCodex"
