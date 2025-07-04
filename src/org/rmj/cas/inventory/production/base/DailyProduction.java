@@ -140,7 +140,7 @@ public class DailyProduction {
             System.out.println(paDetail.get(ItemCount() - 1).getStockIDx());
             System.out.println(paDetail.get(ItemCount() - 1).getGoalQty());
             if (!paDetail.get(ItemCount() - 1).getStockIDx().equals("")
-                    && Double.valueOf(String.valueOf(paDetail.get(ItemCount() - 1).getGoalQty())) > 0) {
+                    && Double.valueOf(String.valueOf(paDetail.get(ItemCount() - 1).getQuantity())) > 0) {
 
                 paDetail.add(new UnitDailyProductionDetail());
                 paDetail.get(ItemCount() - 1).setDateExpiryDt(poGRider.getServerDate());
@@ -467,6 +467,8 @@ public class DailyProduction {
         ResultSet loRS = poGRider.executeQuery(
                 MiscUtil.addCondition(getSQ_Inv(),
                         "sTransNox = " + SQLUtil.toSQL(fsTransNox)));
+        System.out.println(MiscUtil.addCondition(getSQ_Inv(),
+                "sTransNox = " + SQLUtil.toSQL(fsTransNox)));
         try {
             for (int lnCtr = 1; lnCtr <= MiscUtil.RecordCount(loRS); lnCtr++) {
                 loRS.absolute(lnCtr);
@@ -1190,6 +1192,64 @@ public class DailyProduction {
         return SearchDetail(fnRow, poDetail.getColumn(fsCol), fsValue, fbSearch, fbByCode);
     }
 
+    public boolean SearchBarcode(int fnCol, String fsValue) {
+        String lsHeader = "Barcode»Description»Brand»Unit»Qty on Hand»Stock ID»Inv. Type";
+        String lsColName = "a.sBarCodex»a.sDescript»xBrandNme»f.sMeasurNm»e.nQtyOnHnd»sStockIDx»xInvTypNm";
+
+        String lsSQL = "";
+        JSONObject loJSON;
+        ResultSet loRS;
+
+        setErrMsg("");
+        setMessage("");
+        if (fnCol == 3){
+                lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE)
+                        + " AND a.sInvTypCd IN " 
+                        + CommonUtils.getParameter(System.getProperty("store.inventory.type.product")));
+
+                System.out.println(lsSQL);
+
+                lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
+                loRS = poGRider.executeQuery(lsSQL);
+
+                loJSON = showFXDialog.jsonBrowse(
+                        poGRider,
+                        loRS,
+                        lsHeader,
+                        lsColName);
+
+                if (loJSON == null) {
+                    return false;
+                } else {
+                    //check each row if exist
+                    for (int lnCtr = 0; lnCtr < ItemCount(); lnCtr++) {
+                        if (paDetailOthers.get(lnCtr).getValue("sBarCodex").equals(fsValue)) {
+                            //auto add qty
+                            setDetail(lnCtr, "nQuantity", (Double) paDetail.get(lnCtr).getQuantity() + 1.0);
+                            return true;
+                        }
+                    }
+
+                    addDetail();
+                    int lnCount = ItemCount() - 1;
+                    setDetail(lnCount, fnCol, (String) loJSON.get("sStockIDx"));
+                    paDetailOthers.get(lnCount).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
+                    paDetailOthers.get(lnCount).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
+                    paDetailOthers.get(lnCount).setValue("sDescript", (String) loJSON.get("sDescript"));
+                    paDetailOthers.get(lnCount).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+                    setDetail(lnCount, "nQuantity", (Double) paDetail.get(lnCount).getQuantity() + 1.0);
+
+                    return true;
+                }
+        }
+
+        return false;
+    }
+
+    public boolean SearchBarcode(String fsCol, String fsValue) {
+        return SearchBarcode(poDetail.getColumn(fsCol), fsValue);
+    }
+
     public boolean SearchInv(int fnRow, int fnCol, String fsValue, boolean fbSearch, boolean fbByCode) {
 //        String lsHeader = "Barcode»Description»Inv. Type»Brand»Qty on Hand»Stock ID";
 //        String lsColName = "a.sBarCodex»sDescript»xInvTypNm»xBrandNme»e.nQtyOnHnd»sStockIDx";
@@ -1258,7 +1318,6 @@ public class DailyProduction {
                     return false;
                 } else {
                     setInv(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
-                    setDetail(fnRow, fnCol, (String) loJSON.get("sStockIDx"));
 
                     paInvOthers.get(fnRow).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
                     paInvOthers.get(fnRow).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
@@ -1274,7 +1333,66 @@ public class DailyProduction {
     }
 
     public boolean SearchInv(int fnRow, String fsCol, String fsValue, boolean fbSearch, boolean fbByCode) {
-        return SearchDetail(fnRow, poInv.getColumn(fsCol), fsValue, fbSearch, fbByCode);
+        return SearchInv(fnRow, poInv.getColumn(fsCol), fsValue, fbSearch, fbByCode);
+    }
+
+    public boolean SearchBarcodeRaw(int fnCol, String fsValue) {
+        String lsHeader = "Barcode»Description»Brand»Unit»Qty on Hand»Stock ID»Inv. Type";
+        String lsColName = "a.sBarCodex»a.sDescript»xBrandNme»f.sMeasurNm»e.nQtyOnHnd»sStockIDx»xInvTypNm";
+        String lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»e.nQtyOnHnd»a.sStockIDx»d.sDescript";
+        String lsSQL = "";
+        JSONObject loJSON;
+        ResultSet loRS;
+        int lnRow;
+
+        setErrMsg("");
+        setMessage("");
+        if (fnCol == 3){
+                lsSQL = MiscUtil.addCondition(getStocksWExpiraiton(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
+
+                lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
+                loRS = poGRider.executeQuery(lsSQL);
+                loJSON = showFXDialog.jsonBrowse(
+                        poGRider,
+                        loRS,
+                        lsHeader,
+                        lsColName);
+
+                if (loJSON == null) {
+                    return false;
+                } else {
+                    //check each row if exist
+                    for (int lnCtr = 0; lnCtr < ItemCount(); lnCtr++) {
+                        if (paInvOthers.get(lnCtr).getValue("sBarCodex").equals(fsValue)) {
+                            //auto add qty
+                            setInv(lnCtr, "nQtyReqrd", (Double) paInv.get(lnCtr).getQtyReqrd() + 1.0);
+                            setInv(lnCtr, "nQtyUsedx", (Double) paInv.get(lnCtr).getQtyUsed() + 1.0);
+                            return true;
+                        }
+                    }
+
+                    addInv();
+                    int lnCount = InvCount() - 1;
+
+                    setInv(lnCount, fnCol, (String) loJSON.get("sStockIDx"));
+
+                    paInvOthers.get(lnCount).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
+                    paInvOthers.get(lnCount).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
+                    paInvOthers.get(lnCount).setValue("sDescript", (String) loJSON.get("sDescript"));
+                    paInvOthers.get(lnCount).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+                    paInvOthers.get(lnCount).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
+                    setInv(lnCount, "nQtyReqrd", (Double) paInv.get(lnCount).getQtyReqrd() + 1.0);
+                    setInv(lnCount, "nQtyUsedx", (Double) paInv.get(lnCount).getQtyUsed() + 1.0);
+
+                    return true;
+                }
+        }
+
+        return false;
+    }
+
+    public boolean SearchBarcodeRaw(String fsCol, String fsValue) {
+        return SearchBarcodeRaw(poInv.getColumn(fsCol), fsValue);
     }
 
     private boolean saveInvTrans() {

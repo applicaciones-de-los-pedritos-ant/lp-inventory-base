@@ -1738,10 +1738,10 @@ public class InvTransfer {
         }
 
         String lsSQL = "UPDATE " + loObject.getTable()
-                        + " SET  cTranStat = " + SQLUtil.toSQL(TransactionStatus.STATE_POSTED)
-                            + ", sReceived = " + SQLUtil.toSQL(psUserIDxx)
-                            + ", dReceived = " + SQLUtil.toSQL(received)
-                        + " WHERE sTransNox = " + SQLUtil.toSQL(loObject.getTransNox());
+                + " SET  cTranStat = " + SQLUtil.toSQL(TransactionStatus.STATE_POSTED)
+                + ", sReceived = " + SQLUtil.toSQL(psUserIDxx)
+                + ", dReceived = " + SQLUtil.toSQL(received)
+                + " WHERE sTransNox = " + SQLUtil.toSQL(loObject.getTransNox());
 
         if (!pbWithParent) {
             poGRider.beginTrans();
@@ -2302,6 +2302,58 @@ public class InvTransfer {
             default:
                 return false;
         }
+    }
+
+    public boolean SearchBarcode(int fnCol, String fsValue) {
+        String lsHeader = "";
+        String lsColName = "";
+        String lsSQL = "";
+
+        JSONObject loJSON;
+        ResultSet loRS;
+
+        setErrMsg("");
+        setMessage("");
+        if (fnCol == 3) {
+
+            lsHeader = "Barcode»Description»Brand»Unit»Qty on Hand»Stock ID»Inv. Type";
+            lsColName = "a.sBarCodex»a.sDescript»xBrandNme»f.sMeasurNm»e.nQtyOnHnd»sStockIDx»xInvTypNm";
+            lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
+
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
+            loRS = poGRider.executeQuery(lsSQL);
+            System.out.println(lsSQL);
+            loJSON = showFXDialog.jsonBrowse(
+                    poGRider,
+                    loRS,
+                    lsHeader,
+                    lsColName);
+
+            if (loJSON != null) {
+                for (int lnCtr = 0; lnCtr < ItemCount(); lnCtr++) {
+                    if (paDetailOthers.get(lnCtr).getValue("sBarCodex").equals(fsValue)) {
+                        //auto add qty
+                        setDetail(lnCtr, "nQuantity", (Double) paDetail.get(lnCtr).getQuantity() + 1.0);
+                        return true;
+                    }
+                }
+
+                addDetail();
+                int lnCount = ItemCount() - 1;
+
+                setDetail(lnCount, fnCol, (String) loJSON.get("sStockIDx"));
+                paDetailOthers.get(lnCount).setValue("sOrigCode", (String) loJSON.get("sBarCodex"));
+                paDetailOthers.get(lnCount).setValue("sOrigDesc", (String) loJSON.get("sDescript"));
+                paDetailOthers.get(lnCount).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
+                setDetail(lnCount, "nQuantity", (Double) paDetail.get(lnCount).getQuantity() + 1.0);
+
+                return true;
+            } else {
+                return false;
+            }
+
+        }
+        return false;
     }
 
     public boolean setUtilityDetail(int fnRow, String fsValue, boolean fbByCode) throws SQLException {
