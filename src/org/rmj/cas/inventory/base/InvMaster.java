@@ -715,7 +715,6 @@ public class InvMaster {
         if (pnEditMode != EditMode.UNKNOWN) {
             // Don't allow specific fields to assign values
             if (!(fnCol == poData.getColumn("sStockIDx")
-                    || fnCol == poData.getColumn("cRecdStat")
                     || fnCol == poData.getColumn("sModified")
                     || fnCol == poData.getColumn("dModified"))) {
 
