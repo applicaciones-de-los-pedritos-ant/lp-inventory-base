@@ -1283,7 +1283,18 @@ public class DailyProduction {
                     loJSON = showFXDialog.jsonBrowse(poGRider, loRS, lsHeader, lsColName);
                 } else {
                     if (!fbSearch) {
-                        if (paInvOthers.get(fnRow).getValue("sBarCodex").equals(fsValue)) {
+                        if (paInvOthers.get(fnRow).getValue("sBarCodex").equals(fsValue) && !fsValue.isEmpty()) {
+                            return true;
+                        }
+
+                        loJSON = showFXDialog.jsonSearch(poGRider,
+                                lsSQL,
+                                fsValue,
+                                lsHeader,
+                                lsColName,
+                                lsColCrit, 0);
+                    } else {
+                        if (paInvOthers.get(fnRow).getValue("sDescript").equals(fsValue) && !fsValue.isEmpty()) {
                             return true;
                         }
 
@@ -1293,17 +1304,6 @@ public class DailyProduction {
                                 lsHeader,
                                 lsColName,
                                 lsColCrit, 1);
-                    } else {
-                        if (paInvOthers.get(fnRow).getValue("sDescript").equals(fsValue)) {
-                            return true;
-                        }
-
-                        loJSON = showFXDialog.jsonSearch(poGRider,
-                                lsSQL,
-                                fsValue,
-                                lsHeader,
-                                lsColName,
-                                lsColCrit, 2);
                     }
                 }
 
