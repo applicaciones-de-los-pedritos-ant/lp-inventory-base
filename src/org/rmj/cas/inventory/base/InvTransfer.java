@@ -61,7 +61,6 @@ public class InvTransfer {
     }
 
     public boolean BrowseRecord(String fsValue, boolean fbByCode) {
-        psApproveID= "";
         String lsHeader = "Transfer No»Destination»Date";
         String lsColName = "sTransNox»sBranchNm»dTransact";
         String lsColCrit = "a.sTransNox»b.sBranchNm»a.dTransact";
@@ -170,9 +169,9 @@ public class InvTransfer {
 
                 if (fnCol == poDetail.getColumn("nQuantity")) {
                     if (foData instanceof Number) {
-//                        if (Double.valueOf(foData.toString()) <= 0.0) {
-//                            return;
-//                        }
+                        if (Double.valueOf(foData.toString()) <= 0.0) {
+                            return;
+                        }
                         if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
                             //validate if has parent or will uses a parent if no uses child or not a subitem with negative qty
                             if (!confirmSelectParent(fnRow)) {
@@ -1690,7 +1689,7 @@ public class InvTransfer {
 
         String lsSQL = "UPDATE " + loObject.getTable()
                 + " SET  cTranStat = " + SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)
-                + ", sApproved = " + SQLUtil.toSQL(psApproveID)
+                + ", sApproved = " + SQLUtil.toSQL(psUserIDxx)
                 + ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate())
                 + " WHERE sTransNox = " + SQLUtil.toSQL(loObject.getTransNox());
 
@@ -3246,10 +3245,6 @@ public class InvTransfer {
         poCallBack = foCallBack;
     }
 
-    public void setApproveID(String fsValue) {
-        psApproveID = fsValue;
-    }
-
     private void MasterRetreived(int fnRow) {
         if (poCallBack == null) {
             return;
@@ -3269,7 +3264,6 @@ public class InvTransfer {
     //Member Variables
     private GRider poGRider = null;
     private String psUserIDxx = "";
-    private String psApproveID = "";
     private String psBranchCd = "";
     private String psWarnMsg = "";
     private String psErrMsgx = "";
