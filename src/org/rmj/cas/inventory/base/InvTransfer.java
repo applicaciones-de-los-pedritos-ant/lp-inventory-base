@@ -3256,7 +3256,7 @@ public class InvTransfer {
             }
             loRS.beforeFirst();
             while (loRS.next()) {
-                if (loRS.getInt("cEmpRankx") <= 10) {
+                if (loRS.getInt("cEmpRankx") <= 6) {
                     psApproveID = loRS.getString("sUserIDxx");
                     return true;
                 }
