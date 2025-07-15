@@ -43,6 +43,7 @@ import org.rmj.cas.inventory.pojo.UnitInvTransferDetail;
 import org.rmj.cas.inventory.pojo.UnitInvTransferMaster;
 import org.rmj.lp.parameter.agent.XMBranch;
 import org.rmj.appdriver.agentfx.callback.IMasterDetail;
+import org.rmj.appdriver.constants.UserRight;
 import org.rmj.cas.inventory.base.views.InvDiscrepancyController;
 import org.rmj.cas.inventory.constants.basefx.InvConstants;
 
@@ -61,7 +62,7 @@ public class InvTransfer {
     }
 
     public boolean BrowseRecord(String fsValue, boolean fbByCode) {
-        psApproveID= "";
+        psApproveID = "";
         String lsHeader = "Transfer No»Destination»Date";
         String lsColName = "sTransNox»sBranchNm»dTransact";
         String lsColCrit = "a.sTransNox»b.sBranchNm»a.dTransact";
@@ -3227,6 +3228,40 @@ public class InvTransfer {
                 + " FROM Inv_Stock_Request_Detail a"
                 + " WHERE a.sTransNox = " + SQLUtil.toSQL(fsOrderNox)
                 + "AND a.nCancelld = " + SQLUtil.toSQL("0");
+    }
+
+    public boolean getOfficer(String fsUserID) {
+        try {
+            psApproveID = "";
+            String lsSQL = " SELECT "
+                    + " a.`sUserIDxx`"
+                    + ", b.`sEmployID`"
+                    + ", a.`nUserLevl`"
+                    + ", IFNULL(b.`cEmpRankx`,'00') cEmpRankx"
+                    + ", a.`sProdctID`"
+                    + " FROM xxxSysUser a"
+                    + "   LEFT JOIN `GGC_ISysDBF`.`Employee_Master001` b ON a.`sEmployNo` = b.`sEmployID` "
+                    + " WHERE sProdctID IN(" + SQLUtil.toSQL(poGRider.getProductID())
+                    + "," + SQLUtil.toSQL("gRider") + ")";
+
+            ResultSet loRS = poGRider.executeQuery(lsSQL);
+
+            if (MiscUtil.RecordCount(loRS) <= 0) {
+                return false;
+            }
+            loRS.beforeFirst();
+            while (loRS.next()) {
+                if (loRS.getInt("cEmpRankx") >= 6) {
+                    psApproveID = loRS.getString("sUserIDxx");
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (SQLException ex) {
+            Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
     }
 
     public void printColumnsMaster() {
