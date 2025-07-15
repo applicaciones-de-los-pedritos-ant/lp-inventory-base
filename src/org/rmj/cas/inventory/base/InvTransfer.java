@@ -43,6 +43,7 @@ import org.rmj.cas.inventory.pojo.UnitInvTransferDetail;
 import org.rmj.cas.inventory.pojo.UnitInvTransferMaster;
 import org.rmj.lp.parameter.agent.XMBranch;
 import org.rmj.appdriver.agentfx.callback.IMasterDetail;
+import org.rmj.appdriver.constants.UserRight;
 import org.rmj.cas.inventory.base.views.InvDiscrepancyController;
 import org.rmj.cas.inventory.constants.basefx.InvConstants;
 
@@ -169,9 +170,9 @@ public class InvTransfer {
 
                 if (fnCol == poDetail.getColumn("nQuantity")) {
                     if (foData instanceof Number) {
-                        if (Double.valueOf(foData.toString()) <= 0.0) {
-                            return;
-                        }
+//                        if (Double.valueOf(foData.toString()) <= 0.0) {
+//                            return;
+//                        }
                         if (Double.valueOf(foData.toString()) > Double.valueOf(paDetailOthers.get(fnRow).getValue("nQtyOnHnd").toString())) {
                             //validate if has parent or will uses a parent if no uses child or not a subitem with negative qty
                             if (!confirmSelectParent(fnRow)) {
@@ -1689,7 +1690,7 @@ public class InvTransfer {
 
         String lsSQL = "UPDATE " + loObject.getTable()
                 + " SET  cTranStat = " + SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)
-                + ", sApproved = " + SQLUtil.toSQL(psUserIDxx)
+                + ", sApproved = " + SQLUtil.toSQL(psApproveID)
                 + ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate())
                 + " WHERE sTransNox = " + SQLUtil.toSQL(loObject.getTransNox());
 
@@ -3228,6 +3229,46 @@ public class InvTransfer {
                 + "AND a.nCancelld = " + SQLUtil.toSQL("0");
     }
 
+    public boolean getOfficer(String fsUserID) {
+        try {
+            psApproveID = "";
+            String lsSQL = " SELECT "
+                    + " a.`sUserIDxx`"
+                    + ", b.`sEmployID`"
+                    + ", a.`nUserLevl`"
+                    + ", IFNULL(b.`cEmpRankx`,'12') cEmpRankx"
+                    + ", a.`sProdctID` "
+                    + ", b.`cRecdStat`"
+                    + ", a.`cUserStat`"
+                    + " FROM xxxSysUser a"
+                    + "   LEFT JOIN `GGC_ISysDBF`.`Employee_Master001` b ON a.`sEmployNo` = b.`sEmployID` "
+                    + " WHERE sProdctID IN(" + SQLUtil.toSQL(poGRider.getProductID())
+                    + "," + SQLUtil.toSQL("gRider") + ")"
+                    + " AND sUserIDxx = " + SQLUtil.toSQL(fsUserID)
+                    + " AND cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE)
+                    + " AND sUserIDxx = " + SQLUtil.toSQL(RecordStatus.ACTIVE);
+
+            ResultSet loRS = poGRider.executeQuery(lsSQL);
+            System.out.println(lsSQL);
+
+            if (MiscUtil.RecordCount(loRS) <= 0) {
+                return false;
+            }
+            loRS.beforeFirst();
+            while (loRS.next()) {
+                if (loRS.getInt("cEmpRankx") <= 10) {
+                    psApproveID = loRS.getString("sUserIDxx");
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (SQLException ex) {
+            Logger.getLogger(InvTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+
     public void printColumnsMaster() {
         poData.list();
     }
@@ -3243,6 +3284,10 @@ public class InvTransfer {
     //callback methods
     public void setCallBack(IMasterDetail foCallBack) {
         poCallBack = foCallBack;
+    }
+
+    public void setApproveID(String fsValue) {
+        psApproveID = fsValue;
     }
 
     private void MasterRetreived(int fnRow) {
@@ -3264,6 +3309,7 @@ public class InvTransfer {
     //Member Variables
     private GRider poGRider = null;
     private String psUserIDxx = "";
+    private String psApproveID = "";
     private String psBranchCd = "";
     private String psWarnMsg = "";
     private String psErrMsgx = "";
