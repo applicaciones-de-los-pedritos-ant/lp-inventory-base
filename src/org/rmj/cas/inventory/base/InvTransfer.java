@@ -3236,7 +3236,7 @@ public class InvTransfer {
                     + " a.`sUserIDxx`"
                     + ", b.`sEmployID`"
                     + ", a.`nUserLevl`"
-                    + ", IFNULL(b.`cEmpRankx`,'00') cEmpRankx"
+                    + ", IFNULL(b.`cEmpRankx`,'12') cEmpRankx"
                     + ", a.`sProdctID` "
                     + ", b.`cRecdStat`"
                     + ", a.`cUserStat`"
