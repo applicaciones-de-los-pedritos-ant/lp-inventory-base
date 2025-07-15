@@ -62,7 +62,6 @@ public class InvTransfer {
     }
 
     public boolean BrowseRecord(String fsValue, boolean fbByCode) {
-        psApproveID = "";
         String lsHeader = "Transfer No»Destination»Date";
         String lsColName = "sTransNox»sBranchNm»dTransact";
         String lsColCrit = "a.sTransNox»b.sBranchNm»a.dTransact";
