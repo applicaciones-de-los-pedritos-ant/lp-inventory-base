@@ -3242,9 +3242,11 @@ public class InvTransfer {
                     + " FROM xxxSysUser a"
                     + "   LEFT JOIN `GGC_ISysDBF`.`Employee_Master001` b ON a.`sEmployNo` = b.`sEmployID` "
                     + " WHERE sProdctID IN(" + SQLUtil.toSQL(poGRider.getProductID())
-                    + "," + SQLUtil.toSQL("gRider") + ")";
+                    + "," + SQLUtil.toSQL("gRider") + ")"
+                    + " AND sUserIDxx = " + SQLUtil.toSQL(fsUserID);
 
             ResultSet loRS = poGRider.executeQuery(lsSQL);
+            System.out.println(lsSQL);
 
             if (MiscUtil.RecordCount(loRS) <= 0) {
                 return false;
