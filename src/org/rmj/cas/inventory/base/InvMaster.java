@@ -900,10 +900,13 @@ public class InvMaster {
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
-        if (MiscUtil.RecordCount(loRS) <= 0) {
+        if (!loRS.next()) {
             setMessage("No inventory found for this branch.");
             return false;
         }
+        
+        lnLedgerNo = 0;
+        lnQOH = loRS.getInt("nBegQtyxx");
 
         //get the starting on hand from the ledger of the transaction date
         lsSQL = "SELECT * FROM Inv_Ledger"
@@ -916,10 +919,7 @@ public class InvMaster {
         loRS = poGRider.executeQuery(lsSQL);
 
         //beginning quantity and ledger no
-        if (!loRS.next()) {
-            lnQOH = 0;
-            lnLedgerNo = 0;
-        } else {
+        if (loRS.next()) {
             lnQOH = loRS.getDouble("nQtyOnHnd");
             lnLedgerNo = loRS.getInt("nLedgerNo");
         }
@@ -1070,6 +1070,20 @@ public class InvMaster {
         loRS = poGRider.executeQuery(lsSQL);
 
         if (MiscUtil.RecordCount(loRS) <= 0) {
+            lsSQL = "UPDATE Inv_Master SET"
+                    + "  nQtyOnHnd = " + lnQOH
+                    + ", nLedgerNo = 0"
+                    + ", dLastTran = " + SQLUtil.toSQL(SQLUtil.dateFormat(ldBegInv, SQLUtil.FORMAT_SHORT_DATE))
+                    + ", sModified = " + SQLUtil.toSQL(poGRider.getUserID())
+                    + ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate())
+                    + " WHERE sStockIDx = " + SQLUtil.toSQL(fsStockIDx)
+                    + " AND sBranchCd = " + SQLUtil.toSQL(psBranchCd);
+            
+            if (poGRider.executeQuery(lsSQL, "Inv_Master", psBranchCd, "") != 1) {
+                setMessage("Unable to execute ledger update.");
+                return false;
+            }
+            
             return true;
         }
 
