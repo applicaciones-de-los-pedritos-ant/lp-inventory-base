@@ -3269,6 +3269,17 @@ public class InvTransfer {
         }
     }
 
+    public boolean hasNegativeEntry() {
+        //check if has negative
+        for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
+            if (paDetail.get(lnCtr).getQuantity().doubleValue() < 0.00) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void printColumnsMaster() {
         poData.list();
     }
