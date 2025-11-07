@@ -34,5 +34,9 @@
             <file>file:/D:/000MNVProject/Los%20Pedritos%20IntegSys%20Java/lp-inventory-base/src/org/rmj/cas/inventory/base/InvTransfer.java</file>
             <file>file:/D:/000MNVProject/Los%20Pedritos%20IntegSys%20Java/lp-inventory-base/src/org/rmj/cas/inventory/base/InvTransferReturn.java</file>
         </group>
+        <group name="Incentive System">
+            <file>file:/D:/GMC_SEG_Folder%20-%20Maven/applicaciones-de-los-pedritos-ant/lp-inventory-base/src/org/rmj/cas/inventory/base/InvMaster.java</file>
+            <file>file:/D:/GMC_SEG_Folder%20-%20Maven/applicaciones-de-los-pedritos-ant/lp-inventory-base/src/org/rmj/cas/inventory/base/InvTransfer.java</file>
+        </group>
     </open-files>
 </project-private>
