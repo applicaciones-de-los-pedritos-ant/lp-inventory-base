@@ -909,7 +909,7 @@ public class InvAdjustment {
 //                lsColCrit = "b.sDescript»a.sDescript»f.sMeasurNm»c.sDescript»e.nQtyOnHnd»d.sDescript»a.sBarCodex»a.sStockIDx";
 
                 lsHeader = "Barcode»Description»Brand»Unit»Qty on Hand»Stock ID»Model»Inv. Type";
-                lsColName = "a.sBarCodex»a.sDescript»xBrandNme»f.sMeasurNm»e.nQtyOnHnd»sStockIDx»xModelNme»xInvTypNm";
+                lsColName = "a.sBarCodex»a.sDescript»xBrandNme»f.sMeasurNm»nQtyOnHnd»sStockIDx»xModelNme»xInvTypNm";
                 lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»e.nQtyOnHnd»a.sStockIDx»xModelNme»d.sDescript";
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
 
@@ -989,7 +989,7 @@ public class InvAdjustment {
                 lsColCrit = "a.sBarCodex»a.sDescript»d.sDescript»b.sDescript»c.sDescript»a.sStockIDx";
 
                 lsHeader = "Barcode»Description»Brand»Unit»Qty on Hand»Stock ID»Model»Inv. Type";
-                lsColName = "a.sBarCodex»a.sDescript»xBrandNme»f.sMeasurNm»e.nQtyOnHnd»sStockIDx»xModelNme»xInvTypNm";
+                lsColName = "a.sBarCodex»a.sDescript»xBrandNme»f.sMeasurNm»nQtyOnHnd»sStockIDx»xModelNme»xInvTypNm";
                 lsColCrit = "a.sBarCodex»a.sDescript»b.sDescript»f.sMeasurNm»e.nQtyOnHnd»a.sStockIDx»xModelNme»d.sDescript";
                 lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
 
