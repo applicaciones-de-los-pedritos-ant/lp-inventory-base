@@ -44,6 +44,7 @@ import org.rmj.appdriver.constants.UserRight;
 import org.rmj.cas.inventory.base.InvExpiration;
 import org.rmj.cas.inventory.base.InvRequest;
 import org.rmj.cas.inventory.base.InvTransfer;
+import org.rmj.cas.inventory.constants.basefx.InvConstants;
 import org.rmj.cas.inventory.others.pojo.UnitDailyProductionInvOthers;
 import org.rmj.cas.inventory.production.pojo.UnitDailyProductionInv;
 import org.rmj.lp.parameter.agent.XMBranch;
@@ -944,13 +945,12 @@ public class DailyProduction {
             } catch (SQLException ex) {
                 Logger.getLogger(DailyProduction.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else {
-            /* for saving of detail */
-            lbResult = saveInvTrans();
-            /* for saving of raw detail */
-            if (lbResult) {
-                lbResult = saveInvTransSub();
-            }
+        }
+        /* for saving of detail */
+        lbResult = saveInvTrans();
+        /* for saving of raw detail */
+        if (lbResult) {
+            lbResult = saveInvTransSub();
         }
         if (!pbWithParent) {
             if (getErrMsg().isEmpty()) {
@@ -1020,6 +1020,11 @@ public class DailyProduction {
                 || loObject.getTranStat().equalsIgnoreCase(TransactionStatus.STATE_VOID)) {
             setMessage("Unable to close processed transaction.");
             return lbResult;
+
+        }
+
+        if (!pbWithParent) {
+            poGRider.beginTrans();
         }
 
         String lsSQL = "UPDATE " + loObject.getTable()
@@ -1028,18 +1033,90 @@ public class DailyProduction {
                 + ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate())
                 + " WHERE sTransNox = " + SQLUtil.toSQL(loObject.getTransNox());
 
-        if (!pbWithParent) {
-            poGRider.beginTrans();
-        }
-
         if (poGRider.executeQuery(lsSQL, loObject.getTable(), "", "") == 0) {
             if (!poGRider.getErrMsg().isEmpty()) {
                 setErrMsg(poGRider.getErrMsg());
             } else {
-                setErrMsg("No record deleted.");
+                setErrMsg("No record Updated.");
             }
         } else {
             lbResult = true;
+        }
+
+        if (loObject.getTranStat().equalsIgnoreCase(TransactionStatus.STATE_CLOSED)) {
+
+            String lsSourceNo = (String) getMaster("sSourceNo");
+            if (lsSourceNo != null && !lsSourceNo.isEmpty()) {
+
+                lsSQL = "UPDATE Product_Request_Master SET"
+                        + " cTranStat = '1'"
+                        + " WHERE sTransNox = " + SQLUtil.toSQL(lsSourceNo);
+
+                if (poGRider.executeQuery(lsSQL, "Product_Request_Master", "", lsSourceNo.substring(0, 4)) <= 0) {
+                    setMessage("Unable to roll back Product Request");
+                    return false;
+                }
+            }
+            
+            //Delete the Ledger and LESS the QTY IN of Daily Production -MNV20260225
+            for (int lnCtr = 0; lnCtr <= paDetail.size() - 1; lnCtr++) {
+                if (paDetail.get(lnCtr).getStockIDx().equals("")) {
+                    break;
+                }
+                lsSQL = "DELETE FROM Inv_Ledger"
+                        + " WHERE sSourceNo = " + SQLUtil.toSQL(poData.getTransNox())
+                        + " AND sSourceCd = " + SQLUtil.toSQL(InvConstants.DAILY_PRODUCTION_IN) 
+                        + " AND sStockIDx = " + SQLUtil.toSQL( paDetail.get(lnCtr).getStockIDx()) ;
+
+                if (poGRider.executeQuery(lsSQL, "Inv_Ledger", "", poData.getTransNox().substring(0, 4)) <= 0) {
+                    setMessage("Unable to rolled back Product Request");
+                    return false;
+                }
+                
+                
+                //Delete the Ledger
+                lsSQL = "UPDATE Inv_Master"
+                        + " SET nQtyOnHnd = nQtyOnHnd -" + SQLUtil.toSQL(paDetail.get(lnCtr).getQuantity())
+                        + " WHERE sBranchCd = " + SQLUtil.toSQL(poGRider.getBranchCode()) 
+                        + " AND sStockIDx = " + SQLUtil.toSQL( paDetail.get(lnCtr).getStockIDx()) ;
+
+                if (poGRider.executeQuery(lsSQL, "Inv_Ledger", "", poData.getTransNox().substring(0, 4)) <= 0) {
+                    setMessage("Unable to rolled back Product Request");
+                    return false;
+                }
+                
+            }
+            
+            //Delete the Ledger and ADD the QTY Out of Daily Production -MNV20260225
+            for (int lnCtr = 0; lnCtr <= paInv.size() - 1; lnCtr++) {
+                if (paInv.get(lnCtr).getStockIDx().equals("")) {
+                    break;
+                }
+
+                lsSQL = "DELETE FROM Inv_Ledger"
+                        + " WHERE sSourceNo = " + SQLUtil.toSQL(poData.getTransNox())
+                        + " AND sSourceCd = " + SQLUtil.toSQL(InvConstants.DAILY_PRODUCTION_OUT) 
+                        + " AND sStockIDx = " + SQLUtil.toSQL( paInv.get(lnCtr).getStockIDx()) ;
+
+                if (poGRider.executeQuery(lsSQL, "Inv_Ledger", "", poData.getTransNox().substring(0, 4)) <= 0) {
+                    setMessage("Unable to rolled back Product Request");
+                    return false;
+                }
+                
+                
+                //Delete the Ledger
+                lsSQL = "UPDATE Inv_Master"
+                        + " SET nQtyOnHnd = nQtyOnHnd +" + SQLUtil.toSQL(paInv.get(lnCtr).getQtyUsed())
+                        + " WHERE sBranchCd = " + SQLUtil.toSQL(poGRider.getBranchCode()) 
+                        + " AND sStockIDx = " + SQLUtil.toSQL( paInv.get(lnCtr).getStockIDx()) ;
+
+                if (poGRider.executeQuery(lsSQL, "Inv_Ledger", "", poData.getTransNox().substring(0, 4)) <= 0) {
+                    setMessage("Unable to rolled back Product Request");
+                    return false;
+                }
+                
+            }
+
         }
 
         if (!pbWithParent) {
@@ -1202,45 +1279,45 @@ public class DailyProduction {
 
         setErrMsg("");
         setMessage("");
-        if (fnCol == 3){
-                lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE)
-                        + " AND a.sInvTypCd IN " 
-                        + CommonUtils.getParameter(System.getProperty("store.inventory.type.product")));
+        if (fnCol == 3) {
+            lsSQL = MiscUtil.addCondition(getSQ_Stocks(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE)
+                    + " AND a.sInvTypCd IN "
+                    + CommonUtils.getParameter(System.getProperty("store.inventory.type.product")));
 
-                System.out.println(lsSQL);
+            System.out.println(lsSQL);
 
-                lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
-                loRS = poGRider.executeQuery(lsSQL);
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
+            loRS = poGRider.executeQuery(lsSQL);
 
-                loJSON = showFXDialog.jsonBrowse(
-                        poGRider,
-                        loRS,
-                        lsHeader,
-                        lsColName);
+            loJSON = showFXDialog.jsonBrowse(
+                    poGRider,
+                    loRS,
+                    lsHeader,
+                    lsColName);
 
-                if (loJSON == null) {
-                    return false;
-                } else {
-                    //check each row if exist
-                    for (int lnCtr = 0; lnCtr < ItemCount(); lnCtr++) {
-                        if (paDetailOthers.get(lnCtr).getValue("sBarCodex").equals(fsValue)) {
-                            //auto add qty
-                            setDetail(lnCtr, "nQuantity", (Double) paDetail.get(lnCtr).getQuantity() + 1.0);
-                            return true;
-                        }
+            if (loJSON == null) {
+                return false;
+            } else {
+                //check each row if exist
+                for (int lnCtr = 0; lnCtr < ItemCount(); lnCtr++) {
+                    if (paDetailOthers.get(lnCtr).getValue("sBarCodex").equals(fsValue)) {
+                        //auto add qty
+                        setDetail(lnCtr, "nQuantity", (Double) paDetail.get(lnCtr).getQuantity() + 1.0);
+                        return true;
                     }
-
-                    addDetail();
-                    int lnCount = ItemCount() - 1;
-                    setDetail(lnCount, fnCol, (String) loJSON.get("sStockIDx"));
-                    paDetailOthers.get(lnCount).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
-                    paDetailOthers.get(lnCount).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
-                    paDetailOthers.get(lnCount).setValue("sDescript", (String) loJSON.get("sDescript"));
-                    paDetailOthers.get(lnCount).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
-                    setDetail(lnCount, "nQuantity", (Double) paDetail.get(lnCount).getQuantity() + 1.0);
-
-                    return true;
                 }
+
+                addDetail();
+                int lnCount = ItemCount() - 1;
+                setDetail(lnCount, fnCol, (String) loJSON.get("sStockIDx"));
+                paDetailOthers.get(lnCount).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
+                paDetailOthers.get(lnCount).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
+                paDetailOthers.get(lnCount).setValue("sDescript", (String) loJSON.get("sDescript"));
+                paDetailOthers.get(lnCount).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+                setDetail(lnCount, "nQuantity", (Double) paDetail.get(lnCount).getQuantity() + 1.0);
+
+                return true;
+            }
         }
 
         return false;
@@ -1347,45 +1424,45 @@ public class DailyProduction {
 
         setErrMsg("");
         setMessage("");
-        if (fnCol == 3){
-                lsSQL = MiscUtil.addCondition(getStocksWExpiraiton(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
+        if (fnCol == 3) {
+            lsSQL = MiscUtil.addCondition(getStocksWExpiraiton(), "a.cRecdStat = " + SQLUtil.toSQL(RecordStatus.ACTIVE));
 
-                lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
-                loRS = poGRider.executeQuery(lsSQL);
-                loJSON = showFXDialog.jsonBrowse(
-                        poGRider,
-                        loRS,
-                        lsHeader,
-                        lsColName);
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.sBarCodex = " + SQLUtil.toSQL(fsValue));
+            loRS = poGRider.executeQuery(lsSQL);
+            loJSON = showFXDialog.jsonBrowse(
+                    poGRider,
+                    loRS,
+                    lsHeader,
+                    lsColName);
 
-                if (loJSON == null) {
-                    return false;
-                } else {
-                    //check each row if exist
-                    for (int lnCtr = 0; lnCtr < ItemCount(); lnCtr++) {
-                        if (paInvOthers.get(lnCtr).getValue("sBarCodex").equals(fsValue)) {
-                            //auto add qty
-                            setInv(lnCtr, "nQtyReqrd", (Double) paInv.get(lnCtr).getQtyReqrd() + 1.0);
-                            setInv(lnCtr, "nQtyUsedx", (Double) paInv.get(lnCtr).getQtyUsed() + 1.0);
-                            return true;
-                        }
+            if (loJSON == null) {
+                return false;
+            } else {
+                //check each row if exist
+                for (int lnCtr = 0; lnCtr < ItemCount(); lnCtr++) {
+                    if (paInvOthers.get(lnCtr).getValue("sBarCodex").equals(fsValue)) {
+                        //auto add qty
+                        setInv(lnCtr, "nQtyReqrd", (Double) paInv.get(lnCtr).getQtyReqrd() + 1.0);
+                        setInv(lnCtr, "nQtyUsedx", (Double) paInv.get(lnCtr).getQtyUsed() + 1.0);
+                        return true;
                     }
-
-                    addInv();
-                    int lnCount = InvCount() - 1;
-
-                    setInv(lnCount, fnCol, (String) loJSON.get("sStockIDx"));
-
-                    paInvOthers.get(lnCount).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
-                    paInvOthers.get(lnCount).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
-                    paInvOthers.get(lnCount).setValue("sDescript", (String) loJSON.get("sDescript"));
-                    paInvOthers.get(lnCount).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
-                    paInvOthers.get(lnCount).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
-                    setInv(lnCount, "nQtyReqrd", (Double) paInv.get(lnCount).getQtyReqrd() + 1.0);
-                    setInv(lnCount, "nQtyUsedx", (Double) paInv.get(lnCount).getQtyUsed() + 1.0);
-
-                    return true;
                 }
+
+                addInv();
+                int lnCount = InvCount() - 1;
+
+                setInv(lnCount, fnCol, (String) loJSON.get("sStockIDx"));
+
+                paInvOthers.get(lnCount).setValue("sStockIDx", (String) loJSON.get("sStockIDx"));
+                paInvOthers.get(lnCount).setValue("sBarCodex", (String) loJSON.get("sBarCodex"));
+                paInvOthers.get(lnCount).setValue("sDescript", (String) loJSON.get("sDescript"));
+                paInvOthers.get(lnCount).setValue("sMeasurNm", (String) loJSON.get("sMeasurNm"));
+                paInvOthers.get(lnCount).setValue("sBrandNme", (String) loJSON.get("xBrandNme"));
+                setInv(lnCount, "nQtyReqrd", (Double) paInv.get(lnCount).getQtyReqrd() + 1.0);
+                setInv(lnCount, "nQtyUsedx", (Double) paInv.get(lnCount).getQtyUsed() + 1.0);
+
+                return true;
+            }
         }
 
         return false;
@@ -1831,6 +1908,7 @@ public class DailyProduction {
         }
 
         lsSQL = MiscUtil.addCondition(lsSQL, lsCondition);
+        
         return lsSQL;
     }
 

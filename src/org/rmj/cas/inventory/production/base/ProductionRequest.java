@@ -876,10 +876,10 @@ public class ProductionRequest {
             return false;
         }
 
-        if (((String) getMaster("cTranStat")).equals("2")) {
-            p_sMessage = "Transaction was already posted.";
-            return false;
-        }
+//        if (((String) getMaster("cTranStat")).equals("2")) {
+//            p_sMessage = "Transaction was already posted.";
+//            return false;
+//        }
 
         if (((String) getMaster("cTranStat")).equals("3")) {
             p_sMessage = "Transaction was already cancelled.";
