@@ -92,7 +92,7 @@ public class Inventory {
                     for (int lnCol = 1; lnCol <= loRS.getMetaData().getColumnCount(); lnCol++) {
                         loSubUnit.setValue(lnCol, loRS.getObject(lnCol));
                     }
-                    
+
                     laSubUnits.add(new UnitInvSubUnit());
                     laSubUnits.get(laSubUnits.size() - 1).setStockIDx(loSubUnit.getStockIDx());
                     laSubUnits.get(laSubUnits.size() - 1).setEntryNox(loSubUnit.getEntryNox());
